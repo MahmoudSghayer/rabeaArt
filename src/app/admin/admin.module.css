@@ -1,0 +1,22 @@
+/**
+ * Admin-only background token — the design's paper bg for the admin dashboard (#F0E9D8) is
+ * deliberately different from the storefront's `--color-paper` (#F6F0E3) token, so it's
+ * hardcoded here rather than added to src/styles/tokens.css (see project plan).
+ */
+.shellBg {
+  background: #f0e9d8;
+  min-height: 100dvh;
+}
+
+/** Shared page-content wrapper used by every admin route (Overview, Orders, Order detail, …):
+ * consistent max-width, padding and vertical rhythm matching the design reference. */
+.page {
+  padding: clamp(16px, 2.5vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1220px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto;
+}

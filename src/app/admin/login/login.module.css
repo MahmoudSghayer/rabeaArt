@@ -1,0 +1,99 @@
+.screen {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(700px 420px at 80% -10%, rgba(183, 71, 42, 0.14), rgba(183, 71, 42, 0)),
+    radial-gradient(600px 420px at 10% 110%, rgba(51, 96, 90, 0.16), rgba(51, 96, 90, 0)),
+    #f0e9d8;
+}
+
+.card {
+  width: min(400px, 100%);
+  background: #fbf7ee;
+  border: 1px solid rgba(35, 32, 27, 0.16);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 30px 60px -30px rgba(60, 40, 15, 0.35);
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.logoAr {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+  color: #23201b;
+}
+
+.logoDot {
+  color: #b7472a;
+}
+
+.logoTag {
+  font-family: var(--font-accent);
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  color: #6b6355;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 13.5px;
+  color: #8a8070;
+  margin-bottom: 26px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #23201b;
+}
+
+.input {
+  border: 1.5px solid rgba(35, 32, 27, 0.2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #fff;
+  color: #23201b;
+}
+
+.input:focus-visible {
+  outline: 2px solid #b7472a;
+  outline-offset: 1px;
+}
+
+.error {
+  font-size: 12px;
+  color: #8f3018;
+  font-weight: 600;
+}
+
+.backLink {
+  text-align: center;
+  font-size: 12px;
+  color: #b7472a;
+  font-weight: 600;
+  margin-top: 14px;
+}

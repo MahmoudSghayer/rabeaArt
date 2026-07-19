@@ -1,0 +1,147 @@
+.primaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 195px), 1fr));
+  gap: 14px;
+}
+
+.primaryCard {
+  text-align: start;
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  background: #fbf7ee;
+  border-radius: 16px;
+  padding: 16px 18px;
+  text-decoration: none;
+  color: inherit;
+  border-top: 3px solid var(--stat-color, var(--color-sienna));
+  display: block;
+}
+
+.primaryLabel {
+  font-size: 12px;
+  color: #8a8070;
+  font-weight: 600;
+}
+
+.primaryValue {
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 6px;
+  color: #23201b;
+}
+
+.primarySub {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+  color: var(--stat-color, var(--color-sienna));
+}
+
+.secondaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 135px), 1fr));
+  gap: 10px;
+}
+
+.secondaryTile {
+  border: 1px solid rgba(35, 32, 27, 0.12);
+  background: rgba(251, 247, 238, 0.7);
+  border-radius: 13px;
+  padding: 12px 14px;
+}
+
+.secondaryLabel {
+  font-size: 11px;
+  color: #8a8070;
+  font-weight: 600;
+}
+
+.secondaryValue {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 3px;
+}
+
+.panel {
+  background: #fbf7ee;
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 18px;
+  border-bottom: 1px solid rgba(35, 32, 27, 0.12);
+}
+
+.panelTitle {
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.panelSpacer {
+  flex: 1;
+}
+
+.panelLink {
+  border: none;
+  background: none;
+  color: #b7472a;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 18px;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px dashed rgba(35, 32, 27, 0.1);
+}
+
+.row:hover {
+  background: rgba(35, 32, 27, 0.03);
+}
+
+.rowRef {
+  font-family: var(--font-accent);
+  font-size: 14px;
+  color: #b7472a;
+  min-width: 64px;
+}
+
+.rowName {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowDate {
+  font-size: 12px;
+  color: #8a8070;
+  min-width: 80px;
+}
+
+.rowTotal {
+  font-size: 12.5px;
+  font-weight: 700;
+  min-width: 70px;
+  text-align: end;
+}
+
+.empty {
+  text-align: center;
+  color: #8a8070;
+  font-size: 13px;
+  padding: 20px;
+}

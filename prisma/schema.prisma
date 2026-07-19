@@ -59,6 +59,7 @@ enum ContactMethod {
   PHONE
   WHATSAPP
   EMAIL
+  INTERNAL // CommunicationLog only — never a customer's preferred contact (app-validated)
 }
 
 enum SizeScope {
