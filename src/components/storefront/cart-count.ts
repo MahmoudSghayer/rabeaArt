@@ -1,9 +1,5 @@
 /**
- * Stub for the storefront cart badge. Returns 0 for now — the cart/order agent building the
- * order flow (localStorage or server-backed cart) will replace the internals of this hook with
- * real state. Keep the exported signature (`useCartCount(): number`) stable so SiteHeader never
- * needs to change when that lands.
+ * Storefront cart badge hook — thin re-export so SiteHeader stays decoupled from the cart
+ * store's module location. Real state lives in src/lib/cart/store.ts (Zustand, localStorage).
  */
-export function useCartCount(): number {
-  return 0;
-}
+export { useCartCount } from "@/lib/cart/store";
