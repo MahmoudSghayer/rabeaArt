@@ -1,0 +1,82 @@
+{
+  "_note": "Skeleton locale, structurally complete but not yet reviewed by a native speaker or the business. Intentionally excluded from SUPPORTED_LOCALES in src/i18n/routing.ts until reviewed — do not add 'he' there without sign-off.",
+  "brand": {
+    "wordmark": "Rabea.art",
+    "arName": "רביע",
+    "tag": "אמנות שלובשים, סיפורים שתולים"
+  },
+  "nav": {
+    "home": "בית",
+    "shop": "חנות",
+    "shirts": "חולצות",
+    "paintings": "ציורים",
+    "custom": "הזמנה בהתאמה אישית",
+    "about": "על רביע",
+    "gallery": "גלריה",
+    "contact": "צור קשר",
+    "faq": "שאלות נפוצות",
+    "terms": "תנאים והגבלות",
+    "privacy": "מדיניות פרטיות",
+    "admin": "ניהול",
+    "order": "ההזמנה שלי"
+  },
+  "actions": {
+    "addToOrder": "הוסף להזמנה",
+    "submitOrder": "שלח הזמנה",
+    "continueShopping": "המשך בקנייה",
+    "viewOrder": "בדוק את ההזמנה",
+    "remove": "הסר",
+    "edit": "ערוך",
+    "back": "חזרה",
+    "next": "הבא",
+    "close": "סגור",
+    "copy": "העתק",
+    "copied": "הועתק",
+    "download": "הורדה",
+    "save": "שמור",
+    "cancel": "ביטול",
+    "search": "חיפוש…",
+    "whatsapp": "וואטסאפ",
+    "email": "אימייל",
+    "call": "שיחת טלפון"
+  },
+  "common": {
+    "payNote": "אין תשלום מקוון — נבדוק את ההזמנה וניצור איתך קשר לאישור המחיר, התשלום והמשלוח.",
+    "manualPrice": "התמחור לאחר בדיקה",
+    "qty": "כמות",
+    "size": "מידה",
+    "color": "צבע",
+    "method": "שיטת ייצור",
+    "frame": "מסגרת",
+    "notes": "הערות",
+    "total": "סכום משוער",
+    "prep": "זמן הכנה",
+    "outOfStock": "לא זמין כרגע",
+    "saleTag": "מבצע",
+    "featuredTag": "נבחר",
+    "originalTag": "מקורי",
+    "printTag": "הדפס אמנותי",
+    "loading": "טוען…",
+    "errorGeneric": "משהו השתבש. נסו שוב מאוחר יותר.",
+    "currency": "₪"
+  },
+  "orderStatus": {
+    "new": "חדש",
+    "review": "בבדיקה",
+    "needsInfo": "נדרש מידע נוסף",
+    "quoted": "נשלחה הצעת מחיר",
+    "accepted": "אושר",
+    "declined": "נדחה",
+    "progress": "בביצוע",
+    "ready": "מוכן",
+    "completed": "הושלם",
+    "cancelled": "בוטל"
+  },
+  "paymentStatus": {
+    "notRequired": "אינו נדרש עדיין",
+    "unpaid": "לא שולם",
+    "partial": "שולם חלקית",
+    "paid": "שולם",
+    "refunded": "הוחזר"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "brand": {
+    "wordmark": "Rabea.art",
+    "arName": "Rabea",
+    "tag": "Art you wear, stories you hang"
+  },
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "shirts": "Shirts",
+    "paintings": "Paintings",
+    "custom": "Custom order",
+    "about": "About Rabea",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "admin": "Admin",
+    "order": "My order"
+  },
+  "actions": {
+    "addToOrder": "Add to order",
+    "submitOrder": "Submit order",
+    "continueShopping": "Continue shopping",
+    "viewOrder": "Review your order",
+    "remove": "Remove",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search…",
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "call": "Phone call"
+  },
+  "common": {
+    "payNote": "No online payment — we review your order, then contact you to confirm price, payment and delivery.",
+    "manualPrice": "Priced after review",
+    "qty": "Quantity",
+    "size": "Size",
+    "color": "Colour",
+    "method": "Production method",
+    "frame": "Frame",
+    "notes": "Notes",
+    "total": "Estimated total",
+    "prep": "Preparation time",
+    "outOfStock": "Currently unavailable",
+    "saleTag": "Sale",
+    "featuredTag": "Featured",
+    "originalTag": "Original",
+    "printTag": "Fine-art print",
+    "loading": "Loading…",
+    "errorGeneric": "Something went wrong. Please try again later.",
+    "currency": "₪"
+  },
+  "orderStatus": {
+    "new": "New",
+    "review": "Under review",
+    "needsInfo": "Needs info",
+    "quoted": "Quotation sent",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "progress": "In progress",
+    "ready": "Ready",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "paymentStatus": {
+    "notRequired": "Not required yet",
+    "unpaid": "Unpaid",
+    "partial": "Partially paid",
+    "paid": "Paid",
+    "refunded": "Refunded"
+  }
+}

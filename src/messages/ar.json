@@ -1,0 +1,81 @@
+{
+  "brand": {
+    "wordmark": "Rabea.art",
+    "arName": "ربيع",
+    "tag": "فن يُلبَس وحكايات تُعلَّق"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "shop": "المتجر",
+    "shirts": "قمصان",
+    "paintings": "لوحات",
+    "custom": "تصميم خاص",
+    "about": "عن ربيع",
+    "gallery": "المعرض",
+    "contact": "تواصل",
+    "faq": "الأسئلة الشائعة",
+    "terms": "الشروط والأحكام",
+    "privacy": "سياسة الخصوصية",
+    "admin": "لوحة الإدارة",
+    "order": "طلبي"
+  },
+  "actions": {
+    "addToOrder": "أضِف إلى الطلب",
+    "submitOrder": "أرسِل الطلب",
+    "continueShopping": "تابع التسوق",
+    "viewOrder": "راجع طلبك",
+    "remove": "إزالة",
+    "edit": "تعديل",
+    "back": "رجوع",
+    "next": "التالي",
+    "close": "إغلاق",
+    "copy": "نسخ",
+    "copied": "تم النسخ",
+    "download": "تنزيل",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "search": "ابحث…",
+    "whatsapp": "واتساب",
+    "email": "البريد",
+    "call": "اتصال"
+  },
+  "common": {
+    "payNote": "لا يوجد دفع إلكتروني — نراجع طلبك ونتواصل معك لتأكيد السعر وطريقة الدفع والتوصيل.",
+    "manualPrice": "يُسعَّر بعد المراجعة",
+    "qty": "الكمية",
+    "size": "المقاس",
+    "color": "اللون",
+    "method": "طريقة التنفيذ",
+    "frame": "الإطار",
+    "notes": "ملاحظات",
+    "total": "الإجمالي التقديري",
+    "prep": "مدة التجهيز",
+    "outOfStock": "غير متوفر حاليًا",
+    "saleTag": "تخفيض",
+    "featuredTag": "مختارة",
+    "originalTag": "أصلية",
+    "printTag": "نسخة فنية",
+    "loading": "جارٍ التحميل…",
+    "errorGeneric": "حدث خطأ غير متوقع. يرجى المحاولة لاحقًا.",
+    "currency": "₪"
+  },
+  "orderStatus": {
+    "new": "جديد",
+    "review": "قيد المراجعة",
+    "needsInfo": "بانتظار معلومات",
+    "quoted": "أُرسل عرض السعر",
+    "accepted": "مقبول",
+    "declined": "معتذَر عنه",
+    "progress": "قيد التنفيذ",
+    "ready": "جاهز",
+    "completed": "مكتمل",
+    "cancelled": "ملغي"
+  },
+  "paymentStatus": {
+    "notRequired": "لا حاجة بعد",
+    "unpaid": "غير مدفوع",
+    "partial": "مدفوع جزئيًا",
+    "paid": "مدفوع",
+    "refunded": "مسترجَع"
+  }
+}

@@ -1,0 +1,31 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1.5px solid rgba(35, 32, 27, 0.2);
+  border-radius: var(--radius-pill);
+  padding: 8px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--color-card);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    background var(--duration-fast) var(--ease-standard);
+}
+
+.chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--color-sienna);
+}
+
+.active {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: var(--color-ink);
+}

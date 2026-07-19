@@ -1,0 +1,457 @@
+// Rabea.art data model.
+// Connection URLs are NOT declared here (Prisma 7) — see prisma.config.ts (CLI/migrations)
+// and src/lib/prisma.ts (runtime, via a pg driver adapter).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  NEW
+  REVIEW
+  NEEDS_INFO
+  QUOTED
+  ACCEPTED
+  DECLINED
+  PROGRESS
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  NOT_REQUIRED
+  UNPAID
+  PARTIAL
+  PAID
+  REFUNDED
+}
+
+enum AdminRole {
+  OWNER
+  ADMIN
+  STAFF
+}
+
+enum ProductType {
+  SHIRT
+  PAINTING
+}
+
+enum ItemKind {
+  SHIRT
+  PAINTING
+  CUSTOM_SHIRT
+  CUSTOM_PAINTING
+  CUSTOM_OTHER
+}
+
+enum ContactMethod {
+  PHONE
+  WHATSAPP
+  EMAIL
+}
+
+enum SizeScope {
+  SHIRT
+  PAINTING
+}
+
+// ---------------------------------------------------------------------------
+// Admin / RBAC
+// ---------------------------------------------------------------------------
+
+model AdminUser {
+  id          String    @id // = Supabase auth.users.id
+  email       String    @unique
+  name        String
+  role        AdminRole @default(STAFF)
+  active      Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  statusHistoryEntries OrderStatusHistory[]
+  communicationLogs    CommunicationLog[]
+  auditLogs            AuditLog[]
+
+  @@map("admin_users")
+}
+
+// ---------------------------------------------------------------------------
+// Customers
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id               String         @id @default(cuid())
+  name             String
+  phone            String?
+  phoneNormalized  String?        @db.VarChar(32)
+  whatsapp         String?
+  email            String?
+  emailNormalized  String?
+  country          String?
+  city             String?
+  street           String?
+  building         String?
+  apt              String?
+  postal           String?
+  instructions     String?
+  preferredContact ContactMethod?
+  notes            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  orders Order[]
+
+  @@index([phoneNormalized])
+  @@index([emailNormalized])
+  @@map("customers")
+}
+
+// ---------------------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------------------
+
+model Category {
+  id        String      @id @default(cuid())
+  type      ProductType
+  code      String      @unique
+  nameAr    String
+  nameEn    String
+  sortOrder Int         @default(0)
+  active    Boolean     @default(true)
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                  String      @id @default(cuid())
+  slug                String      @unique
+  type                ProductType
+  categoryId          String
+  nameAr              String
+  nameEn              String
+  descAr              String?
+  descEn              String?
+  price               Decimal?    @db.Decimal(10, 2) // shirts base price; null for paintings
+  sale                Decimal?    @db.Decimal(10, 2)
+  featured            Boolean     @default(false)
+  archived            Boolean     @default(false)
+  trackStock          Boolean     @default(false) // shirts only, opt-in
+  printAvailable      Boolean     @default(false)
+  embroideryAvailable Boolean     @default(false)
+  isOriginal          Boolean     @default(false) // paintings: one-of-a-kind
+  artistNoteAr        String?
+  artistNoteEn        String?
+  prepAr              String?
+  prepEn              String?
+  displayOrder        Int         @default(0)
+  seoTitle            String?
+  seoDescription      String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  archivedAt          DateTime?
+
+  category   Category         @relation(fields: [categoryId], references: [id])
+  images     ProductImage[]
+  colors     ProductColor[]
+  sizes      ProductSize[]
+  variants   ProductVariant[]
+  orderItems OrderItem[]
+
+  @@index([type, archived])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  path      String // object key in the public "product-images" bucket
+  alt       String?
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Color {
+  id        String  @id @default(cuid())
+  code      String  @unique
+  nameAr    String
+  nameEn    String
+  hex       String
+  sortOrder Int     @default(0)
+  active    Boolean @default(true)
+
+  variants ProductVariant[]
+  products ProductColor[]
+
+  @@map("colors")
+}
+
+model ProductColor {
+  productId String
+  colorId   String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color   Color   @relation(fields: [colorId], references: [id])
+
+  @@id([productId, colorId])
+  @@map("product_colors")
+}
+
+model Size {
+  id        String    @id @default(cuid())
+  scope     SizeScope
+  code      String // "XS".."XXL" or "A5"/"A4"/"A3"/"custom"
+  labelAr   String
+  labelEn   String
+  sortOrder Int       @default(0)
+  active    Boolean   @default(true)
+
+  variants     ProductVariant[]
+  productSizes ProductSize[]
+
+  @@unique([scope, code])
+  @@map("sizes")
+}
+
+model ProductSize {
+  // painting size -> price
+  id        String  @id @default(cuid())
+  productId String
+  sizeId    String
+  price     Decimal @db.Decimal(10, 2)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size    Size    @relation(fields: [sizeId], references: [id])
+
+  @@unique([productId, sizeId])
+  @@map("product_sizes")
+}
+
+model ProductVariant {
+  // shirt color x size -> stock (auto-generated from the product's selected color/size sets)
+  id        String  @id @default(cuid())
+  productId String
+  colorId   String?
+  sizeId    String?
+  sku       String? @unique
+  stock     Int     @default(0)
+  active    Boolean @default(true)
+
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color      Color?      @relation(fields: [colorId], references: [id])
+  size       Size?       @relation(fields: [sizeId], references: [id])
+  orderItems OrderItem[]
+
+  @@unique([productId, colorId, sizeId])
+  @@map("product_variants")
+}
+
+model Frame {
+  id      String  @id @default(cuid())
+  code    String  @unique
+  labelAr String
+  labelEn String
+  add     Decimal @db.Decimal(10, 2) @default(0)
+  active  Boolean @default(true)
+  sortOrder Int   @default(0)
+
+  @@map("frames")
+}
+
+model Material {
+  id        String  @id @default(cuid())
+  code      String  @unique
+  labelAr   String
+  labelEn   String
+  active    Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  @@map("materials")
+}
+
+model ProductionMethod {
+  // scope: "shirt" | "custom-painting-style" | "placement" | "orientation" | "shirt-type"
+  id        String  @id @default(cuid())
+  scope     String
+  code      String
+  labelAr   String
+  labelEn   String
+  active    Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  @@unique([scope, code])
+  @@map("production_methods")
+}
+
+// ---------------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------------
+
+model Order {
+  id                    String        @id @default(cuid())
+  ref                   String        @unique // "RA-1042"
+  status                OrderStatus   @default(NEW)
+  pay                   PaymentStatus @default(NOT_REQUIRED)
+  estTotal              Decimal?      @db.Decimal(10, 2)
+  finalPrice            Decimal?      @db.Decimal(10, 2)
+  eta                   DateTime?
+  customerId            String
+  contactMethod         ContactMethod
+  notes                 String?
+  consentTerms          Boolean       @default(false)
+  consentCustomApproval Boolean       @default(false)
+  archived              Boolean       @default(false)
+  idempotencyKey        String        @unique
+  locale                String        @default("ar")
+  stockAppliedAt        DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  customer       Customer             @relation(fields: [customerId], references: [id])
+  items          OrderItem[]
+  files          OrderFile[]
+  history        OrderStatusHistory[]
+  communications CommunicationLog[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  kind           ItemKind
+  productId      String?
+  variantId      String?
+  labelAr        String?
+  labelEn        String?
+  qty            Int      @default(1)
+  unitPrice      Decimal? @db.Decimal(10, 2) // null = manual pricing
+  finalUnitPrice Decimal? @db.Decimal(10, 2) // admin override
+  optionsJson    Json
+  notes          String?
+  snapshotNameAr String?
+  snapshotNameEn String?
+  stockWarning   Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product?        @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id])
+  files   OrderFile[]
+
+  @@map("order_items")
+}
+
+model OrderFile {
+  id           String   @id @default(cuid())
+  orderId      String
+  orderItemId  String?
+  bucketPath   String // order-uploads/{orderId}/{uuid}-name
+  originalName String
+  mimeType     String
+  size         Int
+  createdAt    DateTime @default(now())
+
+  order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+
+  @@map("order_files")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  status    OrderStatus
+  note      String?
+  byAdminId String?
+  at        DateTime    @default(now())
+
+  order   Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  byAdmin AdminUser? @relation(fields: [byAdminId], references: [id])
+
+  @@map("order_status_history")
+}
+
+model CommunicationLog {
+  id        String        @id @default(cuid())
+  orderId   String
+  channel   ContactMethod
+  text      String
+  byAdminId String
+  at        DateTime      @default(now())
+
+  order   Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  byAdmin AdminUser @relation(fields: [byAdminId], references: [id])
+
+  @@map("communication_logs")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  action     String // "order.status.update", "product.delete", "user.role.change", "csv.export"
+  targetType String
+  targetId   String?
+  metadata   Json?
+  at         DateTime @default(now())
+
+  actor AdminUser @relation(fields: [actorId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model EmailLog {
+  id                String   @id @default(cuid())
+  orderId           String?
+  to                String
+  template          String
+  status            String // "sent" | "failed"
+  providerMessageId String?
+  error             String?
+  at                DateTime @default(now())
+
+  @@map("email_logs")
+}
+
+model RateLimitBucket {
+  // Postgres-backed sliding-window rate limiter (avoids a Redis/Upstash vendor dependency).
+  key        String   @id // e.g. "login:203.0.113.4" or "order-submit:203.0.113.4"
+  count      Int      @default(1)
+  windowFrom DateTime @default(now())
+
+  @@map("rate_limit_buckets")
+}
+
+model Settings {
+  id                 Int      @id @default(1)
+  whatsapp           String
+  email              String
+  instagram          String?
+  announcementAr     String?
+  announcementEn     String?
+  announcementActive Boolean  @default(false)
+  customOtherEnabled Boolean  @default(true)
+  updatedAt          DateTime @updatedAt
+
+  @@map("settings")
+}

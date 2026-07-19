@@ -1,0 +1,126 @@
+/**
+ * Design tokens ported 1:1 from the approved Rabea.art design (StyleGuide.dc.html / store.js
+ * TOKENS). Do not change these values without design sign-off — see the plan file for context.
+ */
+:root {
+  /* Colors */
+  --color-paper: #f6f0e3;
+  --color-paper-deep: #ede3cf;
+  --color-card: #fbf7ee;
+  --color-ink: #23201b;
+  --color-ink-soft: #6b6355;
+  --color-line: rgba(35, 32, 27, 0.14);
+  --color-sienna: #b7472a;
+  --color-sienna-deep: #8f3018;
+  --color-ochre: #c99b3f;
+  --color-teal: #33605a;
+
+  /* Garment swatches */
+  --swatch-sand: #e6d8bf;
+  --swatch-cream: #f2eada;
+  --swatch-ink: #2a2620;
+  --swatch-clay: #b7472a;
+  --swatch-olive: #5c6b4d;
+  --swatch-teal: #33605a;
+  --swatch-dusty-rose: #c89a8e;
+
+  /* Order status chip colors (bg/fg pairs), from store.js ORDER_STATUS */
+  --status-new-fg: #8f3018;
+  --status-new-bg: #f6e2da;
+  --status-review-fg: #8a6410;
+  --status-review-bg: #f4e8c6;
+  --status-needs-info-fg: #7c5286;
+  --status-needs-info-bg: #efe2f0;
+  --status-quoted-fg: #2e5550;
+  --status-quoted-bg: #dceae4;
+  --status-accepted-fg: #3f7048;
+  --status-accepted-bg: #dfebda;
+  --status-declined-fg: #7c2e22;
+  --status-declined-bg: #f0d8d1;
+  --status-progress-fg: #3e5c8a;
+  --status-progress-bg: #e0e7f0;
+  --status-ready-fg: #2e6e62;
+  --status-ready-bg: #daeee6;
+  --status-completed-fg: #3b372f;
+  --status-completed-bg: #e7e1d2;
+  --status-cancelled-fg: #6b6459;
+  --status-cancelled-bg: #ece7db;
+
+  /* Payment status chip colors, from store.js PAY_STATUS */
+  --pay-not-required-fg: #6b6459;
+  --pay-not-required-bg: #ece7db;
+  --pay-unpaid-fg: #8f3018;
+  --pay-unpaid-bg: #f6e2da;
+  --pay-partial-fg: #8a6410;
+  --pay-partial-bg: #f4e8c6;
+  --pay-paid-fg: #3f7048;
+  --pay-paid-bg: #dfebda;
+  --pay-refunded-fg: #3e5c8a;
+  --pay-refunded-bg: #e0e7f0;
+
+  /* Typography — CSS vars set by next/font/google in app/layout.tsx */
+  --font-display: var(--font-amiri), serif; /* headings, quotes — never body text */
+  --font-body: var(--font-ibm-plex-sans-arabic), ui-sans-serif, sans-serif;
+  --font-accent: var(--font-instrument-serif), serif; /* step numbers, order refs, Latin only */
+
+  /* Shape */
+  --radius-card: 18px;
+  --radius-card-lg: 22px;
+  --radius-input: 12px;
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-card: 0 18px 44px -20px rgba(60, 40, 15, 0.28);
+  --shadow-cta: 0 14px 30px -14px rgba(183, 71, 42, 0.7);
+
+  /* Spacing scale (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-10: 40px;
+
+  /* Motion */
+  --ease-standard: ease;
+  --duration-fast: 0.2s;
+  --duration-standard: 0.25s;
+  --duration-entrance: 0.7s;
+}
+
+@keyframes rbFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rbFloat {
+  from {
+    transform: translateY(-7px);
+  }
+  to {
+    transform: translateY(9px);
+  }
+}
+
+@keyframes rbMarquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

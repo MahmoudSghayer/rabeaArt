@@ -1,0 +1,80 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: 14.5px;
+  font-weight: 600;
+  padding: 13px 24px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-sienna);
+  outline-offset: 2px;
+}
+
+.primary {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.primary:hover:not(:disabled) {
+  background: var(--color-sienna);
+  color: #fff3e4;
+}
+
+.accent {
+  background: var(--color-sienna);
+  color: #fff3e4;
+  box-shadow: var(--shadow-cta);
+}
+.accent:hover:not(:disabled) {
+  background: var(--color-sienna-deep);
+}
+
+.outline {
+  background: rgba(251, 247, 238, 0.6);
+  border-color: rgba(35, 32, 27, 0.28);
+  color: var(--color-ink);
+}
+.outline:hover:not(:disabled) {
+  border-color: var(--color-sienna);
+  color: var(--color-sienna);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-ink);
+}
+.ghost:hover:not(:disabled) {
+  color: var(--color-sienna);
+}
+
+.destructive {
+  background: var(--status-declined-bg);
+  color: var(--status-declined-fg);
+  border-color: rgba(143, 48, 24, 0.4);
+}
+.destructive:hover:not(:disabled) {
+  background: var(--status-declined-fg);
+  color: var(--status-declined-bg);
+}
+
+.sm {
+  padding: 8px 15px;
+  font-size: 13px;
+}
+
+.fullWidth {
+  width: 100%;
+}
