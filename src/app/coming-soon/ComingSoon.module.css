@@ -1,0 +1,126 @@
+.wrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: clip;
+  background: var(--color-paper);
+  padding: var(--space-6);
+}
+
+.blobA,
+.blobB {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  pointer-events: none;
+  filter: blur(30px);
+  animation: rbFloat 8s ease-in-out infinite alternate;
+}
+
+.blobA {
+  inset-inline-end: -140px;
+  top: -100px;
+  background: radial-gradient(circle at 50% 50%, rgba(201, 155, 63, 0.3), rgba(201, 155, 63, 0) 70%);
+}
+
+.blobB {
+  inset-inline-start: -160px;
+  bottom: -140px;
+  background: radial-gradient(circle at 50% 50%, rgba(183, 71, 42, 0.18), rgba(183, 71, 42, 0) 70%);
+  animation-delay: 0.9s;
+}
+
+.card {
+  position: relative;
+  text-align: center;
+  max-width: 560px;
+  animation: rbFadeUp 0.7s ease both;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(35, 32, 27, 0.2);
+  border-radius: var(--radius-pill);
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #57503f;
+  background: rgba(251, 247, 238, 0.7);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-sienna);
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(56px, 10vw, 88px);
+  line-height: 1.2;
+  margin: 18px 0 0;
+  color: var(--color-ink);
+}
+
+.latin {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-size: clamp(16px, 2vw, 20px);
+  color: #8a8070;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+.line {
+  width: 56px;
+  height: 2px;
+  background: var(--color-sienna);
+  margin: 26px auto;
+  border-radius: 2px;
+}
+
+.soonAr {
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.soonEn {
+  font-size: 15px;
+  color: var(--color-ink-soft);
+  margin: 8px 0 0;
+}
+
+.sub {
+  font-size: 14px;
+  line-height: 2;
+  color: #57503f;
+  margin: 18px auto 0;
+  max-width: 44ch;
+}
+
+.ig {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  border: 1.5px solid rgba(35, 32, 27, 0.28);
+  border-radius: var(--radius-pill);
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(251, 247, 238, 0.6);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.ig:hover {
+  border-color: var(--color-sienna);
+  color: var(--color-sienna);
+}

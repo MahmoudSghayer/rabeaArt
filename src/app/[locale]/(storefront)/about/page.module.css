@@ -1,0 +1,244 @@
+.page {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+}
+
+.hero {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: clamp(36px, 6vw, 72px) clamp(16px, 4vw, 40px) clamp(40px, 6vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: clamp(30px, 5vw, 64px);
+  align-items: center;
+  animation: rbFadeUp var(--duration-entrance) var(--ease-standard) both;
+}
+
+.kicker {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--color-sienna);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(34px, 4.8vw, 58px);
+  margin: 12px 0 10px;
+  line-height: 1.35;
+}
+
+.artistLine {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-size: 16px;
+  color: #8a8070;
+  margin-bottom: 16px;
+}
+
+.intro {
+  font-size: 15px;
+  line-height: 2.1;
+  color: #57503f;
+  margin: 0 0 14px;
+  max-width: 56ch;
+  text-wrap: pretty;
+}
+
+.intro:last-child {
+  margin-bottom: 0;
+}
+
+.heroArtWrap {
+  position: relative;
+  max-width: 430px;
+  justify-self: center;
+  width: 100%;
+}
+
+.heroGlow {
+  position: absolute;
+  inset-block-start: -26px;
+  inset-inline-end: -20px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-sienna) 22%, transparent),
+    transparent 70%
+  );
+  filter: blur(18px);
+}
+
+.heroFrame {
+  position: relative;
+  transform: rotate(2deg);
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  padding: 12px 12px 44px;
+  box-shadow: var(--shadow-card);
+}
+
+.heroArt {
+  width: 100%;
+  height: min(460px, 92vw);
+  background-size: cover;
+  background-position: center;
+}
+
+.heroCaption {
+  position: absolute;
+  inset-block-end: 13px;
+  inset-inline-start: 0;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-accent);
+  font-style: italic;
+  color: #8a8070;
+  font-size: 13.5px;
+}
+
+.valuesBand {
+  background: var(--color-paper-deep);
+  border-block: 1px solid var(--color-line);
+  padding: clamp(40px, 6vw, 64px) clamp(16px, 4vw, 40px);
+}
+
+.valuesGrid {
+  max-width: 1180px;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 18px;
+}
+
+.valueCard {
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: 22px;
+}
+
+.valueNum {
+  font-family: var(--font-accent);
+  font-size: 34px;
+  color: color-mix(in srgb, var(--color-sienna) 85%, transparent);
+  line-height: 1;
+}
+
+.valueTitle {
+  font-weight: 700;
+  font-size: 15.5px;
+  margin: 11px 0 7px;
+}
+
+.valueDesc {
+  font-size: 13px;
+  line-height: 1.9;
+  color: #57503f;
+}
+
+.story {
+  max-width: 820px;
+  margin-inline: auto;
+  padding: clamp(44px, 6vw, 72px) clamp(16px, 4vw, 40px);
+}
+
+.storyTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(26px, 3.4vw, 38px);
+  margin: 0 0 20px;
+}
+
+.storyText {
+  font-size: 15px;
+  line-height: 2.2;
+  color: #3b372f;
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+
+.pullQuote {
+  border-inline-start: 3px solid var(--color-ochre);
+  padding: 6px 18px;
+  margin: 22px 0;
+}
+
+.pullQuote span {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.9;
+  color: var(--color-ink-soft);
+  font-style: italic;
+}
+
+.timeline {
+  margin-top: 34px;
+  border-block-start: 1px solid var(--color-line);
+}
+
+.timelineRow {
+  display: flex;
+  gap: 18px;
+  padding: 15px 2px;
+  border-block-end: 1px dashed color-mix(in srgb, var(--color-ink) 14%, transparent);
+  align-items: baseline;
+}
+
+.timelineYear {
+  flex: none;
+  font-family: var(--font-accent);
+  font-size: 19px;
+  color: var(--color-sienna);
+  min-width: 52px;
+}
+
+.timelineTitle {
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.timelineDesc {
+  font-size: 13px;
+  color: #57503f;
+  line-height: 1.8;
+  margin-top: 3px;
+}
+
+.ctaSection {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: 0 clamp(16px, 4vw, 40px) clamp(56px, 8vw, 92px);
+  text-align: center;
+}
+
+.ctaBanner {
+  border: 1px solid var(--color-line);
+  border-radius: 26px;
+  background: linear-gradient(180deg, var(--color-card), #f1e7d2);
+  padding: clamp(32px, 5vw, 56px) 24px;
+}
+
+.ctaTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 4vw, 46px);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.ctaSub {
+  font-size: 14px;
+  color: #57503f;
+  margin: 0 0 24px;
+  line-height: 1.9;
+}
+
+.ctaActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}

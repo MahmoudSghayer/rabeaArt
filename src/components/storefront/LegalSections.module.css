@@ -1,0 +1,28 @@
+.section {
+  margin-bottom: 26px;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 21px;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.num {
+  font-family: var(--font-accent);
+  font-size: 16px;
+  color: var(--color-sienna);
+}
+
+.body {
+  font-size: 14px;
+  line-height: 2.2;
+  color: #3b372f;
+  margin: 0;
+  text-wrap: pretty;
+  white-space: pre-line;
+}

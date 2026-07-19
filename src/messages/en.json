@@ -77,5 +77,106 @@
     "partial": "Partially paid",
     "paid": "Paid",
     "refunded": "Refunded"
+  },
+  "header": {
+    "announcementDefault": "Custom orders are open this month — pre-holiday delivery guaranteed for orders confirmed 10 days ahead.",
+    "langToggleTitle": "العربية / English",
+    "toggleToAr": "عربي",
+    "toggleToEn": "EN",
+    "menuOpenLabel": "Open menu",
+    "menuCloseLabel": "Close menu",
+    "orderAriaLabelWithCount": "My order — {count} in cart"
+  },
+  "footer": {
+    "blurb": "A small studio for meaningful pieces: printed & embroidered shirts, original paintings and fine-art prints, and custom orders that start from your idea.",
+    "infoHeading": "Information",
+    "contactHeading": "Get in touch",
+    "hours": "Sun–Thu · 10:00–18:00 · WhatsApp replies within hours",
+    "copyright": "© 2026 Rabea.art — made with love in the studio",
+    "whatsappMessage": "Hi Rabea! I have a question"
+  },
+  "about": {
+    "kicker": "THE STORY",
+    "title": "Rabea — an artist making piece by piece",
+    "artistLine": "Rabea — artist & maker",
+    "intro1": "Rabea is a visual artist working across painting, embroidery and print. He started with small sketchbooks, a needle and thread — today he runs a studio releasing a limited number of pieces each week: shirts printed and embroidered to order, and paintings that carry his signature.",
+    "intro2": "No mass production, no big warehouse — every order starts with a conversation, is made by two hands, and wrapped like a gift.",
+    "heroImageAlt": "Rabea at work in the studio",
+    "heroCaption": "The studio, Haifa",
+    "values": [
+      { "title": "Piece by piece", "desc": "Every order is made by hand, to order — no templates, no repeats." },
+      { "title": "Materials that last", "desc": "Heavy cotton, silk threads, archival fade-resistant inks and paints." },
+      { "title": "A personal line", "desc": "You talk directly with Rabea — and get progress photos before delivery." }
+    ],
+    "storyTitle": "From sketchbook to studio",
+    "story1": "It began in a small room: watercolours on school paper, and thread borrowed from his mother’s sewing box. The drawings grew, became gifts for friends, then someone asked for the first shirt — “paint me this on a black tee” — and from that sentence Rabea.art was born.",
+    "pull": "“Every piece that leaves the studio has passed through my hands twice: once as an idea, once as colour.”",
+    "story2": "Today the studio holds a print table, an embroidery hoop, and an easel by the window. Rabea works with every client on their idea: he suggests, tests, sends progress photos — and never closes an order until the piece arrives and its owner smiles.",
+    "timeline": [
+      { "year": "2016", "title": "The first finished sketchbook", "desc": "A hundred watercolour pages — and a first drawing sold to a friend." },
+      { "year": "2019", "title": "The first shirt request", "desc": "“Paint me this on a tee” — the first wearable piece walks out." },
+      { "year": "2023", "title": "The studio opens", "desc": "A room with a sea window in Haifa: print table and embroidery hoop." },
+      { "year": "2026", "title": "Rabea.art", "desc": "The small shop opens — custom orders from all over." }
+    ],
+    "ctaTitle": "Let the next piece tell your story",
+    "ctaSub": "A shirt from your idea, or a painting from your photo — it starts with a simple chat.",
+    "ctaCustom": "Start a custom piece",
+    "ctaShop": "Browse the shop"
+  },
+  "contact": {
+    "kicker": "CONTACT",
+    "title": "Talk to us — we love questions",
+    "sub": "WhatsApp is fastest. We reply within working hours — usually sooner.",
+    "waTitle": "WhatsApp",
+    "waSub": "For orders, questions and idea photos — tap to chat.",
+    "mailTitle": "Email",
+    "mailSub": "For longer details, invoices and collaborations.",
+    "igTitle": "Instagram",
+    "igSub": "New work and studio stories every week.",
+    "hoursTitle": "Working hours",
+    "hours1": "Sun – Thu: 10:00 – 18:00",
+    "hours2": "Fri & Sat: painting break",
+    "pickup": "The studio is in Haifa — self pick-up is possible by appointment via WhatsApp, and delivery covers all areas.",
+    "faqTitle": "Frequently asked questions",
+    "faqSub": "Everything people ask before ordering — honestly",
+    "faqs": [
+      { "q": "How do I pay? There is no payment page.", "a": "There is no online payment at all. You submit the order, we review it, contact you to confirm the final price, then agree on payment: cash on delivery, bank transfer, or local payment apps." },
+      { "q": "How long does an order take?", "a": "Ready shirts take 2–5 working days, embroidery 5–7. Custom paintings vary by size and style — we confirm the date before starting, and we keep it." },
+      { "q": "Can I upload my own design or photo?", "a": "Yes — on the “Custom order” page. Upload up to 6 images, choose print, embroidery or painting, and write your instructions. Your images stay private and are never displayed anywhere." },
+      { "q": "Where do you deliver?", "a": "Everywhere. Self pick-up from the Haifa studio is possible by appointment. Delivery cost depends on the area and is included when we confirm the price." },
+      { "q": "Can I exchange or return?", "a": "Ready pieces can be exchanged within 7 days in original condition. Custom pieces are made just for you so they can’t be returned — but we send progress photos and never close an order before you’re happy." },
+      { "q": "What painting sizes and frames are available?", "a": "A5, A4 and A3 as standard, plus any custom size in centimetres. Frames: natural wood or black metal — or none." },
+      { "q": "Do you make bulk orders (teams, companies, weddings)?", "a": "Yes, with enough lead time: usually two weeks for 10+ pieces. Message us the details and quantity for a custom quote." },
+      { "q": "Is the packaging gift-ready?", "a": "Every piece is hand-wrapped in kraft paper and thread — with a small handwritten card if you like. Add the dedication in your order notes." }
+    ],
+    "stillQ": "Still curious?",
+    "stillSub": "Write to us — your question saves us both time.",
+    "stillCta": "Ask on WhatsApp",
+    "whatsappMessage": "Hi Rabea! I have a question"
+  },
+  "legal": {
+    "updated": "Last updated: July 2026",
+    "contactLine": "Questions about this page?",
+    "contactLink": "Contact us",
+    "terms": {
+      "sections": [
+        { "title": "Ordering & confirmation", "body": "Submitting an order does not mean automatic acceptance. Every order is reviewed manually and we contact you to confirm within 24 working hours. No work starts before your explicit approval of price and timing." },
+        { "title": "Pricing & payment", "body": "There is no online payment on this site. Listed prices for ready pieces are final; custom pieces are priced after design review (complexity, colours, size, production method). The final price is what we agree in writing before starting, paid on delivery or as agreed." },
+        { "title": "Production & delivery", "body": "Stated preparation times are estimates, confirmed when the order is accepted. Dates may shift for reasons beyond our control — we tell you immediately. Delivery cost depends on the area and is included in the price confirmation." },
+        { "title": "Exchanges & cancellation", "body": "Ready pieces can be exchanged within 7 days of delivery in original condition. Custom pieces are made specifically for you and cannot be returned; a custom order can be cancelled free of charge before work starts. Damaged arrivals are repaired or replaced at our cost." },
+        { "title": "Uploaded content", "body": "By uploading images or designs you confirm you have the right to use them. We use your files only to produce your order, and never display them publicly without your written permission." },
+        { "title": "Intellectual property", "body": "Rabea’s designs, paintings and site imagery belong to Rabea.art and may not be copied or commercially reproduced without permission." }
+      ]
+    },
+    "privacy": {
+      "sections": [
+        { "title": "What we collect", "body": "When you submit an order we collect: name, phone and WhatsApp numbers, email, delivery address, your notes, and the images you upload. We collect no payment data because the site takes no payments." },
+        { "title": "How we use it", "body": "Your data is used exclusively to review the order, contact you, produce the piece, and deliver it. No marketing messages unless you ask for them." },
+        { "title": "Uploaded images", "body": "Your images and designs are private: stored securely, visible only to authorised studio staff, and used solely to produce your order. They are never shown in any gallery or public page without your written permission." },
+        { "title": "Who sees your data", "body": "Customer data is visible only to authorised admins in the dashboard. We never sell or share data with third parties, except the delivery company (name, address and phone only)." },
+        { "title": "Retention & deletion", "body": "We keep order records for follow-up and guarantees. You can request a copy of your data, or its permanent deletion, at any time." },
+        { "title": "Your rights", "body": "You may access, correct, delete, or object to any use of your data. Write to us and we respond within a few working days." }
+      ]
+    }
   }
 }
