@@ -21,12 +21,15 @@ const ORPHAN_AGE_MS = 24 * 60 * 60 * 1000;
  * next scheduled run. */
 const MAX_DELETIONS_PER_RUN = 500;
 
-/** Constant-time comparison of the `x-cron-secret` header against `CRON_SECRET`. Length is
+/** Constant-time comparison of the caller-supplied secret against `CRON_SECRET`. Accepts either
+ * our own `x-cron-secret` header (manual/pg_cron/GitHub Actions callers) or Vercel Cron's
+ * convention (`Authorization: Bearer <CRON_SECRET>`, sent on its GET requests). Length is
  * checked first because `timingSafeEqual` throws (rather than returning false) on a length
  * mismatch, and comparing lengths up front leaks nothing an attacker doesn't already know
  * (secret length isn't the secret). */
 function isAuthorized(request: NextRequest): boolean {
-  const provided = request.headers.get("x-cron-secret");
+  const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const provided = request.headers.get("x-cron-secret") ?? bearer;
   const expected = process.env.CRON_SECRET;
   if (!provided || !expected) return false;
 
@@ -81,7 +84,7 @@ async function cleanupOrphanedUploads(): Promise<{ scanned: number; deleted: num
   return { scanned, deleted };
 }
 
-export async function POST(request: NextRequest) {
+async function handle(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   }
@@ -90,7 +93,16 @@ export async function POST(request: NextRequest) {
     const result = await cleanupOrphanedUploads();
     return NextResponse.json(result);
   } catch (err) {
-    console.error("POST /api/cron/cleanup-uploads failed", err);
+    console.error("/api/cron/cleanup-uploads failed", err);
     return NextResponse.json({ error: "INTERNAL" }, { status: 500 });
   }
+}
+
+export async function POST(request: NextRequest) {
+  return handle(request);
+}
+
+/** Vercel Cron invokes scheduled routes with GET (+ Authorization: Bearer CRON_SECRET). */
+export async function GET(request: NextRequest) {
+  return handle(request);
 }
