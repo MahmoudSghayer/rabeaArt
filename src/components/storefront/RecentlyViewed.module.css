@@ -1,0 +1,42 @@
+.wrap {
+  margin-top: 52px;
+}
+
+.heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8a8070;
+  margin-bottom: 14px;
+}
+
+.strip {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-block-end: 8px;
+}
+
+.card {
+  flex: none;
+  width: 150px;
+  display: block;
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-2);
+}
+
+.art {
+  aspect-ratio: 1;
+  border-radius: 9px;
+}
+
+.name {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 8px 2px 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-ink);
+}
