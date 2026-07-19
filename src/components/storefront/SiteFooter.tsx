@@ -87,6 +87,16 @@ export async function SiteFooter() {
       <div className={styles.bottomBar}>
         <div className={styles.bottomInner}>
           <span>{t("copyright")}</span>
+          {/* Brand credit — Latin-script studio name, deliberately untranslated. */}
+          <a
+            href="https://devora.design"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.creditLink}
+            dir="ltr"
+          >
+            Made by devora.design
+          </a>
           <span className={styles.spacer} />
           {/*
             Plain <a>, not the locale-aware <Link>: /admin lives outside the [locale] segment

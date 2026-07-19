@@ -44,6 +44,11 @@ export default function ComingSoonPage() {
         >
           Instagram · {CONTACT_INFO.instagram}
         </a>
+        <div className={styles.credit} dir="ltr">
+          <a href="https://devora.design" target="_blank" rel="noopener noreferrer">
+            Made by devora.design
+          </a>
+        </div>
       </main>
     </div>
   );

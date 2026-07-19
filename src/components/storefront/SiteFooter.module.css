@@ -149,10 +149,22 @@
   color: var(--color-sienna);
 }
 
+.creditLink {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  border-inline-start: 1px solid var(--color-line);
+  padding-inline-start: var(--space-3);
+}
+
+.creditLink:hover {
+  color: var(--color-sienna);
+}
+
 .colLink:focus-visible,
 .waPill:focus-visible,
 .mailLink:focus-visible,
-.adminLink:focus-visible {
+.adminLink:focus-visible,
+.creditLink:focus-visible {
   outline: 2px solid var(--color-sienna);
   outline-offset: 2px;
 }

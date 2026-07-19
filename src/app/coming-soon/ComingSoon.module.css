@@ -124,3 +124,13 @@
   border-color: var(--color-sienna);
   color: var(--color-sienna);
 }
+
+.credit {
+  margin-top: 34px;
+  font-size: 12px;
+  color: var(--color-ink-soft);
+}
+
+.credit a:hover {
+  color: var(--color-sienna);
+}
