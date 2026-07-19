@@ -599,7 +599,7 @@ async function seedSettings(): Promise<void> {
     update: {
       whatsapp: "+972 50 000 0000",
       email: "hello@rabea.art",
-      instagram: "@rabea.art",
+      instagram: "@rab_eart",
       announcementAr: "الطلبات المخصصة مفتوحة هذا الشهر — التسليم قبل العيد مضمون للطلبات المؤكدة قبل ١٠ أيام.",
       announcementEn: "Custom orders are open this month — pre-holiday delivery guaranteed for orders confirmed 10 days ahead.",
       announcementActive: true,
@@ -609,7 +609,7 @@ async function seedSettings(): Promise<void> {
       id: 1,
       whatsapp: "+972 50 000 0000",
       email: "hello@rabea.art",
-      instagram: "@rabea.art",
+      instagram: "@rab_eart",
       announcementAr: "الطلبات المخصصة مفتوحة هذا الشهر — التسليم قبل العيد مضمون للطلبات المؤكدة قبل ١٠ أيام.",
       announcementEn: "Custom orders are open this month — pre-holiday delivery guaranteed for orders confirmed 10 days ahead.",
       announcementActive: true,

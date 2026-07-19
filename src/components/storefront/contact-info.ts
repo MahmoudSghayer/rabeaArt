@@ -6,7 +6,7 @@
 export const CONTACT_INFO = {
   whatsapp: "+972 50 000 0000",
   email: "hello@rabea.art",
-  instagram: "@rabea.art",
+  instagram: "@rab_eart", // actual IG username differs from the domain
 } as const;
 
 /** Digits-only phone number, suitable for a wa.me deep link. */
