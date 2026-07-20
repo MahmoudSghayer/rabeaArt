@@ -8,11 +8,43 @@ const intlMiddleware = createIntlMiddleware(routing);
 const PREVIEW_COOKIE = "rabea_preview";
 
 /**
+ * Public (unauthenticated) API routes. These accept writes from anonymous callers, so while the
+ * coming-soon gate is up they must be refused too — see comingSoonGate. Admin API routes are
+ * deliberately NOT listed: they gate themselves via requireRole() and staying reachable is what
+ * lets the back office be used during a pre-launch preview.
+ */
+const PUBLIC_API_PREFIXES = ["/api/orders", "/api/uploads"];
+
+function isPublicApiPath(pathname: string): boolean {
+  return PUBLIC_API_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+/**
+ * Constant-time string comparison. The preview key is a shared secret, and `===` on strings
+ * short-circuits at the first differing byte, which leaks the length of the matching prefix to
+ * anyone able to time the response. Edge runtime has no node:crypto.timingSafeEqual, so this is
+ * the equivalent accumulate-the-difference loop over the full length of both inputs.
+ */
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/**
  * Pre-launch "coming soon" gate: in production EVERY page (storefront AND admin) rewrites to
  * /coming-soon, so no routes or content leak before release. Launch day: set COMING_SOON=0 in
  * the host's env (no code change). Team preview: set PREVIEW_KEY in the env, then visit any
  * URL with ?preview=<key> once — a cookie keeps the bypass for 30 days. Local development
  * (NODE_ENV !== production) is never gated.
+ *
+ * Public API routes are refused with 503 rather than rewritten: a rewrite would hand an HTML
+ * page to a fetch() caller. Before this, /api/orders and /api/uploads/* were reachable from the
+ * internet while every page said "coming soon", so anyone who guessed the path could write rows
+ * into the production orders/customers tables.
  */
 function comingSoonGate(request: NextRequest): NextResponse | null {
   if (process.env.NODE_ENV !== "production") return null;
@@ -23,7 +55,8 @@ function comingSoonGate(request: NextRequest): NextResponse | null {
 
   const previewKey = process.env.PREVIEW_KEY;
   if (previewKey) {
-    if (searchParams.get("preview") === previewKey) {
+    const supplied = searchParams.get("preview");
+    if (supplied && safeEqual(supplied, previewKey)) {
       const url = request.nextUrl.clone();
       url.searchParams.delete("preview");
       const response = NextResponse.redirect(url);
@@ -36,7 +69,16 @@ function comingSoonGate(request: NextRequest): NextResponse | null {
       });
       return response;
     }
-    if (request.cookies.get(PREVIEW_COOKIE)?.value === previewKey) return null;
+    const cookie = request.cookies.get(PREVIEW_COOKIE)?.value;
+    if (cookie && safeEqual(cookie, previewKey)) return null;
+  }
+
+  // JSON, not a rewrite: API callers must get a machine-readable refusal.
+  if (isPublicApiPath(pathname)) {
+    return NextResponse.json(
+      { error: "SERVICE_UNAVAILABLE" },
+      { status: 503, headers: { "Retry-After": "3600" } },
+    );
   }
 
   const url = request.nextUrl.clone();
@@ -98,6 +140,11 @@ export async function proxy(request: NextRequest) {
   const gated = comingSoonGate(request);
   if (gated) return gated;
 
+  // API routes are matched ONLY so the coming-soon gate above can refuse them. Past that point
+  // they must pass straight through — locale negotiation would rewrite the path and break them.
+  if (request.nextUrl.pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
   // /coming-soon lives outside the [locale] tree — serve it directly, no intl handling.
   if (request.nextUrl.pathname === "/coming-soon") {
     return NextResponse.next();
@@ -111,6 +158,10 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/admin/:path*",
+    // Public API routes: matched so the coming-soon gate can refuse them pre-launch. Admin API
+    // routes stay unmatched — they self-gate with requireRole() and must work during preview.
+    "/api/orders/:path*",
+    "/api/uploads/:path*",
     "/((?!api|_next|_vercel|.*\\..*).*)",
   ],
 };

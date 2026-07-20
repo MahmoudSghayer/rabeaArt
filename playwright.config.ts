@@ -27,7 +27,9 @@ export default defineConfig({
       // This runs a PRODUCTION build, which is exactly where the pre-launch gate in
       // src/proxy.ts is active — without this every request rewrites to /coming-soon and
       // the whole suite asserts against the holding page. Turning it off here tests the
-      // real site; the gate itself is covered separately in coming-soon.spec.ts.
+      // real site; the gate itself is covered in tests/unit/coming-soon-gate.test.ts, which
+      // drives src/proxy.ts directly (it is a pure function of request + env, so exercising it
+      // here would mean a second production build on a second port for no extra fidelity).
       COMING_SOON: "0",
     },
   },

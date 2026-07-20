@@ -312,5 +312,17 @@
       "exchangeTitle": "Exchanges",
       "exchangeBody": "Ready pieces can be exchanged within 7 days in original condition. Custom pieces are made just for you, so no returns — but we never close an order before you love the design."
     }
+  },
+  "notFound": {
+    "title": "We couldn't find that page",
+    "body": "The link may have changed, or the piece you are looking for is no longer on display. Head back home or browse the gallery.",
+    "home": "Home",
+    "shop": "Browse the gallery"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "body": "Sorry — we hit a problem loading this section. Please try again.",
+    "retry": "Try again",
+    "home": "Home"
   }
 }

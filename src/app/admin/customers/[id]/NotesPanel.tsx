@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { useFlash } from "@/components/admin/useFlash";
 import { updateCustomerNotesAction } from "./actions";
 import styles from "./customerDetail.module.css";
 
@@ -14,7 +15,7 @@ export function NotesPanel({ customerId, initialNotes }: { customerId: string; i
   const tCommon = useTranslations("adminCommon");
   const [text, setText] = useState(initialNotes);
   const [pending, startTransition] = useTransition();
-  const [saved, setSaved] = useState(false);
+  const [saved, flashSaved, clearSaved] = useFlash(3000);
   const [error, setError] = useState(false);
 
   const dirty = text !== initialNotes;
@@ -22,12 +23,10 @@ export function NotesPanel({ customerId, initialNotes }: { customerId: string; i
   function save() {
     if (pending || !dirty) return;
     setError(false);
-    setSaved(false);
     startTransition(async () => {
       const result = await updateCustomerNotesAction(customerId, text);
       if (result.ok) {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
+        flashSaved();
       } else {
         setError(true);
       }
@@ -41,7 +40,7 @@ export function NotesPanel({ customerId, initialNotes }: { customerId: string; i
         value={text}
         onChange={(e) => {
           setText(e.target.value);
-          setSaved(false);
+          clearSaved();
         }}
         rows={4}
         placeholder={t("notesPlaceholder")}

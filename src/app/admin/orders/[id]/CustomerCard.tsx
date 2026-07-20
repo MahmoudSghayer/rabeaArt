@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { ORDER_STATUS_META } from "@/lib/orders/status";
 import { ContactMethod, type OrderStatus } from "@/generated/prisma/enums";
 import { formatMoney, initialOf, phoneDigits } from "@/components/admin/format";
+import { useFlash } from "@/components/admin/useFlash";
 import { recordWhatsappSentAction } from "./actions";
 import type { OrderDetailData } from "./OrderDetailView";
 import styles from "./orderDetail.module.css";
@@ -56,18 +57,17 @@ export function CustomerCard({ orderId, orderRef, status, finalPrice, contactMet
     price: draftPriceLine,
   });
 
-  const [copied, setCopied] = useState(false);
+  const [copied, flashCopied] = useFlash(2000);
   const [waOpen, setWaOpen] = useState(false);
   const [waText, setWaText] = useState(initialDraft);
-  const [recorded, setRecorded] = useState(false);
+  const [recorded, flashRecorded] = useFlash(3000);
   const [pending, startTransition] = useTransition();
 
   async function copyPhone() {
     if (!customer.phone) return;
     try {
       await navigator.clipboard.writeText(customer.phone);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      flashCopied();
     } catch {
       // Clipboard API can fail (no permission, insecure context) — silently no-op, the phone
       // number is already visible in the panel for a manual copy.
@@ -79,8 +79,7 @@ export function CustomerCard({ orderId, orderRef, status, finalPrice, contactMet
     startTransition(async () => {
       const result = await recordWhatsappSentAction(orderId, waText);
       if (result.ok) {
-        setRecorded(true);
-        setTimeout(() => setRecorded(false), 3000);
+        flashRecorded();
       }
     });
   }

@@ -41,10 +41,21 @@ const customOptionsSchema = z
     message: `Too many option entries (max ${OPTION_ENTRIES_MAX})`,
   });
 
+/**
+ * `order-uploads/{draftId-uuid}/{object-uuid}.{ext}` — the exact shape randomObjectKey produces
+ * (src/lib/storage/validation.ts). A bare `startsWith("order-uploads/")` accepted any suffix,
+ * so a caller could attach an arbitrary path to their own order: rows pointing at objects that
+ * don't exist, or — if a path were ever guessed — another draft's object, which would then be
+ * treated as "claimed" and skipped forever by the orphan-cleanup cron. Both UUIDs are v4 and
+ * never disclosed, so pinning now requires already possessing the path, i.e. having uploaded it.
+ */
+const BUCKET_PATH_RE =
+  /^order-uploads\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z0-9]{1,10}$/;
+
 const customFileSchema = z.object({
   // See src/lib/storage/uploads.ts's CANONICAL bucketPath FORMAT comment: this is the full
   // "order-uploads/{draftId}/{uuid}.{ext}" form, not the bucket-relative upload-sign response.
-  bucketPath: z.string().min(1).max(500).startsWith("order-uploads/"),
+  bucketPath: z.string().min(1).max(500).regex(BUCKET_PATH_RE, "Invalid upload reference"),
   originalName: z.string().min(1).max(200),
   // Spread to a mutable array: z.enum's typing wants a non-readonly tuple even though the
   // allowlist itself (see lib/storage/validation) is intentionally declared `as const`.

@@ -2,6 +2,7 @@ import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { ALLOWED_UPLOAD_MIME, MAX_UPLOAD_BYTES } from "@/lib/storage/validation";
+import { clientIp } from "@/lib/client-ip";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { ORDER_UPLOADS_BUCKET, getObjectMetadata, removeObject } from "@/lib/storage/uploads";
 
@@ -13,18 +14,9 @@ const bodySchema = z.object({
   path: z.string().min(1).max(300),
 });
 
-function clientIp(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return "unknown";
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const ip = clientIp(request);
+    const ip = clientIp(request.headers);
     const rateLimit = await checkRateLimit({ key: `upload-verify:${ip}`, limit: 60, windowSeconds: 600 });
     if (!rateLimit.allowed) {
       return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
