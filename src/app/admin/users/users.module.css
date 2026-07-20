@@ -1,0 +1,274 @@
+.forbidden {
+  max-width: 480px;
+  margin: 60px auto;
+  text-align: center;
+  background: #fbf7ee;
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  border-radius: 18px;
+  padding: 34px 26px;
+}
+
+.forbiddenTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.forbiddenBody {
+  font-size: 13px;
+  color: #8a8070;
+  line-height: 1.8;
+}
+
+.forbiddenBack {
+  display: inline-block;
+  margin-top: 18px;
+  border: 1px solid rgba(35, 32, 27, 0.22);
+  background: #fff;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #23201b;
+  text-decoration: none;
+}
+
+/* ---- Invite card ---- */
+.inviteCard {
+  background: #fbf7ee;
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.inviteTitle {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.inviteForm {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a8070;
+}
+
+.input,
+.select {
+  border: 1.5px solid rgba(35, 32, 27, 0.2);
+  border-radius: 11px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  background: #fff;
+  color: #23201b;
+}
+
+.select {
+  cursor: pointer;
+}
+
+.inviteBtn {
+  border: none;
+  background: var(--color-sienna);
+  color: #fff3e4;
+  border-radius: 999px;
+  padding: 11px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.inviteBtn:hover:not(:disabled) {
+  background: var(--color-sienna-deep);
+}
+
+.inviteBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.inviteFeedback {
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.inviteSuccess {
+  color: #3f7048;
+  font-weight: 700;
+}
+
+.inviteError {
+  color: #8f3018;
+  font-weight: 700;
+}
+
+/* ---- Users table ---- */
+.tableWrap {
+  background: #fbf7ee;
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  border-radius: 18px;
+  overflow-x: auto;
+}
+
+.tableInner {
+  min-width: 820px;
+}
+
+.headRow {
+  display: grid;
+  grid-template-columns: 1.5fr 1.2fr 100px 100px 110px 90px 140px;
+  gap: 10px;
+  padding: 13px 18px;
+  border-bottom: 1px solid rgba(35, 32, 27, 0.14);
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a8070;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.5fr 1.2fr 100px 100px 110px 90px 140px;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 13px 18px;
+  border-bottom: 1px dashed rgba(35, 32, 27, 0.1);
+}
+
+.rowInactive {
+  opacity: 0.55;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 99px;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email {
+  font-size: 11.5px;
+  color: #8a8070;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill {
+  display: inline-flex;
+  font-size: 10.5px;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 4px 10px;
+  width: fit-content;
+}
+
+.statusActive {
+  color: #3f7048;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.statusInactive {
+  color: #8f3018;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.metaText {
+  font-size: 11px;
+  color: #8a8070;
+}
+
+.rowActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.roleSelect {
+  border: 1px solid rgba(35, 32, 27, 0.2);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #23201b;
+}
+
+.toggleBtn {
+  border: 1px solid rgba(35, 32, 27, 0.22);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  color: #23201b;
+}
+
+.toggleBtn:hover:not(:disabled) {
+  border-color: var(--color-sienna);
+  color: var(--color-sienna);
+}
+
+.toggleBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.rowError {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: #8f3018;
+  margin-top: 6px;
+}
+
+.empty {
+  text-align: center;
+  color: #8a8070;
+  font-size: 13px;
+  padding: 20px;
+}

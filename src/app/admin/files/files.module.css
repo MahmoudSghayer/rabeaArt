@@ -1,0 +1,152 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: #fbf7ee;
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.thumbWrap {
+  aspect-ratio: 4 / 3;
+  border-radius: 9px;
+  border: 1px solid rgba(35, 32, 27, 0.1);
+  overflow: hidden;
+  background: #ece7db;
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbType {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.extChip {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 4px 12px;
+  background: #23201b;
+  color: #f6f0e3;
+  letter-spacing: 0.03em;
+}
+
+.fileIcon {
+  font-size: 20px;
+  color: #8a8070;
+}
+
+.name {
+  font-size: 11.5px;
+  font-weight: 700;
+  margin: 9px 2px 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 2px;
+  font-size: 10px;
+  color: #8a8070;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+  align-items: center;
+}
+
+.orderBtn {
+  flex: 1;
+  border: 1px solid rgba(35, 32, 27, 0.2);
+  background: #fff;
+  border-radius: 9px;
+  padding: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  color: #23201b;
+  text-decoration: none;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.orderBtn:hover {
+  border-color: var(--color-sienna);
+  color: var(--color-sienna);
+}
+
+.dlBtn {
+  border: 1px solid rgba(35, 32, 27, 0.2);
+  border-radius: 9px;
+  padding: 7px 10px;
+  font-size: 11px;
+  color: var(--color-sienna);
+  font-weight: 700;
+  background: #fff;
+  text-decoration: none;
+}
+
+.dlBtn:hover {
+  border-color: var(--color-sienna);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.pageBtn {
+  border: 1px solid rgba(35, 32, 27, 0.22);
+  background: #fbf7ee;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #23201b;
+  text-decoration: none;
+}
+
+.pageBtnDisabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.pageInfo {
+  font-size: 12.5px;
+  color: #57503f;
+}
+
+.empty {
+  text-align: center;
+  color: #8a8070;
+  font-size: 13px;
+  padding: 30px;
+  border: 1.5px dashed rgba(35, 32, 27, 0.2);
+  border-radius: 16px;
+}

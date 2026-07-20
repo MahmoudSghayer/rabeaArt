@@ -1,0 +1,54 @@
+.bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.searchWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(35, 32, 27, 0.2);
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #fbf7ee;
+  flex: 1;
+  min-width: 200px;
+  max-width: 340px;
+}
+
+.searchIcon {
+  color: #8a8070;
+  font-size: 13px;
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  width: 100%;
+  color: #23201b;
+}
+
+.csvLink {
+  border: 1px solid rgba(35, 32, 27, 0.25);
+  background: #fbf7ee;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  color: #23201b;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.csvLink:hover {
+  border-color: var(--color-sienna);
+  color: var(--color-sienna);
+}
