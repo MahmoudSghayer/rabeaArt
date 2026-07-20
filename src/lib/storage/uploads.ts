@@ -2,6 +2,7 @@ import "server-only";
 import { StorageApiError } from "@supabase/supabase-js";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { randomObjectKey } from "@/lib/storage/validation";
+import { ORDER_UPLOADS_BUCKET, PRODUCT_IMAGES_BUCKET } from "@/lib/storage/buckets";
 
 /**
  * Server-only Supabase Storage helpers for the two app buckets.
@@ -19,8 +20,9 @@ import { randomObjectKey } from "@/lib/storage/validation";
  * can change.
  */
 
-export const ORDER_UPLOADS_BUCKET = "order-uploads";
-export const PRODUCT_IMAGES_BUCKET = "product-images";
+// Re-exported so existing server-side imports keep working; the values live in a
+// client-safe module (see buckets.ts for why).
+export { ORDER_UPLOADS_BUCKET, PRODUCT_IMAGES_BUCKET };
 
 /** Files are listed in pages of this size when walking a bucket (cron / admin listings). */
 const LIST_PAGE_SIZE = 1000;

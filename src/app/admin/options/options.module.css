@@ -1,0 +1,275 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.card {
+  background: #fbf7ee;
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.cardTitle {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.cardHint {
+  font-size: 11.5px;
+  color: #8a8070;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.chipRow {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1.5px solid rgba(35, 32, 27, 0.25);
+  background: #fff;
+  border-radius: 10px;
+  padding: 7px 8px 7px 11px;
+}
+
+.chipInactive {
+  border-color: rgba(35, 32, 27, 0.12);
+  background: #f0e9d8;
+}
+
+.chipToggle {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #23201b;
+  padding: 0;
+}
+
+.chipToggleInactive {
+  color: #b9b2a4;
+  text-decoration: line-through;
+}
+
+.chipRemove {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #8a8070;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+}
+
+.chipRemove:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.addRow {
+  display: flex;
+  gap: 8px;
+}
+
+.addInput {
+  flex: 1;
+  min-width: 0;
+  border: 1.5px solid rgba(35, 32, 27, 0.2);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  background: #fff;
+  color: #23201b;
+  outline-color: var(--color-sienna);
+}
+
+.addBtn {
+  border: none;
+  background: #23201b;
+  color: #f6f0e3;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.errorText {
+  font-size: 11px;
+  color: #8f3018;
+  margin-top: 6px;
+}
+
+/* ---- Frames list ---- */
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(35, 32, 27, 0.12);
+}
+
+.listLabel {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #23201b;
+  text-align: start;
+  flex: 1;
+  padding: 0;
+}
+
+.listLabelInactive {
+  color: #b9b2a4;
+  text-decoration: line-through;
+}
+
+.priceInputWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(35, 32, 27, 0.18);
+  border-radius: 9px;
+  padding: 5px 9px;
+  background: #fff;
+}
+
+.priceInputWrap span {
+  font-size: 10px;
+  color: #8a8070;
+}
+
+.priceInput {
+  width: 44px;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 12px;
+  background: none;
+  color: #23201b;
+}
+
+/* ---- Colors ---- */
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(35, 32, 27, 0.12);
+}
+
+.colorSwatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 99px;
+  border: 1px solid rgba(35, 32, 27, 0.2);
+  flex: none;
+}
+
+.colorNames {
+  flex: 1;
+  min-width: 0;
+}
+
+.colorNameEn {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.colorNameAr {
+  font-size: 11px;
+  color: #8a8070;
+}
+
+.toggleBtn {
+  border: 1px solid rgba(35, 32, 27, 0.22);
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  color: #57503f;
+}
+
+.toggleBtnActive {
+  background: #dfebda;
+  color: #3f7048;
+  border-color: transparent;
+}
+
+.addColorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.hexInput {
+  width: 76px;
+}
+
+/* ---- Materials + methods ---- */
+.scopeGroup {
+  margin-bottom: 12px;
+}
+
+.scopeLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #8a8070;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.methodRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 0;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: start;
+}
+
+.methodRow:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.methodDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  flex: none;
+}
