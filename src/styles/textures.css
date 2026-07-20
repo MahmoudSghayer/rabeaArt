@@ -1,0 +1,147 @@
+/**
+ * Procedural texture system.
+ *
+ * Every texture here is generated — inline SVG data-URIs and CSS gradients — so the site gets
+ * fabric, paper, canvas, thread and print surfaces with zero image files, zero extra network
+ * requests, and no dependency on photography that does not exist yet (public/ holds only the
+ * logo and OG card).
+ *
+ * These are exposed as :root custom properties on purpose. Custom property VALUES are not
+ * scoped by CSS Modules — unlike animation-name, which is, and which silently broke every
+ * animation on this site before it was fixed (see tokens.css). A texture referenced as
+ * `background-image: var(--texture-linen)` from any .module.css resolves correctly.
+ *
+ * Layering convention: textures are grayscale/alpha only. Colour comes from whatever sits
+ * underneath, so the same texture reads as sienna, ochre or paper depending on its backdrop.
+ * List the texture FIRST in a background-image stack so it composites on top of the colour.
+ *
+ * SVG encoding follows the existing convention in art.ts: %22 for quotes, %23 for `#`.
+ * Keep the markup on one line — a newline inside a url() breaks the value.
+ */
+
+:root {
+  /* ---------- Paper & grain ---------- */
+
+  /**
+   * Fine paper grain. Higher baseFrequency = tighter noise. This is the same recipe as GRAIN in
+   * art.ts but at a lower opacity, meant for large page backgrounds rather than card art.
+   */
+  --texture-grain: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%222%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22140%22 height=%22140%22 filter=%22url(%23n)%22 opacity=%220.035%22/></svg>");
+
+  /**
+   * Handmade-paper fibre — a much lower baseFrequency with more octaves, giving soft cloudy
+   * mottling rather than TV static. This is the site-wide background texture.
+   *
+   * Opacity is 0.035, not the 0.055 it started at, and the ceiling is an accessibility one
+   * rather than an aesthetic one. Any darkening texture lowers the contrast of text sitting on
+   * it, measured against the DARKEST pixel the noise can produce (the conservative WCAG reading
+   * for a textured background). Measured on --color-paper:
+   *
+   *            plain paper   @0.035   @0.055
+   *   ink            14.29    14.00    13.71   comfortable at any value
+   *   ink-soft        5.22     4.85     4.63   passes AA throughout
+   *   sienna          4.68     4.35     4.15   FAILS AA once textured
+   *
+   * See the --color-sienna note in tokens.css: sienna is a fill colour, not a text colour, and
+   * --color-sienna-deep (6.59 here) is the accessible pairing. 0.035 keeps ink-soft at a real
+   * margin above the 4.5 floor while still killing the flatness.
+   */
+  --texture-paper-fiber: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22><filter id=%22f%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.032%22 numOctaves=%225%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22300%22 height=%22300%22 filter=%22url(%23f)%22 opacity=%220.035%22/></svg>");
+
+  /* ---------- Woven cloth ---------- */
+
+  /**
+   * Linen and canvas are pure CSS gradients rather than SVG — a crossed pair of repeating
+   * gradients is what a plain weave physically is (warp over weft), it costs nothing to
+   * rasterise, and it stays crisp at any zoom. Linen is fine and soft; canvas is coarser and
+   * asymmetric, because a real canvas weave is denser in one direction.
+   */
+  --texture-linen:
+    repeating-linear-gradient(0deg, rgba(35, 32, 27, 0.035) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(35, 32, 27, 0.03) 0 1px, transparent 1px 3px);
+
+  --texture-canvas:
+    repeating-linear-gradient(0deg, rgba(35, 32, 27, 0.05) 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(90deg, rgba(35, 32, 27, 0.038) 0 2px, transparent 2px 6px);
+
+  /**
+   * Loose slubby weave for hero garment surfaces — the diagonal breaks the grid so it reads as
+   * cloth rather than graph paper.
+   */
+  --texture-weave-soft:
+    repeating-linear-gradient(45deg, rgba(35, 32, 27, 0.022) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgba(35, 32, 27, 0.022) 0 1px, transparent 1px 4px);
+
+  /* ---------- Thread & embroidery ---------- */
+
+  /**
+   * A running stitch — the dashes lean, because hand embroidery never sits perfectly square.
+   * Use as a background-image on a thin element for a stitched divider, or on a pseudo-element
+   * inset around a card for a stitched border.
+   */
+  --texture-stitch: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%228%22><path d=%22M1 6 L6 2%22 stroke=%22rgba(35,32,27,0.32)%22 stroke-width=%221.6%22 stroke-linecap=%22round%22/><path d=%22M9 6 L14 2%22 stroke=%22rgba(35,32,27,0.32)%22 stroke-width=%221.6%22 stroke-linecap=%22round%22/></svg>");
+
+  /** Same stitch in sienna, for accent dividers and the custom-order flow. */
+  --texture-stitch-sienna: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%228%22><path d=%22M1 6 L6 2%22 stroke=%22rgba(183,71,42,0.55)%22 stroke-width=%221.6%22 stroke-linecap=%22round%22/><path d=%22M9 6 L14 2%22 stroke=%22rgba(183,71,42,0.55)%22 stroke-width=%221.6%22 stroke-linecap=%22round%22/></svg>");
+
+  /**
+   * A twisted thread — two out-of-phase sine paths read as fibres twisted around each other.
+   * Tiles horizontally at 40px; used for connectors in the how-it-works and wizard timelines.
+   */
+  --texture-thread: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%228%22><path d=%22M0 4 Q10 0 20 4 T40 4%22 fill=%22none%22 stroke=%22rgba(35,32,27,0.22)%22 stroke-width=%221.2%22/><path d=%22M0 4 Q10 8 20 4 T40 4%22 fill=%22none%22 stroke=%22rgba(35,32,27,0.12)%22 stroke-width=%221.2%22/></svg>");
+
+  /* ---------- Print ---------- */
+
+  /**
+   * Halftone dot screen, as a screen-print would lay down. Two offset dot grids rather than one
+   * so the pattern does not read as an obvious square lattice.
+   */
+  --texture-halftone:
+    radial-gradient(circle at 1px 1px, rgba(35, 32, 27, 0.09) 1px, transparent 1.4px) 0 0 / 7px 7px,
+    radial-gradient(circle at 1px 1px, rgba(35, 32, 27, 0.05) 1px, transparent 1.4px) 3.5px 3.5px / 7px 7px;
+
+  /** Ink-press mottle — where a hand-pulled print takes unevenly. */
+  --texture-press: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22p%22><feTurbulence type=%22turbulence%22 baseFrequency=%220.14%22 numOctaves=%223%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23p)%22 opacity=%220.07%22/></svg>");
+
+  /* ---------- Edges ---------- */
+
+  /**
+   * Torn deckle edge, as a mask. Apply with `mask-image` on a band so its top or bottom tears
+   * like handmade paper instead of ending on a ruled line. The turbulence displaces a solid
+   * rect, so the tear is irregular rather than a repeating scallop.
+   */
+  --texture-deckle: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%2216%22><filter id=%22d%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.06%22 numOctaves=%223%22 result=%22t%22/><feDisplacementMap in=%22SourceGraphic%22 in2=%22t%22 scale=%2214%22/></filter><rect width=%22400%22 height=%2210%22 fill=%22black%22 filter=%22url(%23d)%22/></svg>");
+
+  /* ---------- Composed surfaces ---------- */
+
+  /**
+   * Ready-made stacks for the common cases, so components do not each re-derive them and drift.
+   * Each is texture-first (composites on top) over a warm gradient.
+   */
+  --surface-paper: var(--texture-paper-fiber), linear-gradient(180deg, #f8f3e8 0%, var(--color-paper) 100%);
+
+  --surface-linen-band: var(--texture-linen), var(--texture-grain),
+    linear-gradient(180deg, #f0e7d4 0%, var(--color-paper-deep) 50%, #e7dcc5 100%);
+
+  --surface-canvas: var(--texture-canvas), var(--texture-grain),
+    linear-gradient(160deg, #f4ecdb 0%, #e9dcc2 100%);
+
+  --surface-ink: var(--texture-press),
+    linear-gradient(165deg, #2c2823 0%, var(--color-ink) 55%, #1b1915 100%);
+}
+
+/**
+ * Textures are decorative only. Under forced-colors the browser replaces backgrounds anyway,
+ * but being explicit keeps the intent obvious and avoids muddy output in high-contrast mode.
+ */
+@media (forced-colors: active) {
+  :root {
+    --texture-grain: none;
+    --texture-paper-fiber: none;
+    --texture-linen: none;
+    --texture-canvas: none;
+    --texture-weave-soft: none;
+    --texture-halftone: none;
+    --texture-press: none;
+  }
+}

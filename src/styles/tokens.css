@@ -25,6 +25,16 @@
   --color-ink: #23201b;
   --color-ink-soft: #6b6355;
   --color-line: rgba(35, 32, 27, 0.14);
+  /**
+   * --color-sienna is a FILL colour — buttons, borders, dots, decorative marks. It is not safe
+   * as a text colour on paper: measured against --color-paper it lands at 4.68:1, barely over
+   * the 4.5 AA floor, and it drops to 4.35:1 once the paper texture is applied (worst-case
+   * pixel). It also fails outright against --color-paper-deep bands.
+   *
+   * Use --color-sienna-deep for sienna-coloured TEXT and links: 7.10:1 on paper, 6.59:1 on
+   * textured paper. Same hue family, so nothing about the brand changes — see the contrast
+   * table in textures.css.
+   */
   --color-sienna: #b7472a;
   --color-sienna-deep: #8f3018;
   --color-ochre: #c99b3f;
