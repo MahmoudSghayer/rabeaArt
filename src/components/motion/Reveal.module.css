@@ -1,0 +1,27 @@
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s var(--ease-standard, cubic-bezier(0.22, 0.61, 0.36, 1)),
+    transform 0.7s var(--ease-standard, cubic-bezier(0.22, 0.61, 0.36, 1));
+  /* Hint the compositor before the transition starts, then let it go once settled. */
+  will-change: opacity, transform;
+}
+
+.shown {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/*
+  Belt and braces alongside the JS check in Reveal.tsx: if motion is reduced, content must be
+  visible and static even in the frame before hydration runs.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

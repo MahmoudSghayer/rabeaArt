@@ -352,11 +352,43 @@
   border-radius: var(--radius-card-lg);
   overflow: hidden;
   min-height: 250px;
-  transition: transform var(--duration-standard) var(--ease-standard);
+  /* The gradient art is a background on this element, so scaling the element scales the art
+     with it; `overflow: hidden` keeps the growth inside the rounded corners. */
+  background-size: 100% 100%;
+  transition:
+    transform var(--duration-standard) var(--ease-standard),
+    background-size 0.7s var(--ease-standard),
+    box-shadow var(--duration-standard) var(--ease-standard);
 }
 
 .catTile:hover {
   transform: translateY(-4px);
+  background-size: 112% 112%;
+  box-shadow: var(--shadow-card);
+}
+
+.catTile:hover .catArrow {
+  /* Arrow leans toward the direction of travel — reads correctly in RTL and LTR because the
+     translation is along the inline axis. */
+  transform: translateX(0.35em);
+}
+
+.catArrow {
+  transition: transform var(--duration-standard) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catTile,
+  .catArrow {
+    transition: none;
+  }
+  .catTile:hover {
+    transform: none;
+    background-size: 100% 100%;
+  }
+  .catTile:hover .catArrow {
+    transform: none;
+  }
 }
 
 .catOverlay {

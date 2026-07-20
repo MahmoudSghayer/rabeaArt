@@ -11,6 +11,13 @@
 .card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-card);
+  border-color: color-mix(in srgb, var(--color-sienna) 28%, var(--color-line));
+}
+
+/* Slow push-in on the artwork itself. The card lifts, the art breathes — together they read
+   as depth rather than a flat rectangle sliding. Kept subtle (3%) so the crop barely shifts. */
+.card:hover .artWrap {
+  transform: scale(1.03);
 }
 
 .card:focus-visible {
@@ -27,6 +34,19 @@
   border-radius: var(--radius-input);
   overflow: hidden;
   aspect-ratio: 4 / 5;
+  /* Slower than the card's own lift so the art trails it slightly — the small offset in timing
+     is what stops the whole card feeling like one rigid slab. */
+  transition: transform 0.55s var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .artWrap,
+  .card {
+    transition: none;
+  }
+  .card:hover .artWrap {
+    transform: none;
+  }
 }
 
 .frameOverlay {

@@ -6,6 +6,7 @@ import type { SupportedLocale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { grainedArt } from "@/components/storefront/art";
 import { artKeyForSlug } from "@/components/storefront/product-art";
+import { TiltCard } from "@/components/motion/TiltCard";
 import styles from "./ProductCard.module.css";
 
 export interface ProductCardProps {
@@ -40,50 +41,52 @@ export async function ProductCard({ item }: ProductCardProps) {
   const name = pickText(item.name, locale);
 
   return (
-    <Link href={`/product/${item.slug}`} className={cx(styles.card, soldOut && styles.soldOut)}>
-      <div
-        className={styles.artWrap}
-        style={{ backgroundImage: grainedArt(artKeyForSlug(item.slug)) }}
-        role="img"
-        aria-label={name}
-      >
-        {isPaint && <div className={styles.frameOverlay} aria-hidden="true" />}
-        {badge && <span className={cx(styles.badge, badge.tone)}>{badge.label}</span>}
-      </div>
-      <div className={styles.info}>
-        <div className={styles.name}>{name}</div>
-        <div className={styles.metaRow}>
-          {!isPaint &&
-            item.colors.map((c) => (
-              <span
-                key={c.code}
-                className={styles.dot}
-                style={{ background: c.hex }}
-                title={pickText(c.name, locale)}
-              />
-            ))}
-          {isPaint && (
-            <span className={styles.meta}>
-              {item.isOriginal ? t("card.originalPrints") : t("card.finePrints")}
-            </span>
-          )}
+    <TiltCard>
+      <Link href={`/product/${item.slug}`} className={cx(styles.card, soldOut && styles.soldOut)}>
+        <div
+          className={styles.artWrap}
+          style={{ backgroundImage: grainedArt(artKeyForSlug(item.slug)) }}
+          role="img"
+          aria-label={name}
+        >
+          {isPaint && <div className={styles.frameOverlay} aria-hidden="true" />}
+          {badge && <span className={cx(styles.badge, badge.tone)}>{badge.label}</span>}
         </div>
-        <div className={styles.priceRow}>
-          {priceText ? (
-            <span className={styles.price}>
-              {isPaint && <span>{t("card.fromPrefix")}</span>}
-              <span dir="ltr">{priceText}</span>
-            </span>
-          ) : (
-            <span className={styles.manualPrice}>{tCommon("manualPrice")}</span>
-          )}
-          {oldPriceText && (
-            <span className={styles.oldPrice} dir="ltr">
-              {oldPriceText}
-            </span>
-          )}
+        <div className={styles.info}>
+          <div className={styles.name}>{name}</div>
+          <div className={styles.metaRow}>
+            {!isPaint &&
+              item.colors.map((c) => (
+                <span
+                  key={c.code}
+                  className={styles.dot}
+                  style={{ background: c.hex }}
+                  title={pickText(c.name, locale)}
+                />
+              ))}
+            {isPaint && (
+              <span className={styles.meta}>
+                {item.isOriginal ? t("card.originalPrints") : t("card.finePrints")}
+              </span>
+            )}
+          </div>
+          <div className={styles.priceRow}>
+            {priceText ? (
+              <span className={styles.price}>
+                {isPaint && <span>{t("card.fromPrefix")}</span>}
+                <span dir="ltr">{priceText}</span>
+              </span>
+            ) : (
+              <span className={styles.manualPrice}>{tCommon("manualPrice")}</span>
+            )}
+            {oldPriceText && (
+              <span className={styles.oldPrice} dir="ltr">
+                {oldPriceText}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </TiltCard>
   );
 }

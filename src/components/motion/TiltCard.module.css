@@ -1,0 +1,24 @@
+.tilt {
+  /* The hook writes `transform` inline on pointer move and clears it on leave; this transition
+     is what eases the card back to rest rather than snapping. Kept short on the way in so the
+     tilt tracks the cursor closely, and it is the *return* that reads as smooth. */
+  transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+  height: 100%;
+}
+
+/*
+  Children lifted slightly out of the card plane so the tilt reads as real depth rather than a
+  flat sheet rotating — the badge and price float above the artwork as the card turns.
+*/
+.tilt > * {
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt {
+    transition: none;
+    transform: none !important;
+  }
+}

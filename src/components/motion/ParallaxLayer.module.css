@@ -1,0 +1,16 @@
+.layer {
+  /* --px/--py are set by useParallaxLayer on pointer move; they default to 0 so the layer sits
+     exactly where the static layout puts it before any pointer arrives (and forever, on touch). */
+  transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
+  /* Long, soft easing: the art should feel like it is drifting after the cursor, not snapping
+     to it. Short durations here read as jitter. */
+  transition: transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer {
+    transform: none;
+    transition: none;
+  }
+}

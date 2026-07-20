@@ -5,6 +5,8 @@ import { grainedArt } from "@/components/storefront/art";
 import { getFeaturedProducts } from "@/lib/catalog/queries";
 import type { CatalogListItem } from "@/lib/catalog/types";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { ParallaxLayer } from "@/components/motion/ParallaxLayer";
+import { Reveal } from "@/components/motion/Reveal";
 import buttonStyles from "@/components/ui/Button.module.css";
 import styles from "./page.module.css";
 
@@ -97,7 +99,9 @@ export default async function HomePage({
         </div>
 
         <div className={styles.heroArt} role="img" aria-label={t("heroArt1") + " · " + t("heroArt2")}>
-          <div className={cx(styles.floatCard, styles.floatCard1)}>
+          {/* Depths differ per card so the three pieces separate as the pointer moves — the
+              nearest drifts furthest, which is what sells the depth. */}
+          <ParallaxLayer depth={1} className={cx(styles.floatCard, styles.floatCard1)}>
             <div className={styles.polaroidDark}>
               <div className={styles.polaroidInner}>
                 <div className={styles.polaroidArt} style={{ backgroundImage: grainedArt("rivers") }} />
@@ -107,9 +111,9 @@ export default async function HomePage({
               <span className={styles.floatName}>{t("heroArt1")}</span>
               <span className={styles.floatMeta}>A3 · {t("origTag")}</span>
             </div>
-          </div>
+          </ParallaxLayer>
 
-          <div className={cx(styles.floatCard, styles.floatCard2)}>
+          <ParallaxLayer depth={0.62} className={cx(styles.floatCard, styles.floatCard2)}>
             <div className={styles.polaroidDashed}>
               <div className={styles.polaroidInnerRound}>
                 <div className={styles.polaroidArtRound} style={{ backgroundImage: grainedArt("dawn") }} />
@@ -119,13 +123,13 @@ export default async function HomePage({
               <span className={styles.floatName}>{t("heroArt2")}</span>
               <span className={styles.embChip}>{t("embTag")}</span>
             </div>
-          </div>
+          </ParallaxLayer>
 
-          <div className={cx(styles.floatCard, styles.floatCard3)}>
+          <ParallaxLayer depth={0.34} className={cx(styles.floatCard, styles.floatCard3)}>
             <div className={styles.polaroidSquare}>
               <div className={styles.polaroidArtSquare} style={{ backgroundImage: grainedArt("letters") }} />
             </div>
-          </div>
+          </ParallaxLayer>
         </div>
       </section>
 
@@ -138,7 +142,7 @@ export default async function HomePage({
         </div>
       </div>
 
-      <section className={styles.featured}>
+      <Reveal as="section" index={0} className={styles.featured}>
         <div className={styles.sectionHeadRow}>
           <div>
             <h2 className={styles.sectionTitle}>{t("featTitle")}</h2>
@@ -162,9 +166,9 @@ export default async function HomePage({
             <p className={styles.featuredEmptySub}>{t("featEmptySub")}</p>
           </div>
         )}
-      </section>
+      </Reveal>
 
-      <section className={styles.catGrid}>
+      <Reveal as="section" index={1} className={styles.catGrid}>
         <Link
           href={{ pathname: "/shop", query: { cat: "shirts" } }}
           className={styles.catTile}
@@ -197,9 +201,9 @@ export default async function HomePage({
             </span>
           </div>
         </Link>
-      </section>
+      </Reveal>
 
-      <section className={styles.howBand}>
+      <Reveal as="section" index={0} className={styles.howBand}>
         <div className={styles.howInner}>
           <h2 className={styles.sectionTitle}>{t("howTitle")}</h2>
           <p className={styles.sectionSub}>{t("howSub")}</p>
@@ -232,7 +236,7 @@ export default async function HomePage({
             <span>{tCommon("payNote")}</span>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       <section className={styles.customSection}>
         <div className={styles.customBanner}>
