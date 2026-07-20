@@ -27,9 +27,26 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
+const SITE_DESCRIPTION =
+  "Art you wear, stories you hang — custom shirts, paintings, and prints.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://rabea.art"),
   title: "Rabea.art",
-  description: "Art you wear, stories you hang — custom shirts, paintings, and prints.",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: "Rabea.art",
+    description: SITE_DESCRIPTION,
+    siteName: "Rabea.art",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Rabea Hamoud · ربيع حمود" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rabea.art",
+    description: SITE_DESCRIPTION,
+    images: ["/og-image.png"],
+  },
 };
 
 /**

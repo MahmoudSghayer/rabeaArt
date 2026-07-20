@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { CONTACT_INFO } from "@/components/storefront/contact-info";
 import styles from "./ComingSoon.module.css";
 
@@ -23,10 +24,16 @@ export default function ComingSoonPage() {
           <span className={styles.dot} aria-hidden />
           فن يُلبَس وحكايات تُعلَّق
         </span>
-        <h1 className={styles.wordmark}>ربيع.</h1>
-        <div className={styles.latin} dir="ltr">
-          RABEA.ART
-        </div>
+        <h1 className={styles.logoHeading}>
+          <Image
+            src="/logo.png"
+            alt="ربيع حمود · Rabea Hamoud"
+            width={800}
+            height={832}
+            className={styles.logoImage}
+            priority
+          />
+        </h1>
         <div className={styles.line} aria-hidden />
         <p className={styles.soonAr}>شيء جميل يتجهّز في المرسم — قريبًا</p>
         <p className={styles.soonEn} dir="ltr" lang="en">

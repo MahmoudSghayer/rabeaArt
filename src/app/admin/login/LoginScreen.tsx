@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { LoginForm } from "./LoginForm";
 import styles from "./login.module.css";
@@ -16,10 +17,14 @@ export function LoginScreen({ next, storeHref }: LoginScreenProps) {
     <div className={styles.screen}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <span className={styles.logoAr}>
-            ربيع<span className={styles.logoDot}>.</span>
-          </span>
-          <span className={styles.logoTag}>RABEA.ART</span>
+          <Image
+            src="/logo.png"
+            alt="ربيع حمود · Rabea Hamoud"
+            width={800}
+            height={832}
+            className={styles.logoImage}
+            priority
+          />
         </div>
         <div className={styles.subtitle}>{t("subtitle")}</div>
         <LoginForm next={next} />

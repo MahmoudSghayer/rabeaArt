@@ -35,9 +35,27 @@
 
 .logo {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   flex: none;
+}
+
+.logoMark {
+  height: 44px;
+  width: auto;
+  /* The mark is drawn facing right; in RTL it sits left of the wordmark and reads better
+     mirrored so the pen still points toward the text. */
+  transform: scaleX(-1);
+}
+
+:global([dir="ltr"]) .logoMark {
+  transform: none;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .logoAr {

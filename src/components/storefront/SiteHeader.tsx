@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { SupportedLocale } from "@/i18n/routing";
@@ -41,6 +42,7 @@ export function SiteHeader({ announcement }: SiteHeaderProps) {
   const router = useRouter();
   const t = useTranslations("header");
   const tNav = useTranslations("nav");
+  const tBrand = useTranslations("brand");
   const cartCount = useCartCount();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -71,11 +73,23 @@ export function SiteHeader({ announcement }: SiteHeaderProps) {
       <p className={styles.announcement}>{announcementText}</p>
       <header className={styles.header}>
         <div className={styles.bar}>
-          <Link href="/" className={styles.logo}>
-            <span className={styles.logoAr}>
-              ربيع<span className={styles.logoDot}>.</span>
+          <Link href="/" className={styles.logo} aria-label={tBrand("wordmark")}>
+            {/* Signature mark from the brand lockup; the full lockup is square and would be
+                illegible at header height, so the wordmark carries the name beside it. */}
+            <Image
+              src="/logo-mark.png"
+              alt=""
+              width={368}
+              height={240}
+              className={styles.logoMark}
+              priority
+            />
+            <span className={styles.logoText}>
+              <span className={styles.logoAr}>
+                ربيع<span className={styles.logoDot}>.</span>
+              </span>
+              <span className={styles.logoEn}>RABEA.ART</span>
             </span>
-            <span className={styles.logoEn}>RABEA.ART</span>
           </Link>
 
           <nav className={styles.desktopNav}>

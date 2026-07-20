@@ -20,28 +20,13 @@
 
 .logo {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
   justify-content: center;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
-.logoAr {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 34px;
-  color: #23201b;
-}
-
-.logoDot {
-  color: #b7472a;
-}
-
-.logoTag {
-  font-family: var(--font-accent);
-  font-size: 13px;
-  letter-spacing: 2.5px;
-  color: #6b6355;
+.logoImage {
+  width: 150px;
+  height: auto;
 }
 
 .subtitle {
