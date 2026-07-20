@@ -1,4 +1,5 @@
 @import "../styles/tokens.css";
+@import "../styles/textures.css";
 
 * {
   box-sizing: border-box;
@@ -15,13 +16,34 @@ html {
   height: 100%;
 }
 
+/**
+ * The page itself is a sheet of handmade paper, not a flat fill.
+ *
+ * `background-attachment: fixed` keeps the fibre from sliding with the content, which is what
+ * sells it as the surface the page is printed on rather than a tiled image scrolling past.
+ * The texture is ~5% opacity — enough to kill the dead flatness, far below anything that could
+ * touch text contrast (verified against the AA floor for --color-ink-soft on --color-paper).
+ */
 body {
   min-height: 100%;
-  background: var(--color-paper);
+  background-color: var(--color-paper);
+  background-image: var(--surface-paper);
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/**
+ * `fixed` attachment forces a full-page repaint on scroll on mobile Safari/Chrome, which is a
+ * real jank source on long pages. Scroll the texture with the content there instead — at this
+ * opacity the difference is invisible, the cost is not.
+ */
+@media (hover: none), (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
 }
 
 a {
@@ -29,8 +51,9 @@ a {
   text-decoration: none;
 }
 
+/* sienna-deep, not sienna: this is text, and plain sienna sits under AA on textured paper. */
 a:hover {
-  color: var(--color-sienna);
+  color: var(--color-sienna-deep);
 }
 
 ::selection {
