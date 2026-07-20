@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import type { SupportedLocale } from "@/i18n/routing";
+import { SHOW_LANGUAGE_SWITCHER, type SupportedLocale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { useCartCount } from "./cart-count";
 import styles from "./SiteHeader.module.css";
@@ -106,14 +106,16 @@ export function SiteHeader({ announcement }: SiteHeaderProps) {
 
           <div className={styles.spacer} />
 
-          <button
-            type="button"
-            className={styles.langToggle}
-            title={t("langToggleTitle")}
-            onClick={toggleLocale}
-          >
-            {locale === "ar" ? t("toggleToEn") : t("toggleToAr")}
-          </button>
+          {SHOW_LANGUAGE_SWITCHER && (
+            <button
+              type="button"
+              className={styles.langToggle}
+              title={t("langToggleTitle")}
+              onClick={toggleLocale}
+            >
+              {locale === "ar" ? t("toggleToEn") : t("toggleToAr")}
+            </button>
+          )}
 
           <Link href="/order" className={styles.orderPill} aria-label={orderAriaLabel}>
             <svg
