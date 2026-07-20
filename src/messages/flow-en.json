@@ -1,0 +1,190 @@
+{
+  "custom": {
+    "kicker": "CUSTOM ORDER",
+    "title": "Design your own piece",
+    "sub": "Upload your idea — a photo, sketch, logo, or just a description — and together we turn it into a shirt or painting that feels like you.",
+    "priceNotice": "Final pricing for custom pieces is confirmed after design review — depending on complexity, colour count, size and production method. We send you the price and timing before any work starts.",
+    "chooser": {
+      "startHere": "Start here",
+      "shirt": {
+        "title": "Custom shirt",
+        "tag": "Print or embroidery",
+        "desc": "Your design on heavy cotton — pick the cut, colour and placement."
+      },
+      "painting": {
+        "title": "Custom painting",
+        "tag": "Painted or printed",
+        "desc": "From your photo to a piece: printed, hand-painted, or artistically interpreted."
+      },
+      "other": {
+        "title": "Something else",
+        "tag": "Open idea",
+        "desc": "A mural, gift, logo, painted notebooks… tell us your idea."
+      }
+    },
+    "flowTitle": {
+      "shirt": "Custom shirt",
+      "painting": "Custom painting",
+      "other": "Custom request"
+    },
+    "steps": {
+      "shirt": ["Base", "Method", "Design", "Review"],
+      "painting": ["Base", "Style", "Design", "Review"],
+      "other": ["Idea", "Images", "Review"]
+    },
+    "changeType": "Change type",
+    "fields": {
+      "shirtType": "Shirt type",
+      "fabricColor": "Fabric colour",
+      "placement": "Design placement",
+      "placementHint": "You can pick more than one spot",
+      "paintSize": "Painting size",
+      "customSizeLabel": "Custom size",
+      "widthPh": "Width",
+      "heightPh": "Height",
+      "cm": "cm",
+      "orientation": "Orientation",
+      "material": "Material / surface",
+      "styleQ": "How should we treat your image?",
+      "otherQ": "Tell us about your idea",
+      "otherHint": "Any other art request: a mural, painted notebook, special gift, logo design…",
+      "otherPh": "e.g. I want a small mural for my kid's room in calm colours, about a metre wide…"
+    },
+    "methods": {
+      "print": { "desc": "Full colour and fine detail — best for photos and colourful artwork." },
+      "embroidery": { "desc": "Raised thread that lasts years — best for logos, letters and linework." }
+    },
+    "paintStyles": {
+      "printed": { "desc": "A high-quality archival print of your image as-is." },
+      "hand": { "desc": "Rabea paints it by hand on your chosen surface." },
+      "interpret": { "desc": "Your image re-imagined in Rabea's own style." }
+    },
+    "upload": {
+      "dropTitle": "Drag your images here, or click to browse",
+      "dropHint": "JPG · PNG · WEBP — up to 8MB × 6",
+      "removeImg": "Remove image",
+      "attached": "Attached images",
+      "instructions": "Written instructions",
+      "instructionsPh": "e.g. the logo centred, palm-sized, in gold thread…",
+      "errorTooMany": "Maximum {max} images per request",
+      "errorType": "Unsupported file: {name}",
+      "errorSize": "File over 8MB: {name}",
+      "errorRead": "Could not read {name}",
+      "errorSign": "Could not prepare {name} for upload — try again",
+      "errorUpload": "Could not upload {name} — try again",
+      "errorVerify": "Could not verify {name} — try again",
+      "errorRejected": "{name} was rejected — check its type and size"
+    },
+    "review": {
+      "estLineShirt": "Rough guide only: ~{amount} — final depends on the design.",
+      "estLineOther": "We send the final price and timing after reviewing the design.",
+      "attached": "Attached images",
+      "requestType": "Request type",
+      "requestTypeValue": "Custom art request"
+    },
+    "validation": {
+      "customSize": "Enter width and height for the custom size",
+      "otherMinLen": "Describe your idea (at least 10 characters)",
+      "placementRequired": "Pick a placement — front, back, or sleeve",
+      "uploadMinOne": "Upload at least one image so we can see your idea",
+      "uploadWaiting": "Wait for uploads to finish"
+    },
+    "success": {
+      "title": "Your custom piece was added to the order",
+      "sub": "Complete your details on the order page so we can review the design and send you the price.",
+      "reviewCta": "Review & submit your order",
+      "againCta": "Start another piece",
+      "shopCta": "Keep shopping"
+    }
+  },
+  "order": {
+    "crumbs": {
+      "review": "Review",
+      "details": "Your details",
+      "confirmation": "Confirmation"
+    },
+    "empty": {
+      "title": "Your order is empty",
+      "sub": "Add a ready piece from the shop, or start a custom design from your idea.",
+      "shopCta": "Browse the shop",
+      "customCta": "Custom design"
+    },
+    "review": {
+      "title": "Review your order",
+      "summary": "Order summary",
+      "itemsCount": "Pieces",
+      "manualNote": "{count} piece(s) are priced manually after design review — added to the total later.",
+      "toDetails": "Continue — details & submit",
+      "priceAfterReview": "Set after review",
+      "sizePrefix": "Size ",
+      "customDims": "custom",
+      "qtyTimes": "× {qty}"
+    },
+    "form": {
+      "title": "Your details & delivery address",
+      "sub": "We use this only to contact you and deliver the order. No payment is requested now.",
+      "nameLabel": "Full name",
+      "namePh": "First & family name",
+      "phoneLabel": "Phone number",
+      "phonePh": "05x-xxx-xxxx",
+      "whatsappLabel": "WhatsApp (if different)",
+      "whatsappPh": "Leave empty if same",
+      "emailLabel": "Email address",
+      "emailPh": "name@email.com",
+      "countryLabel": "Country",
+      "countryPh": "Palestine",
+      "cityLabel": "City",
+      "cityPh": "Haifa",
+      "streetLabel": "Street address",
+      "streetPh": "Street name",
+      "buildingLabel": "Building / house no.",
+      "aptLabel": "Apartment no.",
+      "postalLabel": "Postal code",
+      "instructionsLabel": "Delivery instructions",
+      "instructionsPh": "e.g. call before arriving",
+      "contactMethod": "Preferred contact method",
+      "orderNotes": "Order notes",
+      "orderNotesPh": "Anything else we should know…",
+      "consentTermsPre": "I agree to the ",
+      "consentMid": " and the ",
+      "consentCustom": "I understand custom pieces need Rabea's approval, and the final price or delivery time may change after review.",
+      "submitting": "Submitting…",
+      "submitHint": "Submitting sends your order for review — we contact you before any work or payment.",
+      "errorBanner": "Check the fields marked in red, then submit again.",
+      "requiredError": "Required",
+      "phoneError": "Enter a valid phone number",
+      "emailError": "Enter a valid email",
+      "agreeTermsError": "You must agree to the terms",
+      "agreeCustomError": "This confirmation is required"
+    },
+    "confirmation": {
+      "title": "We received your order",
+      "greeting": "Thanks {name}! We will review it and contact you via {method}.",
+      "refLabel": "Order ref",
+      "statusNew": "Status: New — awaiting review",
+      "itemsTitle": "Requested pieces",
+      "afterReview": "after review",
+      "nextTitle": "What happens next?",
+      "next1": "We review your order within 24 working hours.",
+      "next2": "We contact you via {method} to confirm price and details.",
+      "next3": "Once you approve, we start the work and arrange delivery & payment.",
+      "waCta": "Chat on WhatsApp",
+      "mailCta": "Email us",
+      "waMessage": "Hi! I'm {name}, I just submitted order {ref}",
+      "mailSubject": "Order {ref}",
+      "contactMethodNames": {
+        "phone": "phone",
+        "whatsapp": "WhatsApp",
+        "email": "email"
+      }
+    },
+    "errors": {
+      "validation": "Please check your details and try again.",
+      "rateLimited": "Too many attempts in a short time — try again shortly.",
+      "server": "Something went wrong. Please try again, or contact us directly.",
+      "productNotFound": "One of the products in your order is no longer available — remove it and try again.",
+      "invalidOption": "One of your selected options is no longer available — review your order and try again.",
+      "customOtherDisabled": "Open art requests aren't available right now — please contact us directly."
+    }
+  }
+}
