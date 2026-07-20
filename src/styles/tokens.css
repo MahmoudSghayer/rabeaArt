@@ -1,6 +1,21 @@
 /**
- * Design tokens ported 1:1 from the approved Rabea.art design (StyleGuide.dc.html / store.js
- * TOKENS). Do not change these values without design sign-off — see the plan file for context.
+ * Rabea.art design tokens.
+ *
+ * The colour palette, garment swatches, status/payment chips, fonts and radii below were ported
+ * 1:1 from the approved design (StyleGuide.dc.html / store.js TOKENS) and are unchanged — they
+ * are the brand identity and should keep design sign-off before moving.
+ *
+ * The scales (spacing, elevation, type, motion, z-index, blur) are ADDITIVE and were introduced
+ * for the premium redesign, with owner sign-off, because the original set was too thin to build
+ * depth from: two shadows total, four durations, and a spacing scale missing half its steps —
+ * which is why ~40 hard-coded literals like `13px 24px` and `0.42s` had accumulated in the
+ * component CSS.
+ *
+ * One original value DID change: `--ease-standard` was the literal keyword `ease`. The design's
+ * real curve is cubic-bezier(0.22, 0.61, 0.36, 1) — it is hard-coded in TiltCard and
+ * ParallaxLayer, and appears in Reveal.module.css as `var(--ease-standard, cubic-bezier(...))`.
+ * Because the token was defined, that fallback never applied and every scroll reveal on the site
+ * silently ran on flat `ease`. Correcting the token restores the intended motion everywhere.
  */
 :root {
   /* Colors */
@@ -68,26 +83,114 @@
   --radius-card-lg: 22px;
   --radius-input: 12px;
   --radius-pill: 999px;
+  /* Added: the redesign needs a tighter step for chips and a larger one for feature panels. */
+  --radius-sm: 8px;
+  --radius-panel: 26px;
+  --radius-stage: 34px;
 
   /* Shadow */
   --shadow-card: 0 18px 44px -20px rgba(60, 40, 15, 0.28);
   --shadow-cta: 0 14px 30px -14px rgba(183, 71, 42, 0.7);
 
-  /* Spacing scale (4px base) */
+  /**
+   * Elevation scale. Each step pairs a tight contact shadow with a wide ambient one — a single
+   * blurred shadow reads as fog, two read as an object resting on paper. Warm-tinted (60,40,15)
+   * rather than neutral black so nothing looks grey against the paper palette.
+   */
+  --shadow-1: 0 1px 2px rgba(60, 40, 15, 0.06), 0 2px 6px -2px rgba(60, 40, 15, 0.08);
+  --shadow-2: 0 2px 4px rgba(60, 40, 15, 0.07), 0 6px 14px -4px rgba(60, 40, 15, 0.12);
+  --shadow-3: 0 3px 6px rgba(60, 40, 15, 0.08), 0 12px 26px -8px rgba(60, 40, 15, 0.16);
+  --shadow-4: 0 5px 10px rgba(60, 40, 15, 0.09), 0 22px 44px -14px rgba(60, 40, 15, 0.22);
+  --shadow-5: 0 8px 16px rgba(60, 40, 15, 0.1), 0 36px 68px -20px rgba(60, 40, 15, 0.28);
+  --shadow-6: 0 14px 28px rgba(60, 40, 15, 0.12), 0 56px 100px -28px rgba(60, 40, 15, 0.34);
+
+  /* Pressed state — the inverse of elevation, for buttons and toggles on push. */
+  --shadow-inset-press: inset 0 2px 5px rgba(60, 40, 15, 0.18);
+
+  /* Coloured glows for the ambient/decorative layer. */
+  --shadow-glow-sienna: 0 0 60px -12px rgba(183, 71, 42, 0.45);
+  --shadow-glow-ochre: 0 0 60px -12px rgba(201, 155, 63, 0.45);
+  --shadow-glow-teal: 0 0 60px -12px rgba(51, 96, 90, 0.4);
+
+  /* Spacing scale (4px base) — holes filled so components stop hard-coding literals. */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
   --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
 
-  /* Motion */
-  --ease-standard: ease;
+  /* Fluid type scale. Every size the storefront needs, so 14.5px/15.5px literals can converge. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: clamp(1.0625rem, 0.5vw + 0.94rem, 1.1875rem);
+  --text-xl: clamp(1.25rem, 1vw + 1rem, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.6vw + 1.1rem, 2rem);
+  --text-3xl: clamp(1.75rem, 2.6vw + 1.1rem, 2.625rem);
+  --text-4xl: clamp(2rem, 3.4vw + 1.2rem, 3.25rem);
+  --text-display: clamp(2.625rem, 6.4vw + 0.6rem, 4.75rem);
+
+  /**
+   * Motion.
+   *
+   * `--ease-standard` is the design's real curve — see the file header for why it was `ease`.
+   * The others give the redesign a vocabulary: `soft` for entrances, `expo` for long depth
+   * moves, `spring` for press/hover feedback (it overshoots slightly), `art` for slow ambient
+   * drift.
+   */
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out-art: cubic-bezier(0.65, 0, 0.35, 1);
+
   --duration-fast: 0.2s;
   --duration-standard: 0.25s;
   --duration-entrance: 0.7s;
+  --duration-xs: 0.12s;
+  --duration-sm: 0.2s;
+  --duration-md: 0.32s;
+  --duration-lg: 0.55s;
+  --duration-xl: 0.9s;
+  --duration-float: 7s;
+  --duration-marquee: 42s;
+
+  /* Z-index scale — there was none, so stacking was ad hoc. */
+  --z-base: 1;
+  --z-decor: 2;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-header: 200;
+  --z-overlay: 300;
+  --z-toast: 400;
+
+  /* Blur scale for glass surfaces and depth-of-field on far 3D layers. */
+  --blur-sm: 4px;
+  --blur-md: 10px;
+  --blur-lg: 18px;
+  --blur-xl: 30px;
+  --blur-glass: 14px;
 }
 
+/**
+ * These global keyframes are for GLOBAL stylesheets only (globals.css and friends).
+ *
+ * Do NOT rely on them from a .module.css file. Lightning CSS scopes every animation-name inside
+ * a CSS module, so `animation: rbFadeUp ...` in a module compiles to `page-module__hash__rbFadeUp`
+ * and matches no keyframe — the animation silently does nothing. Every module that needs one of
+ * these declares its own local copy; see the note in those files. Duplicating ~8 lines is the
+ * cost of CSS Modules scoping, and it fails loudly (unused keyframe) rather than silently.
+ */
 @keyframes rbFadeUp {
   from {
     opacity: 0;

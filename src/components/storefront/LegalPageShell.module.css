@@ -74,3 +74,24 @@
   outline: 2px solid var(--color-sienna);
   outline-offset: 2px;
 }
+
+/**
+ * Local copies of the shared entrance/ambient keyframes.
+ *
+ * These MUST be defined inside this module. Lightning CSS scopes every animation-name it sees in
+ * a .module.css file, so a reference to a keyframe declared in a global stylesheet (tokens.css)
+ * compiles to a prefixed name that matches nothing — the animation silently never runs. That is
+ * exactly what happened site-wide before this was fixed. `:global(name)` is not a valid escape
+ * hatch either: it is not supported in the `animation` shorthand and emits invalid CSS.
+ */
+
+@keyframes rbFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
