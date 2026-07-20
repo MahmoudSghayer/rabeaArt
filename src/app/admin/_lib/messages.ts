@@ -23,13 +23,17 @@ export async function getAdminLocale(): Promise<SupportedLocale> {
   return cookieStore.get("rabea_locale")?.value === "en" ? "en" : "ar";
 }
 
-/** Same deep-merge as admin/layout.tsx: base storefront messages + admin-only messages. */
+/** Same deep-merge as admin/layout.tsx: base storefront messages + the two admin message files
+ * (admin-*.json = shell/orders/overview; admin2-*.json = products/customers/options/files/
+ * reports/settings/users — split so parallel workstreams never edit the same JSON file).
+ * Top-level namespaces are unique across all three, so shallow spread is sufficient. */
 export async function getAdminMessages(locale: SupportedLocale): Promise<MessageTree> {
-  const [base, admin] = await Promise.all([
+  const [base, admin, admin2] = await Promise.all([
     import(`@/messages/${locale}.json`).then((m) => m.default as MessageTree),
     import(`@/messages/admin-${locale}.json`).then((m) => m.default as MessageTree),
+    import(`@/messages/admin2-${locale}.json`).then((m) => m.default as MessageTree),
   ]);
-  return { ...base, ...admin };
+  return { ...base, ...admin, ...admin2 };
 }
 
 function getPath(messages: MessageTree, path: string): unknown {
