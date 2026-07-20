@@ -13,12 +13,22 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["iPhone 14"] } },
+    // Pixel 7 (Chromium), not iPhone (WebKit): we test responsive layout and RTL behaviour,
+    // not engine differences, and keeping both projects on Chromium means CI installs one
+    // browser instead of two. Swap to an iPhone device if Safari-specific bugs ever matter.
+    { name: "mobile", use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
     command: "npm run build && npm run start",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    env: {
+      // This runs a PRODUCTION build, which is exactly where the pre-launch gate in
+      // src/proxy.ts is active — without this every request rewrites to /coming-soon and
+      // the whole suite asserts against the holding page. Turning it off here tests the
+      // real site; the gate itself is covered separately in coming-soon.spec.ts.
+      COMING_SOON: "0",
+    },
   },
 });
