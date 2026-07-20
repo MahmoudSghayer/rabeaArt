@@ -150,7 +150,10 @@ export function OrderFlow({
               <path d="M3 6h18" />
               <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
-            <div className={styles.emptyTitle}>{t("empty.title")}</div>
+            {/* h1, not a div: the empty cart is a first-time visitor's default view, and every
+                page needs exactly one top-level heading. .emptyTitle carries its own type
+                styles, so the element swap is visually identical. */}
+            <h1 className={styles.emptyTitle}>{t("empty.title")}</h1>
             <p className={styles.emptySub}>{t("empty.sub")}</p>
             <div className={styles.emptyCtas}>
               <Link href="/shop" className={styles.ctaInk}>
