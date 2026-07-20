@@ -1,0 +1,499 @@
+/* ---- Header / toolbar ---- */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.toolbarSpacer {
+  flex: 1;
+}
+
+.backBtn {
+  border: 1px solid rgba(35, 32, 27, 0.22);
+  background: #fbf7ee;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #23201b;
+  text-decoration: none;
+}
+
+.toolBtn {
+  border: 1px solid rgba(35, 32, 27, 0.25);
+  background: #fbf7ee;
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  color: #23201b;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolBtn:hover {
+  border-color: var(--color-sienna);
+  color: var(--color-sienna);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.refTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  margin: 0;
+}
+
+.dateText {
+  font-size: 12px;
+  color: #8a8070;
+}
+
+.archivedPill {
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 5px 13px;
+  background: #ece7db;
+  color: #6b6459;
+}
+
+/* ---- Two-column layout ---- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panelLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a8070;
+  margin-bottom: 12px;
+}
+
+.emptyInline {
+  font-size: 12.5px;
+  color: #8a8070;
+  padding: 6px 0;
+}
+
+/* ---- Items panel ---- */
+.itemRow {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(35, 32, 27, 0.12);
+  align-items: flex-start;
+}
+
+.itemThumb {
+  flex: none;
+  width: 52px;
+  height: 60px;
+  border-radius: 9px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(35, 32, 27, 0.12);
+}
+
+.itemThumbFiles {
+  display: grid;
+  place-items: center;
+  background: #ece7db;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #57503f;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.itemBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.itemQty {
+  color: #8a8070;
+  font-weight: 400;
+}
+
+.itemOptions {
+  font-size: 11.5px;
+  color: #57503f;
+  margin-top: 3px;
+  line-height: 1.8;
+}
+
+.itemNotes {
+  font-size: 11.5px;
+  color: #8a8070;
+  margin-top: 3px;
+  font-style: italic;
+}
+
+.itemPrice {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.itemPriceManual {
+  color: var(--color-ochre);
+}
+
+.fileChips {
+  display: flex;
+  gap: 7px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.fileChip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(35, 32, 27, 0.18);
+  border-radius: 10px;
+  padding: 5px 9px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+}
+
+.fileChipName {
+  font-size: 10.5px;
+  font-weight: 600;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileChipSize {
+  font-size: 9.5px;
+  color: #8a8070;
+}
+
+.fileChipIcon {
+  color: var(--color-sienna);
+  font-size: 11px;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  font-size: 13.5px;
+}
+
+.totalLabel {
+  color: #57503f;
+}
+
+.totalValue {
+  font-weight: 700;
+}
+
+.custNotesCallout {
+  margin-top: 10px;
+  background: #f4e8c6;
+  border-radius: 11px;
+  padding: 10px 13px;
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: #6d5316;
+}
+
+/* ---- Notes / history ---- */
+.noteRow {
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(35, 32, 27, 0.1);
+}
+
+.noteText {
+  font-size: 12.5px;
+  line-height: 1.8;
+}
+
+.noteMeta {
+  font-size: 10.5px;
+  color: #8a8070;
+  margin-top: 2px;
+}
+
+.noteForm {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.noteInput {
+  flex: 1;
+  border: 1.5px solid rgba(35, 32, 27, 0.2);
+  border-radius: 11px;
+  padding: 10px 13px;
+  font-family: inherit;
+  font-size: 12.5px;
+  background: #fff;
+  color: #23201b;
+}
+
+.errorText {
+  font-size: 11.5px;
+  color: #8f3018;
+  margin-top: 8px;
+}
+
+.historyRow {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  align-items: baseline;
+}
+
+.historyDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--color-sienna);
+  position: relative;
+  top: -1px;
+}
+
+.historyText {
+  font-size: 12.5px;
+  flex: 1;
+}
+
+.historyAt {
+  font-size: 10.5px;
+  color: #8a8070;
+}
+
+/* ---- Customer card ---- */
+.customerHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 99px;
+  background: var(--color-teal);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.customerName {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.customerPref {
+  font-size: 11.5px;
+  color: #8a8070;
+}
+
+.contactList {
+  font-size: 12.5px;
+  line-height: 2.1;
+  color: #3b372f;
+}
+
+.contactLabel {
+  color: #8a8070;
+}
+
+.copyBtn {
+  border: none;
+  background: none;
+  color: var(--color-sienna);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  margin-inline-start: 6px;
+}
+
+.contactActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.waBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: #23201b;
+  color: #f6f0e3;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.waBtn:hover {
+  background: var(--color-teal);
+}
+
+.mailBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(35, 32, 27, 0.25);
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #fff;
+  color: #23201b;
+  text-decoration: none;
+}
+
+.waPanel {
+  margin-top: 12px;
+  background: #efe7d4;
+  border-radius: 13px;
+  padding: 12px;
+}
+
+.waPanelLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a8070;
+  margin-bottom: 7px;
+}
+
+.waTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid rgba(35, 32, 27, 0.18);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  background: #fff;
+  resize: vertical;
+  line-height: 1.9;
+  color: #23201b;
+}
+
+.waActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.waOpenLink {
+  display: inline-flex;
+  background: var(--color-teal);
+  color: #fff;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.waRecordBtn {
+  border: 1px solid rgba(35, 32, 27, 0.25);
+  background: #fff;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  color: #23201b;
+}
+
+.waRecordedText {
+  font-size: 11.5px;
+  color: #3f7048;
+  font-weight: 700;
+}
+
+/* ---- Manage panel ---- */
+.manageForm {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.select,
+.textInput {
+  border: 1.5px solid rgba(35, 32, 27, 0.2);
+  border-radius: 11px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+  color: #23201b;
+}
+
+.textInput {
+  cursor: text;
+}
+
+.autoSaveHint {
+  font-size: 11px;
+  color: #8a8070;
+  line-height: 1.8;
+}
+
+.savingHint {
+  font-size: 11px;
+  color: var(--color-teal);
+  font-weight: 600;
+}

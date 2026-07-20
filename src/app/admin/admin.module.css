@@ -20,3 +20,18 @@
   box-sizing: border-box;
   margin: 0 auto;
 }
+
+/**
+ * Print rules (design reference: `@media print{ [data-noprint]{display:none !important} }`).
+ * Everything marked data-noprint — sidebar, header bar, toolbars, manage/notes panels — is
+ * dropped from the printed order sheet; the paper bg goes white. Scoped under .shellBg (a local
+ * class) because Next.js CSS Modules reject pure-global selectors.
+ */
+@media print {
+  .shellBg {
+    background: #fff;
+  }
+  .shellBg :global([data-noprint]) {
+    display: none !important;
+  }
+}

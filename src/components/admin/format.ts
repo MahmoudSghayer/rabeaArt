@@ -5,6 +5,18 @@
  * by admin components, not business logic.
  */
 import type { SupportedLocale } from "@/i18n/routing";
+import { ARTS, type ArtKey } from "@/components/storefront/art";
+
+const ART_KEYS = Object.keys(ARTS) as ArtKey[];
+
+/** Deterministically picks one of the storefront's abstract-art gradients for an order item's
+ * thumbnail (see components/storefront/art.ts) — the schema has no per-product "art" field, so a
+ * stable hash of the item id stands in for real product photography. */
+export function artKeyForId(id: string): ArtKey {
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return ART_KEYS[hash % ART_KEYS.length];
+}
 
 /** `₪1,234` — Latin digits regardless of locale (matches the design's `fmtILS`). Returns `naLabel`
  * for `null` (an item/order that hasn't been priced yet, e.g. custom work before review). */

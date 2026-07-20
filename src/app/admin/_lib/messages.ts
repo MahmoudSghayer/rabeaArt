@@ -48,13 +48,15 @@ function interpolate(template: string, vars?: Record<string, string | number>): 
   return template.replace(/\{(\w+)\}/g, (match, key: string) => (key in vars ? String(vars[key]) : match));
 }
 
-/** Returns a `t(key, vars?)` function scoped to `namespace`. Falls back to `"namespace.key"`
- * (not a thrown error) when a key is missing, so a translation gap degrades visibly instead of
- * breaking the page. */
+/** Returns a `t(key, vars?)` function scoped to `namespace` (pass `""` for root-level lookups
+ * across namespaces, e.g. the CSV exporter reading both `orderStatus.*` and `paymentStatus.*`).
+ * Falls back to the full key path (not a thrown error) when a key is missing, so a translation
+ * gap degrades visibly instead of breaking the page. */
 export function createTranslator(messages: MessageTree, namespace: string) {
   return function t(key: string, vars?: Record<string, string | number>): string {
-    const value = getPath(messages, `${namespace}.${key}`);
-    if (typeof value !== "string") return `${namespace}.${key}`;
+    const fullPath = namespace ? `${namespace}.${key}` : key;
+    const value = getPath(messages, fullPath);
+    if (typeof value !== "string") return fullPath;
     return interpolate(value, vars);
   };
 }
