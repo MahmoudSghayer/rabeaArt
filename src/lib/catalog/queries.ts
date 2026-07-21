@@ -74,7 +74,26 @@ function mapColors(row: CatalogProductRow): CatalogColorOption[] {
     }));
 }
 
-function computeDisplayPrice(row: CatalogProductRow): { displayPrice: number | null; oldPrice: number | null } {
+/**
+ * Minimal shapes the price/stock rules need. Declared structurally so the same implementation
+ * serves both the lightweight scoring query in `listProducts` and the fully-included row mapper —
+ * two copies of this logic would drift, and a drifted price rule means the shop sorts by one
+ * number and displays another.
+ */
+type PriceShape = {
+  type: ProductType;
+  price: Prisma.Decimal | null;
+  sale: Prisma.Decimal | null;
+  sizes: { price: Prisma.Decimal }[];
+};
+
+type StockShape = {
+  type: ProductType;
+  trackStock: boolean;
+  variants: { active: boolean; stock: number }[];
+};
+
+function computeDisplayPrice(row: PriceShape): { displayPrice: number | null; oldPrice: number | null } {
   if (row.type === ProductType.SHIRT) {
     const price = decimalToNumber(row.price);
     const sale = decimalToNumber(row.sale);
@@ -93,7 +112,7 @@ function computeDisplayPrice(row: CatalogProductRow): { displayPrice: number | n
  * always available once published; callers must still exclude archived rows themselves (all
  * queries here already filter `archived: false`).
  */
-function computeInStock(row: CatalogProductRow): boolean {
+function computeInStock(row: StockShape): boolean {
   if (row.type === ProductType.PAINTING) return true;
   if (!row.trackStock) return true;
   return row.variants.some((v) => v.active && v.stock > 0);
@@ -183,35 +202,61 @@ function matchesPriceBucket(price: number | null, bucket: PriceBucket): boolean 
   return price > 200; // "c"
 }
 
-type ScoredItem = { item: CatalogListItem; createdAt: Date; displayOrder: number };
+/**
+ * What pass 1 of `listProducts` needs to filter, sort and paginate — deliberately NOT the full
+ * CatalogListItem, so the scoring query can avoid the four-deep include entirely.
+ *
+ * Null-price ordering is preserved exactly from the previous implementation: priced items sort
+ * ahead of unpriced ones under priceAsc (+Infinity) and behind them under priceDesc
+ * (-Infinity), so a product still mid-setup never leads the grid.
+ */
+type ScoredCandidate = {
+  id: string;
+  displayPrice: number | null;
+  inStock: boolean;
+  featured: boolean;
+  displayOrder: number;
+  createdAt: Date;
+};
 
-function sortScored(rows: ScoredItem[], sort: ProductSort): ScoredItem[] {
+function sortCandidates(rows: ScoredCandidate[], sort: ProductSort): ScoredCandidate[] {
   const arr = [...rows];
   switch (sort) {
     case "new":
       arr.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       break;
     case "priceAsc":
-      arr.sort((a, b) => (a.item.displayPrice ?? Number.POSITIVE_INFINITY) - (b.item.displayPrice ?? Number.POSITIVE_INFINITY));
+      arr.sort((a, b) => (a.displayPrice ?? Number.POSITIVE_INFINITY) - (b.displayPrice ?? Number.POSITIVE_INFINITY));
       break;
     case "priceDesc":
-      arr.sort((a, b) => (b.item.displayPrice ?? Number.NEGATIVE_INFINITY) - (a.item.displayPrice ?? Number.NEGATIVE_INFINITY));
+      arr.sort((a, b) => (b.displayPrice ?? Number.NEGATIVE_INFINITY) - (a.displayPrice ?? Number.NEGATIVE_INFINITY));
       break;
     case "featured":
     default:
-      arr.sort((a, b) => Number(b.item.featured) - Number(a.item.featured) || a.displayOrder - b.displayOrder);
+      arr.sort((a, b) => Number(b.featured) - Number(a.featured) || a.displayOrder - b.displayOrder);
   }
   return arr;
 }
 
 /**
- * Storefront listing (shop grid + filters). Only `archived`/`type`/`search`/`colorCode`/
- * `sizeCode` are pushed down to Postgres — those map onto indexed columns or simple joins.
- * `priceBucket`, `inStockOnly`, price sorting, and pagination all happen in JS after the fetch,
- * because `displayPrice` is a computed value (sale-or-price for shirts, min ProductSize for
- * paintings) that Prisma can't order/filter by in a single query. This is fine at this store's
- * scale — total product count is in the tens, not thousands — but would need a materialized
- * price column (or raw SQL) to stay correct if the catalog grew substantially.
+ * Storefront listing (shop grid + filters), in two passes.
+ *
+ * `archived`/`type`/`search`/`colorCode`/`sizeCode` push down to Postgres. `priceBucket`,
+ * `inStockOnly`, price sorting and pagination cannot: `displayPrice` is derived (sale-or-price
+ * for shirts, cheapest ProductSize for paintings) and Prisma cannot order or filter by it.
+ *
+ * Previously that meant fetching EVERY matching product with a four-deep include — images,
+ * colours, sizes, and variants each joined to their own lookup rows — and then discarding all
+ * but one page of it in JavaScript. On the anonymous, uncached `/shop` route (audit PERF-01).
+ *
+ * Now pass 1 selects only the handful of columns the price/stock/sort rules actually read, and
+ * pass 2 loads the full include for the ~24 products that survived to the current page. The
+ * JS filter/sort logic is unchanged and still the single source of truth for what a price
+ * means — the win is that the expensive join no longer runs across the whole catalogue.
+ *
+ * A materialised price column would let pass 1 happen entirely in SQL. That is the next step if
+ * the catalogue ever reaches the thousands; at this store's scale the remaining cost is a
+ * narrow scan over a few hundred rows.
  */
 export async function listProducts(opts: ListProductsOptions = {}): Promise<ListProductsResult> {
   const page = Math.max(1, opts.page ?? 1);
@@ -245,31 +290,62 @@ export async function listProducts(opts: ListProductsOptions = {}): Promise<List
     });
   }
 
-  const rows = await prisma.product.findMany({
+  // PASS 1 — scoring. Only the columns the price/stock/sort rules read, no lookup joins.
+  const scoringRows = await prisma.product.findMany({
     where: { AND: conditions },
-    include: catalogProductInclude,
+    select: {
+      id: true,
+      type: true,
+      price: true,
+      sale: true,
+      trackStock: true,
+      featured: true,
+      displayOrder: true,
+      createdAt: true,
+      sizes: { select: { price: true } },
+      variants: { select: { active: true, stock: true } },
+    },
   });
 
-  let scored: ScoredItem[] = rows.map((row) => ({
-    item: mapCatalogListItem(row),
-    createdAt: row.createdAt,
+  let candidates = scoringRows.map((row) => ({
+    id: row.id,
+    displayPrice: computeDisplayPrice(row).displayPrice,
+    inStock: computeInStock(row),
+    featured: row.featured,
     displayOrder: row.displayOrder,
+    createdAt: row.createdAt,
   }));
 
   if (opts.priceBucket) {
     const bucket = opts.priceBucket;
-    scored = scored.filter((s) => matchesPriceBucket(s.item.displayPrice, bucket));
+    candidates = candidates.filter((c) => matchesPriceBucket(c.displayPrice, bucket));
   }
   if (opts.inStockOnly) {
-    scored = scored.filter((s) => s.item.inStock);
+    candidates = candidates.filter((c) => c.inStock);
   }
 
-  scored = sortScored(scored, opts.sort ?? "featured");
+  candidates = sortCandidates(candidates, opts.sort ?? "featured");
 
-  const total = scored.length;
+  const total = candidates.length;
   const pageCount = total === 0 ? 0 : Math.ceil(total / pageSize);
   const start = (page - 1) * pageSize;
-  const items = scored.slice(start, start + pageSize).map((s) => s.item);
+  const pageIds = candidates.slice(start, start + pageSize).map((c) => c.id);
+
+  if (pageIds.length === 0) return { items: [], total, page, pageCount };
+
+  // PASS 2 — hydrate only this page.
+  const rows = await prisma.product.findMany({
+    where: { id: { in: pageIds } },
+    include: catalogProductInclude,
+  });
+
+  // `IN (...)` does not preserve the order of the list, so re-apply pass 1's ordering rather
+  // than letting Postgres decide — otherwise sorting silently stops working.
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  const items = pageIds
+    .map((id) => byId.get(id))
+    .filter((row): row is NonNullable<typeof row> => row !== undefined)
+    .map(mapCatalogListItem);
 
   return { items, total, page, pageCount };
 }

@@ -290,9 +290,10 @@ export function CustomWizard({
             }}
           >
             {/*
-              `background`, not `backgroundImage`, so the tile also clears any inherited
-              background-color in one declaration. Either works: printSurface() emits plain
-              <image> layers, guarded by tests/unit/texture.test.ts.
+              `background` sets the composed printSurface() stack in one declaration, also
+              clearing any background-color underneath. `backgroundImage` would work too:
+              --texture-halftone used to carry its own `position / size` (legal only in the
+              shorthand, silently fatal in background-image), but it is a bare url() now.
             */}
             <div className={styles.typeCardArt} style={{ background: card.art }}>
               <span aria-hidden="true" className={styles.typeCardScrim} />

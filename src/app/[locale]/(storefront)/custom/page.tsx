@@ -109,9 +109,11 @@ export default async function CustomPage({
             <Reveal as="li" key={beat.label} index={i} className={styles.beat}>
               <span aria-hidden="true" className={styles.beatConnector} />
               {/*
-                `background`, not `backgroundImage`, so each beat also clears any inherited
-                background-color in one declaration. Either works: printSurface() emits plain
-                <image> layers, guarded by tests/unit/texture.test.ts.
+                `background` sets the composed printSurface() stack in one declaration, which
+                also resets any inherited background-color underneath it. `backgroundImage`
+                would work too: --texture-halftone used to carry its own `position / size` pair
+                (legal only in the shorthand, silently fatal in background-image), but it is a
+                bare url() now — see the note above it in textures.css.
               */}
               <span
                 aria-hidden="true"

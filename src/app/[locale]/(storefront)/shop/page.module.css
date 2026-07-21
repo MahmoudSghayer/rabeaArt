@@ -172,9 +172,13 @@
 }
 
 /*
-  The halftone screen goes on its own pseudo-element rather than being another printSurface()
-  layer, so the dot screen composites above the artwork and can be tuned on its own. The
-  `background` shorthand here also clears the inherited colour in a single declaration.
+  The halftone screen goes on its own pseudo-element so it can sit above the art without the
+  art's own transitions moving it. It is a separate layer for compositing reasons only.
+
+  (Historical note: this used to be hand-rolled because --texture-halftone carried its own
+  position/size, which is `background` shorthand syntax and illegal inside `background-image`.
+  That is fixed — the token is a bare url() now — so `background-image` and printSurface() are
+  both safe here. Kept as-is because the pseudo-element layering is still wanted.)
 */
 .heroPlateArtPrint::after {
   content: "";
