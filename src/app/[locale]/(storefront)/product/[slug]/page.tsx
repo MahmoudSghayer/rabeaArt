@@ -3,7 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ProductType } from "@/generated/prisma/enums";
-import { getProductBySlug, getRelatedProducts } from "@/lib/catalog/queries";
+import { getRelatedProducts } from "@/lib/catalog/queries";
+import { getCachedProductBySlug } from "@/lib/catalog/cached";
 import { pickText, type CatalogListItem, type CatalogProductDetail } from "@/lib/catalog/types";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { ProductView } from "./ProductView";
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale, slug } = await params;
   let product: CatalogProductDetail | null = null;
   try {
-    product = await getProductBySlug(slug);
+    product = await getCachedProductBySlug(slug);
   } catch {
     return {};
   }
@@ -50,7 +51,7 @@ export default async function ProductPage({ params }: PageProps) {
   let product: CatalogProductDetail | null = null;
   let fetchFailed = false;
   try {
-    product = await getProductBySlug(slug);
+    product = await getCachedProductBySlug(slug);
   } catch {
     fetchFailed = true;
   }

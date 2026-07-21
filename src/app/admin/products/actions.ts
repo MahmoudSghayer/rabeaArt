@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CATALOG_TAGS } from "@/lib/catalog/cache-tags";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { AdminRole, ProductType, SizeScope } from "@/generated/prisma/enums";
@@ -68,6 +69,7 @@ export async function toggleFeaturedAction(productId: string, featured: boolean)
       });
     });
     revalidatePath("/admin/products");
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "FEATURED_UPDATE_FAILED");
@@ -96,6 +98,7 @@ export async function setArchivedAction(productId: string, archived: boolean): P
     });
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${productId}/edit`);
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "ARCHIVE_UPDATE_FAILED");
@@ -127,6 +130,7 @@ export async function deleteProductAction(productId: string): Promise<ActionResu
 
     await removeImagesBestEffort(imagePaths);
     revalidatePath("/admin/products");
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "DELETE_FAILED");
@@ -346,6 +350,7 @@ export async function saveProductAction(raw: unknown): Promise<SaveProductResult
 
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${productId}/edit`);
+    updateTag(CATALOG_TAGS.products);
     return { ok: true, id: productId };
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {

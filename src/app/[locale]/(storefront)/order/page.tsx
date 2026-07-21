@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { getSettings, listActiveOptions } from "@/lib/catalog/queries";
+import { getCachedActiveOptions, getCachedSettings } from "@/lib/catalog/cached";
 import type { CatalogActiveOptions } from "@/lib/catalog/types";
 import { CONTACT_INFO } from "@/components/storefront/contact-info";
 import { buildOptionLabelMaps } from "../custom/fallback-options";
@@ -18,7 +18,7 @@ export default async function OrderPage({ params }: { params: Promise<{ locale: 
 
   let activeOptions: CatalogActiveOptions | null = null;
   try {
-    activeOptions = await listActiveOptions();
+    activeOptions = await getCachedActiveOptions();
   } catch {
     activeOptions = null;
   }
@@ -26,7 +26,7 @@ export default async function OrderPage({ params }: { params: Promise<{ locale: 
   let whatsapp: string = CONTACT_INFO.whatsapp;
   let email: string = CONTACT_INFO.email;
   try {
-    const settings = await getSettings();
+    const settings = await getCachedSettings();
     whatsapp = settings.whatsapp;
     email = settings.email;
   } catch {

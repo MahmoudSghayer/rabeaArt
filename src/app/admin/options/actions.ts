@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CATALOG_TAGS } from "@/lib/catalog/cache-tags";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
@@ -89,6 +90,12 @@ async function addSize(scope: SizeScope, rawCode: string): Promise<ActionResult>
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "SIZE_ADD_FAILED");
@@ -115,6 +122,12 @@ export async function toggleSizeActiveAction(sizeId: string, active: boolean): P
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "SIZE_TOGGLE_FAILED");
@@ -157,6 +170,12 @@ export async function removeSizeAction(sizeId: string): Promise<ActionResult> {
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "SIZE_REMOVE_FAILED");
@@ -185,6 +204,12 @@ export async function addFrameAction(labelAr: string, labelEn: string): Promise<
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "FRAME_ADD_FAILED");
@@ -203,6 +228,12 @@ export async function toggleFrameActiveAction(frameId: string, active: boolean):
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "FRAME_TOGGLE_FAILED");
@@ -232,6 +263,12 @@ export async function updateFrameAddPriceAction(frameId: string, add: number): P
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "FRAME_PRICE_UPDATE_FAILED");
@@ -279,6 +316,12 @@ export async function removeFrameAction(frameId: string): Promise<ActionResult> 
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "FRAME_REMOVE_FAILED");
@@ -315,6 +358,12 @@ export async function addColorAction(nameAr: string, nameEn: string, hex: string
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "COLOR_ADD_FAILED");
@@ -333,6 +382,12 @@ export async function toggleColorActiveAction(colorId: string, active: boolean):
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "COLOR_TOGGLE_FAILED");
@@ -361,6 +416,12 @@ export async function toggleMaterialActiveAction(materialId: string, active: boo
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "MATERIAL_TOGGLE_FAILED");
@@ -385,6 +446,12 @@ export async function toggleProductionMethodActiveAction(methodId: string, activ
       });
     });
     revalidatePath("/admin/options");
+    updateTag(CATALOG_TAGS.options);
+    // Frames (and their surcharges) are baked into the cached product DETAIL response —
+    // getProductBySlug resolves them via listActiveFrames — so an option change is also a
+    // product change. Busting only the options tag would leave product pages quoting the old
+    // frame price for up to an hour.
+    updateTag(CATALOG_TAGS.products);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "METHOD_TOGGLE_FAILED");

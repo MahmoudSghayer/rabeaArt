@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CATALOG_TAGS } from "@/lib/catalog/cache-tags";
 import { prisma } from "@/lib/prisma";
 import { AdminRole } from "@/generated/prisma/enums";
 import { requireRole, AuthError } from "@/lib/auth/requireRole";
@@ -41,6 +42,7 @@ export async function saveSettingsAction(raw: unknown): Promise<ActionResult> {
     });
     revalidatePath("/admin/settings");
     revalidatePath("/");
+    updateTag(CATALOG_TAGS.settings);
     return { ok: true };
   } catch (err) {
     return toActionError(err, "SETTINGS_SAVE_FAILED");

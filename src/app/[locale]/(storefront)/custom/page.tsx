@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getSettings, listActiveOptions } from "@/lib/catalog/queries";
+import { getCachedActiveOptions, getCachedSettings } from "@/lib/catalog/cached";
 import type { CatalogActiveOptions } from "@/lib/catalog/types";
 import { CustomWizard, type WizardType } from "./CustomWizard";
 import { buildWizardOptions } from "./fallback-options";
@@ -30,14 +30,14 @@ export default async function CustomPage({
 
   let activeOptions: CatalogActiveOptions | null = null;
   try {
-    activeOptions = await listActiveOptions();
+    activeOptions = await getCachedActiveOptions();
   } catch {
     activeOptions = null;
   }
 
   let customOtherEnabled = true;
   try {
-    customOtherEnabled = (await getSettings()).customOtherEnabled;
+    customOtherEnabled = (await getCachedSettings()).customOtherEnabled;
   } catch {
     // Defaults open — matches DEFAULT_SETTINGS in @/lib/catalog/queries.
   }

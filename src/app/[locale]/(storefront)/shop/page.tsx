@@ -1,7 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { cx } from "@/lib/cx";
-import { listActiveOptions, listProducts } from "@/lib/catalog/queries";
+import { listProducts } from "@/lib/catalog/queries";
+import { getCachedActiveOptions } from "@/lib/catalog/cached";
 import type { CatalogActiveOptions, ListProductsResult } from "@/lib/catalog/types";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { ShopControls } from "@/components/storefront/ShopControls";
@@ -58,7 +59,7 @@ export default async function ShopPage({
 
   let activeOptions: CatalogActiveOptions | null = null;
   try {
-    activeOptions = await listActiveOptions();
+    activeOptions = await getCachedActiveOptions();
   } catch {
     activeOptions = null;
   }

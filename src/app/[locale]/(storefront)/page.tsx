@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { cx } from "@/lib/cx";
 import { grainedArt } from "@/components/storefront/art";
 import { canvasSurface, printSurface } from "@/components/storefront/texture";
-import { getFeaturedProducts } from "@/lib/catalog/queries";
+import { getCachedFeaturedProducts } from "@/lib/catalog/cached";
 import type { CatalogListItem } from "@/lib/catalog/types";
 import { ArtMarquee } from "@/components/storefront/ArtMarquee";
 import { ProductCard } from "@/components/storefront/ProductCard";
@@ -40,7 +40,7 @@ export default async function HomePage({
   // section degrades to its own empty-state copy instead of crashing the page.
   let featured: CatalogListItem[] = [];
   try {
-    featured = await getFeaturedProducts(6);
+    featured = await getCachedFeaturedProducts(6);
   } catch {
     featured = [];
   }
