@@ -4,6 +4,7 @@ import { cx } from "@/lib/cx";
 import { grainedArt } from "@/components/storefront/art";
 import { getFeaturedProducts } from "@/lib/catalog/queries";
 import type { CatalogListItem } from "@/lib/catalog/types";
+import { ArtMarquee } from "@/components/storefront/ArtMarquee";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { ParallaxLayer } from "@/components/motion/ParallaxLayer";
 import { Reveal } from "@/components/motion/Reveal";
@@ -133,14 +134,7 @@ export default async function HomePage({
         </div>
       </section>
 
-      <div className={styles.marqueeWrap} dir="ltr">
-        <div className={styles.marqueeTrack}>
-          <span className={styles.marqueeItem}>{t("marq")}</span>
-          <span className={styles.marqueeItem} aria-hidden="true">
-            {t("marq")}
-          </span>
-        </div>
-      </div>
+      <ArtMarquee />
 
       <Reveal as="section" index={0} className={styles.featured}>
         <div className={styles.sectionHeadRow}>

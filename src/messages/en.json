@@ -189,7 +189,15 @@
     "ctaPaint": "Shop paintings",
     "ctaCustom": "Create a custom design",
     "trust": "No online payment — we review your order and agree price & delivery with you before we start.",
-    "marq": "HAND PRINTING ✺ SILK-THREAD EMBROIDERY ✺ ORIGINAL PAINTINGS ✺ FINE-ART PRINTS ✺ CUSTOM ORDERS ✺ GIFT WRAPPING ✺ HAND PRINTING ✺ SILK-THREAD EMBROIDERY ✺ ORIGINAL PAINTINGS ✺ FINE-ART PRINTS ✺ CUSTOM ORDERS ✺ GIFT WRAPPING ✺ HAND PRINTING ✺ SILK-THREAD EMBROIDERY ✺ ORIGINAL PAINTINGS ✺ FINE-ART PRINTS ✺ CUSTOM ORDERS ✺ GIFT WRAPPING ✺ ",
+    "marqueeLabel": "What we make in the studio",
+    "marquee": [
+      { "text": "HAND PRINTING", "icon": "press" },
+      { "text": "SILK-THREAD EMBROIDERY", "icon": "needle" },
+      { "text": "ORIGINAL PAINTINGS", "icon": "brush" },
+      { "text": "FINE-ART PRINTS", "icon": "frame" },
+      { "text": "CUSTOM ORDERS", "icon": "spool" },
+      { "text": "GIFT WRAPPING", "icon": "ribbon" }
+    ],
     "heroArt1": "“Between Two Rivers”",
     "heroArt2": "“Dawn Threads”",
     "origTag": "Original",

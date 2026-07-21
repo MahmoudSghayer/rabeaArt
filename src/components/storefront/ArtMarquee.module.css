@@ -1,0 +1,266 @@
+/*
+  An artistic moving ribbon, not an announcement bar.
+
+  The band is a strip of woven cloth lying on the page: linen weave over a warm gradient, an
+  inset shadow along each edge so it reads as slightly recessed, and a torn-paper edge above and
+  below. Two rows travel in opposite directions, which is what gives it energy — a single row
+  reads as a ticker.
+*/
+
+.ribbon {
+  position: relative;
+  /*
+    Contains the tracks, which are deliberately wider than the viewport. Without this the page
+    scrolls sideways — the exact failure the E2E suite asserts against at 390px.
+    `clip` rather than `hidden` so this never becomes a scroll container.
+  */
+  overflow: clip;
+  background-color: var(--color-paper-deep);
+  background-image: var(--surface-linen-band);
+  /* Recessed, like a ribbon set into the page rather than printed on top of it. */
+  box-shadow:
+    inset 0 7px 14px -10px rgba(60, 40, 15, 0.4),
+    inset 0 -7px 14px -10px rgba(60, 40, 15, 0.4);
+}
+
+/*
+  Soft lifted edges.
+
+  A torn deckle mask was tried here first and rejected on sight: at the ~9px an edge strip gets,
+  the displaced tear tiles into a chunky repeating band that reads as a rendering artifact rather
+  than handmade paper. The deckle stays available in TexturedSection, where bands are tall enough
+  to carry it.
+
+  What actually sells "cloth lying on the page" at this height is light: a bright hairline along
+  the top where the weave catches, a darker one beneath where it lifts off. Paired with the inset
+  shadow on .ribbon, the band reads as a physical object with thickness.
+*/
+.ribbon::before,
+.ribbon::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 1px;
+  z-index: var(--z-decor);
+  pointer-events: none;
+}
+
+.ribbon::before {
+  inset-block-start: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 252, 245, 0.85) 18%,
+    rgba(255, 252, 245, 0.85) 82%,
+    transparent
+  );
+}
+
+.ribbon::after {
+  inset-block-end: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(60, 40, 15, 0.16) 18%,
+    rgba(60, 40, 15, 0.16) 82%,
+    transparent
+  );
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /*
+    Clears the 9px torn edges with room to spare. At the old 9px the phrases sat exactly against
+    the tear, which read as cramped — a ribbon needs margin for the eye to register it as cloth
+    rather than a rule.
+  */
+  padding-block: var(--space-5);
+}
+
+/*
+  The soft edge. A mask on the viewport fades each row out at both ends, so phrases dissolve
+  rather than being guillotined by the container — the single biggest difference between "cheap
+  ticker" and "ribbon passing behind the page".
+*/
+.viewport {
+  overflow: clip;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 11%,
+    #000 89%,
+    transparent 100%
+  );
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  /*
+    animation-play-state is what the hover pause toggles; keeping duration in a custom property
+    lets the two rows differ without duplicating the animation shorthand.
+  */
+  animation-duration: var(--row-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-name: marqueeSlide;
+  will-change: transform;
+}
+
+/*
+  Opposite directions, and deliberately different speeds. Two rows at one speed read as a single
+  thick band; the offset is what makes the pair feel woven.
+*/
+.trackA {
+  --row-duration: var(--duration-marquee);
+}
+
+.trackB {
+  --row-duration: calc(var(--duration-marquee) * 1.35);
+  animation-direction: reverse;
+}
+
+/* Row B is the quieter of the two, so the eye has somewhere to rest. */
+.trackB .item {
+  opacity: 0.62;
+  font-size: var(--text-xs);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  padding-inline: 13px;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  letter-spacing: 0.6px;
+  /* sienna-deep, not sienna: this is text on a textured surface — see tokens.css. */
+  color: #57503f;
+}
+
+.text {
+  /* Arabic needs its own direction back; the track above is forced LTR for the transform. */
+  unicode-bidi: isolate;
+}
+
+.mark {
+  color: var(--color-sienna-deep);
+  opacity: 0.75;
+  /* A slow counter-rotation, so the ornaments turn as the ribbon travels. */
+  animation: markTurn 14s linear infinite;
+}
+
+.trackB .mark {
+  color: var(--color-teal);
+  animation-direction: reverse;
+}
+
+/* ---------- Interaction ---------- */
+
+/*
+  Hover slows rather than stops. A hard pause mid-scroll reads as a bug; easing down to a crawl
+  reads as the ribbon responding to attention. focus-within covers keyboard users landing on
+  anything inside.
+*/
+.ribbon:hover .track,
+.ribbon:focus-within .track {
+  animation-play-state: paused;
+}
+
+/* ---------- Keyframes ---------- */
+
+/*
+  Declared locally, NOT in tokens.css. Lightning CSS scopes animation-name inside a CSS module,
+  so a keyframe living in a global stylesheet compiles to a prefixed name that matches nothing
+  and the animation silently never runs. That is precisely why this strip never moved before.
+
+  -50% works because each track holds exactly two copies of the row.
+*/
+@keyframes marqueeSlide {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes markTurn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Gating ---------- */
+
+/*
+  Reduced motion: a STATIC, WRAPPED, CENTRED list — not a frozen track.
+
+  This matters more than it looks. The global !important clamp in tokens.css sets
+  animation-duration to 0.01ms, which does not stop a marquee: it runs it to completion instantly
+  and leaves it parked at translateX(-50%), i.e. permanently scrolled into its own seam. Row two
+  is dropped entirely, since a reversed duplicate has no meaning once nothing moves.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .viewport {
+    mask-image: none;
+  }
+
+  .track {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    transform: none;
+    animation: none;
+  }
+
+  /* The second copy of each row exists only to hide the loop seam. */
+  .track > .item:nth-child(n + 7) {
+    display: none;
+  }
+
+  .rows > .viewport:nth-child(2) {
+    display: none;
+  }
+
+  .mark {
+    animation: none;
+  }
+
+  .trackB .item {
+    opacity: 1;
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  /*
+    One row on small screens. Two counter-scrolling rows in a ~40px band is visual noise at phone
+    width, and it halves the compositing cost on the devices least able to afford it.
+  */
+  .rows > .viewport:nth-child(2) {
+    display: none;
+  }
+
+  .item {
+    gap: 10px;
+    padding-inline: 10px;
+  }
+}
+
+@media (forced-colors: active) {
+  .ribbon::before,
+  .ribbon::after {
+    display: none;
+  }
+
+  .viewport {
+    mask-image: none;
+  }
+}

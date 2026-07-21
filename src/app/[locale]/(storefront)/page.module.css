@@ -242,27 +242,7 @@
   aspect-ratio: 1;
 }
 
-/* ---------- Marquee ---------- */
-
-.marqueeWrap {
-  overflow: hidden;
-  border-block: 1px solid var(--color-line);
-  background: var(--color-paper-deep);
-}
-
-.marqueeTrack {
-  display: flex;
-  width: max-content;
-  animation: rbMarquee 30s linear infinite;
-}
-
-.marqueeItem {
-  white-space: nowrap;
-  padding: 11px 0;
-  font-size: 13.5px;
-  letter-spacing: 0.6px;
-  color: #57503f;
-}
+/* Marquee styles now live with the component — see ArtMarquee.module.css. */
 
 /* ---------- Shared section heads / grid ---------- */
 
@@ -726,8 +706,3 @@
   }
 }
 
-@keyframes rbMarquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
