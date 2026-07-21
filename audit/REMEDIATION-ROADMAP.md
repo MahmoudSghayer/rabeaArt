@@ -200,10 +200,44 @@ Each item lists: Priority · Finding ID · Action · Expected impact · Dependen
   `CREATE INDEX` is fine at current table sizes; switch to `CONCURRENTLY` if these ever grow large.
 
 ### 3.2 🔧 Cache the catalog
-- **Priority:** P2 · **Findings:** CACHE-01, CACHE-02 · **Complexity:** Medium
-- `force-static` on about/contact/legal (zero dynamic inputs); `revalidate` + tag invalidation on
-  home/shop/product. **The invalidation half already exists** — ~30 `revalidatePath` sites.
-- **Verification:** `prerender-manifest.json` lists the content pages; repeat requests show cache hits.
+- **Priority:** P2 · **Findings:** CACHE-01, CACHE-02 · **Complexity:** ~~Medium~~ **Large — blocked**
+
+⚠️ **ATTEMPTED AND REVERTED 2026-07-21. Do not retry with `force-static` alone.**
+
+Adding `export const dynamic = "force-static"` to about/contact/legal *does* prerender them —
+the build emitted all 8 pages (2 locales × 4 routes) as `●` SSG. **But it silently breaks the
+English locale.** Verified in the generated HTML:
+
+```
+.next/server/app/en/about.html  →  <html lang="ar" dir="rtl">   ← English content, Arabic shell
+```
+
+**Root cause:** `src/app/layout.tsx:62` resolves the locale with `await getLocale()`, which needs
+a request context. Under static generation there isn't one, so it falls back to
+`routing.defaultLocale` (`"ar"`) and stamps `lang="ar" dir="rtl"` onto every prerendered page
+regardless of locale. English pages then render LTR text inside an RTL document — worse than the
+per-request rendering this was meant to optimise away.
+
+**Why it can't be fixed locally:** the root layout owns `<html>` because `/admin` lives *outside*
+the `[locale]` segment, and Next.js permits only one `<html>` per app. next-intl's documented
+static-rendering pattern puts `<html>` in `app/[locale]/layout.tsx`, which this architecture
+cannot do without restructuring the admin subtree.
+
+**Options, none small:**
+1. Move `/admin` under `[locale]` so `[locale]/layout.tsx` can own `<html>` — largest change,
+   but unlocks static rendering for the whole storefront.
+2. Keep `<html>` neutral and set `lang`/`dir` on an inner wrapper per subtree. There is precedent
+   — `admin/layout.tsx` already does exactly this — but `<html dir>` affects scrollbar side and
+   document-level direction defaults, so this needs real RTL testing, not just a passing build.
+3. Leave these four pages dynamic. They are cheap (no DB, no I/O) and the site is low-traffic;
+   this is the honest default until 1 or 2 is worth doing.
+
+**CACHE-01 (catalog caching) is unaffected by this** and remains the larger win: `revalidate` +
+tag invalidation on home/shop/product, where the ~30 `revalidatePath` sites already exist with
+nothing to invalidate. It does not touch `<html>`, so it can proceed independently.
+
+- **Verification if retried:** `prerender-manifest.json` listing the pages is **not** sufficient.
+  Grep the emitted HTML for `lang=`/`dir=` on **both** `/ar/...` and `/en/...` before believing it.
 
 ### 3.3 🔧 Bound `listProducts`
 - **Priority:** P2 · **Finding:** PERF-01 · **Complexity:** Medium
@@ -218,10 +252,19 @@ Each item lists: Priority · Finding ID · Action · Expected impact · Dependen
   set `maxDuration` in `vercel.json`.
 - **Verification:** Run against a seeded bucket; confirm it completes within the limit.
 
-### 3.5 🔧 SEO essentials
+### 3.5 ✅ SEO essentials — robots + sitemap DONE, JSON-LD open
 - **Priority:** P2 · **Findings:** SEO-01, FE-04 · **Complexity:** Medium
-- `sitemap.ts`, `robots.ts`, JSON-LD `Product` schema (the data is already computed in
-  `generateMetadata`), `alternates.languages` hreflang, per-page metadata.
+- **Done:** `src/app/robots.ts` and `src/app/sitemap.ts`. The sitemap emits correct
+  `localePrefix: "as-needed"` URLs (`/shop` for Arabic, `/en/shop` for English — emitting
+  `/ar/...` would have filled it with redirects) and carries `alternates.languages` on every
+  entry, which closes the hreflang half of FE-04. `robots.ts` is `force-dynamic` so flipping
+  `COMING_SOON` in Vercel takes effect without a redeploy — otherwise the site would open while
+  robots.txt still said `Disallow: /`.
+- **Still open:** JSON-LD `Product` schema (the data is already computed in `generateMetadata`
+  at `product/[slug]/page.tsx:16-32`), a web manifest, and per-page metadata for the six
+  storefront pages that currently share one generic title/description.
+- ⚠️ **Depends on `NEXT_PUBLIC_SITE_URL` being the real domain in Vercel** — both files derive
+  every URL from it, and locally it resolves to `http://localhost:3000`.
 
 ### 3.6 🔧 Batch order pricing; reconcile the archived-orders discrepancy
 - **Priority:** P3 · **Findings:** API-05, OBS-01 · **Complexity:** Small
