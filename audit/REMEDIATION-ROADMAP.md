@@ -11,18 +11,18 @@ Each item lists: Priority · Finding ID · Action · Expected impact · Dependen
 
 ### 0.1 🖐️ Close the PostgREST path to the database
 - **Priority:** P0 — highest in the entire audit
-- **Finding:** SEC-01
-- **Action:** Run `docs/rls-lockdown.sql` in the Supabase SQL Editor. Then Supabase → Settings →
-  API → remove `public` from Exposed schemas.
-- **Impact:** Removes the only path from an untrusted browser to customer PII. Without it, launch
-  day publishes the anon key in the `/admin/login` bundle and `GET /rest/v1/customers` returns
-  every name, phone, email and address.
-- **Dependencies:** None. Non-destructive, idempotent, reversible.
-- **Complexity:** Small (~10 min)
-- **Verification:** The script's own query returns 22 rows, all `rls_enabled = t`. Then, from an
-  unauthenticated machine: `curl '<url>/rest/v1/customers?select=*' -H "apikey: <anon>"` must
-  return no rows. Then confirm the app still works — `SELECT current_user` through `DATABASE_URL`
-  must report `postgres`.
+- **Finding:** SEC-01 · ✅ **COMPLETE AND VERIFIED 2026-07-21**
+- `docs/rls-lockdown.sql` applied to the production project. Verified by
+  `SELECT relrowsecurity FROM pg_class …` → **22 rows, all `true`**. `SELECT current_user` returns
+  `postgres`, so the application bypasses RLS and is unaffected.
+- **Why verified this way:** an empty `[]` from the REST API is ambiguous while the tables hold no
+  rows, and `customers` and `products` are both currently empty — the first probe returned `[]`
+  for that reason, not because the lock was working. Reading `pg_class` cannot be fooled by it.
+  (A first attempt also hit the wrong Supabase project entirely; the `PGRST205` hint naming an
+  unrelated `meters` table is what exposed that.)
+- **Still open, non-blocking:** remove `public` from Supabase → Settings → API → Exposed schemas.
+  PostgREST is unused here, so disabling it removes the surface altogether — and protects any
+  table added later before someone remembers to enable RLS on it.
 
 ### 0.2 🖐️ Establish and prove backups
 - **Priority:** P0
@@ -287,7 +287,7 @@ Each item lists: Priority · Finding ID · Action · Expected impact · Dependen
 
 | Phase | Items | Done | Manual | Remaining code work |
 |---|---|---|---|---|
-| 0 — Immediate critical | 5 | 1 | 4 | 0 |
+| 0 — Immediate critical | 5 | 2 | 3 | 0 |
 | 1 — Security & data | 8 | 3 | 1 | 4 |
 | 2 — Stability & observability | 7 | 1 | 3 | 3 |
 | 3 — Performance | 6 | 0 | 0 | 6 |
@@ -295,6 +295,18 @@ Each item lists: Priority · Finding ID · Action · Expected impact · Dependen
 | 5 — Reliability & recovery | 6 | 0 | 3 | 3 |
 | **Total** | **36** | **5** | **12** | **19** |
 
-**Phase 0 is the launch gate.** Four of its five items are dashboard actions taking a couple of
-hours in total — no engineering required. Everything after Phase 1 can proceed after launch
-without risk.
+**Phase 0 is the launch gate.** As of 2026-07-21 two of its five items are complete: the public
+API is closed (0.3) and **RLS is enabled and verified on all 22 tables (0.1)** — the audit's most
+serious finding.
+
+**Backups (0.2) are now the top risk and the main remaining blocker.** They are dashboard work,
+not engineering: confirm the plan tier supports PITR, enable it, then actually restore once and
+time it. Until a restore has been performed, recovery is a hypothesis.
+
+Two items surfaced while verifying 0.1 and belong here:
+- **Seed the catalog.** `products` is empty, so `/shop` renders nothing and `settings` (WhatsApp
+  number, contact email — read by the storefront and by order emails) is unpopulated. Run
+  `docs/seed.sql`, or add products through the admin once login is confirmed.
+- **Confirm Vercel's `NEXT_PUBLIC_SUPABASE_URL` points at the project that was hardened.** This
+  account holds more than one Supabase project, and a mismatch here is invisible: the site keeps
+  working, nothing looks wrong, and the hardening simply applies to the wrong database.

@@ -1,6 +1,33 @@
 # Database RLS Matrix — rabea.art
 
-## Current state: RLS is disabled on every table
+## ✅ RESOLVED 2026-07-21 — RLS is now enabled on all 22 tables
+
+`docs/rls-lockdown.sql` was applied to the production Supabase project and verified by reading the
+flag directly:
+
+```sql
+SELECT c.relname, c.relrowsecurity FROM pg_class c
+JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE n.nspname = 'public' AND c.relkind = 'r';
+-- Result: 22 rows, relrowsecurity = true for every one.
+```
+
+Verified this way deliberately rather than by querying the REST API: an empty `[]` from PostgREST
+is ambiguous while the tables hold no rows, and both `customers` and `products` are currently
+empty. Reading `pg_class` cannot be fooled by that.
+
+With **no policies defined**, RLS-enabled means deny-all for `anon` and `authenticated`. The
+application is unaffected because `current_user` is `postgres` (confirmed separately), and table
+owners bypass RLS — which is why the script used `ENABLE` and deliberately not `FORCE`.
+
+**Remaining hardening, non-blocking:** remove `public` from Supabase → Settings → API → Exposed
+schemas. PostgREST is entirely unused by this application, so disabling it removes the attack
+surface altogether — and, unlike per-table RLS, protects any table added later before someone
+remembers to enable RLS on it.
+
+---
+
+## Historical: the state this audit found
 
 Verified by exhaustive search — `grep -rniE "row level security|enable rls|create policy"` across
 `prisma/`, `docs/`, `migration.sql`, `scripts/` and `README.md` returns **zero matches**. There is

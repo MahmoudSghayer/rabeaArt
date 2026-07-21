@@ -46,7 +46,7 @@ revocation is immediate; the owner-floor invariant is transactionally race-safe.
 The one substantive concern is **PM-04** — STAFF, the default role for every new invitee, can set
 final prices and payment status. Recommend raising those two actions to ADMIN.
 
-## 3. RLS assessment — ❌ CRITICAL
+## 3. RLS assessment — ✅ PASS *(closed and verified 2026-07-21)*
 
 Full analysis in `DATABASE-RLS-MATRIX.md`.
 
@@ -59,8 +59,15 @@ holds names, phones, WhatsApp numbers, emails and street addresses.
 Currently masked only because the coming-soon gate suppresses the login bundle. **That protection
 ends the moment you launch.**
 
-Remediation is written and ready: `docs/rls-lockdown.sql`, plus removing `public` from Supabase's
-exposed schemas. Either alone closes it; do both.
+**RESOLVED.** `docs/rls-lockdown.sql` was applied and verified: `pg_class.relrowsecurity` is
+`true` on all 22 tables. No policies exist, so this is deny-all for `anon`/`authenticated`;
+`current_user` is `postgres`, so the application is unaffected.
+
+Verified by reading the flag rather than by an API probe — `customers` and `products` are both
+empty, so an empty `[]` from PostgREST would have been ambiguous.
+
+Still recommended as defence-in-depth: remove `public` from Supabase's exposed schemas, which
+also protects tables created in future before RLS is enabled on them.
 
 ## 4. API security — ⚠️ WARNING (was CRITICAL)
 

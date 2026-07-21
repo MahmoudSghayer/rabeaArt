@@ -4,13 +4,17 @@ Audit date: 2026-07-20 · Commit: `ec8d610` · Auditor: automated full-stack rev
 Evidence convention: every finding cites `file:line` or a reproducible command. Findings marked
 **UNVERIFIED** could not be reached from the codebase and require console access.
 
-**Totals: 5 CRITICAL · 24 WARNING · 19 PASS · 16 fixed**
+**Totals: 5 CRITICAL (2 closed, 3 open) · 24 WARNING · 19 PASS · 17 fixed**
+
+_Update 2026-07-21: **SEC-01 CLOSED AND VERIFIED** — RLS enabled on all 22 tables, confirmed by
+reading `pg_class.relrowsecurity` directly (22/22 true). The three remaining CRITICAL items are
+AVL-01, AVL-02 (backups) and DB-02 (unguarded rollback script)._
 
 _Update 2026-07-21 (session 2): branches reconciled onto `main`; PM-04 (financial actions raised STAFF→ADMIN) and DB-03 (21 missing indexes) fixed. See REMEDIATION-ROADMAP.md._
 
 | ID | Layer | Finding | Status | Severity | Impact | Fix Status | File or Service |
 |----|-------|---------|--------|----------|--------|------------|-----------------|
-| SEC-01 | Security & RLS | RLS disabled on all 22 tables; anon key + Data API may expose all customer PII | CRITICAL | Critical | Full read of names, phones, emails, addresses by anyone with the public anon key | SQL written, **needs manual run** | `docs/rls-lockdown.sql` (new) |
+| SEC-01 | Security & RLS | RLS disabled on all 22 tables; anon key + Data API may expose all customer PII | CRITICAL | Critical | Full read of names, phones, emails, addresses by anyone with the public anon key | ✅ **CLOSED & VERIFIED 2026-07-21** — `pg_class` reports `relrowsecurity = true` on all 22 | `docs/rls-lockdown.sql` |
 | API-01 | API & Backend | Coming-soon gate excluded `/api/**` — public write endpoints live to the internet | CRITICAL | Critical | Anonymous writes into production `orders`/`customers` while site appears closed | **FIXED** | `src/proxy.ts:114` |
 | AVL-01 | Availability | No backup configuration documented or verified anywhere in the repo | CRITICAL | Critical | Total data loss is unrecoverable; no evidence PITR exists | **Manual action** | Supabase dashboard |
 | AVL-02 | Availability | No restore has ever been tested | CRITICAL | Critical | An untested backup is a hypothesis, not a recovery plan | **Manual action** | Supabase dashboard |
