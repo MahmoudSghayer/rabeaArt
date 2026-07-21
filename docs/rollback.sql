@@ -30,6 +30,32 @@
 
 BEGIN;
 
+-- =============================================================================
+-- SAFETY GUARD (audit finding DB-02)
+--
+-- Everything above this line is a comment, and a comment stops nobody. This
+-- script drops 22 tables; the normal way to run SQL on this project is pasting
+-- into the Supabase SQL Editor, where the distance between "the cleanup tab" and
+-- "the production tab" is one click.
+--
+-- So the script now refuses to run unless you explicitly arm it. To proceed,
+-- uncomment the SET line below, or run it yourself first in the same session:
+--
+--     SET LOCAL rabea.i_really_mean_it = 'yes';
+--
+-- Arming it is a deliberate, separate act — which is the whole point.
+-- =============================================================================
+
+-- SET LOCAL rabea.i_really_mean_it = 'yes';
+
+DO $$
+BEGIN
+  IF current_setting('rabea.i_really_mean_it', true) IS DISTINCT FROM 'yes' THEN
+    RAISE EXCEPTION
+      'REFUSING TO RUN: this script drops all 22 Rabea.art tables and deletes every order, customer and product in them. If that is genuinely what you want, arm it with:  SET LOCAL rabea.i_really_mean_it = ''yes'';';
+  END IF;
+END $$;
+
 -- Tables. CASCADE clears the foreign keys between them; order does not matter.
 DROP TABLE IF EXISTS
   "audit_logs",

@@ -1,6 +1,25 @@
 // Rabea.art data model.
 // Connection URLs are NOT declared here (Prisma 7) — see prisma.config.ts (CLI/migrations)
 // and src/lib/prisma.ts (runtime, via a pg driver adapter).
+//
+// ⚠️  NEVER RUN `prisma db push` AGAINST THIS DATABASE.  ⚠️
+//
+// Two objects exist in the database that this file cannot express, because Prisma models
+// neither sequences nor CHECK constraints:
+//
+//   1. SEQUENCE "order_ref_seq"  — order submission calls nextval() on it inside the
+//      transaction (src/lib/orders/submit.ts). Without it, EVERY ORDER FAILS.
+//   2. CHECK "product_variants_stock_non_negative" — the last-resort guard against
+//      negative stock.
+//
+// Both are created in prisma/migrations/0_init/migration.sql. `prisma db push` reconciles the
+// database to THIS file and will happily drop anything it cannot see — producing a database
+// that looks correct, passes every schema diff, and cannot take an order. Prisma will not warn
+// you, because from its point of view nothing is missing.
+//
+// Use `prisma migrate deploy`, or paste the migration SQL directly (which is how this project
+// actually applies schema changes — see docs/SETUP-DATABASE.md). After any restore or rebuild,
+// run docs/verify-restore.sql: checks 2 and 4 exist specifically to catch this.
 
 generator client {
   provider = "prisma-client"
