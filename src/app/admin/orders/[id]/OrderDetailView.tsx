@@ -66,7 +66,14 @@ export interface OrderDetailData {
   history: OrderHistoryEntry[];
 }
 
-export function OrderDetailView({ order }: { order: OrderDetailData }) {
+export function OrderDetailView({
+  order,
+  canEditFinancials,
+}: {
+  order: OrderDetailData;
+  /** False for STAFF: payment status and final price are ADMIN-only (see actions.ts). */
+  canEditFinancials: boolean;
+}) {
   const t = useTranslations("adminOrderDetail");
   const locale = useLocale() as SupportedLocale;
 
@@ -107,6 +114,7 @@ export function OrderDetailView({ order }: { order: OrderDetailData }) {
             pay={order.pay}
             finalPrice={order.finalPrice}
             eta={order.eta}
+            canEditFinancials={canEditFinancials}
           />
         </div>
       </div>

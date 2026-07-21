@@ -136,7 +136,8 @@
     "waDraftTemplate": "שלום {name}, כאן Rabea.art בנוגע להזמנה {ref}. סטטוס נוכחי: {status}.{price}",
     "waDraftPriceLine": " מחיר סופי: {price}.",
     "transitionError": "לא ניתן היה לעדכן את הסטטוס. נסה שוב.",
-    "saveError": "לא ניתן היה לשמור את השינוי. נסה שוב."
+    "saveError": "לא ניתן היה לשמור את השינוי. נסה שוב.",
+    "financialsAdminOnly": "שינוי סטטוס תשלום ומחיר סופי מחייב הרשאת מנהל."
   },
   "adminContactMethod": {
     "internal": "פנימי"

@@ -4,7 +4,9 @@ Audit date: 2026-07-20 · Commit: `ec8d610` · Auditor: automated full-stack rev
 Evidence convention: every finding cites `file:line` or a reproducible command. Findings marked
 **UNVERIFIED** could not be reached from the codebase and require console access.
 
-**Totals: 5 CRITICAL · 24 WARNING · 19 PASS · 14 fixed in this pass**
+**Totals: 5 CRITICAL · 24 WARNING · 19 PASS · 16 fixed**
+
+_Update 2026-07-21 (session 2): branches reconciled onto `main`; PM-04 (financial actions raised STAFF→ADMIN) and DB-03 (21 missing indexes) fixed. See REMEDIATION-ROADMAP.md._
 
 | ID | Layer | Finding | Status | Severity | Impact | Fix Status | File or Service |
 |----|-------|---------|--------|----------|--------|------------|-----------------|
@@ -20,9 +22,9 @@ Evidence convention: every finding cites `file:line` or a reproducible command. 
 | HOST-01 | Hosting | `images.remotePatterns` allowed `*.supabase.co` — every Supabase tenant on earth | WARNING | High | `/_next/image` usable as an open image proxy on your bill | **FIXED** | `next.config.ts:28` |
 | AUTH-01 | Auth | No application-level login brute-force protection | WARNING | High | Only Supabase's project-wide limits stand between an attacker and the admin | Open (roadmap P1) | `src/app/admin/login/LoginForm.tsx:45` |
 | CI-01 | CI/CD | Branch protection / required checks status unknown | WARNING | High | CI may be advisory only; unreviewed code could reach `main` | **UNVERIFIED — manual** | GitHub repo settings |
-| DB-03 | Database | Zero foreign-key indexes across the entire schema | WARNING | Medium | Seq scans on every join; degrades sharply with order volume | Open (roadmap P3) | `prisma/schema.prisma` |
+| DB-03 | Database | Zero foreign-key indexes across the entire schema | WARNING | Medium | Seq scans on every join; degrades sharply with order volume | **FIXED** (migration written, needs manual apply) | `prisma/migrations/20260721000000_add_missing_indexes/` |
 | DB-04 | Storage | `product-images` orphans are never collected by any process | WARNING | Medium | Permanent, unbounded storage leak on every abandoned product form | Open (roadmap P3) | `src/app/api/cron/cleanup-uploads/route.ts:53` |
-| DB-05 | Database | Cleanup cron does one `findFirst` per object against an unindexed `bucketPath` | WARNING | Medium | Cost grows with total files retained, not orphans; compounds with HOST-03 | Open (roadmap P3) | `.../cleanup-uploads/route.ts:68-71` |
+| DB-05 | Database | Cleanup cron does one `findFirst` per object against an unindexed `bucketPath` | WARNING | Medium | Cost grows with total files retained, not orphans; compounds with HOST-03 | **Partially fixed** — `bucketPath` now indexed (DB-03); batching still open | `.../cleanup-uploads/route.ts:68-71` |
 | DB-06 | Database | `order_ref_seq` + stock CHECK exist only in raw migration SQL, not `schema.prisma` | WARNING | Medium | A `prisma db push` silently breaks order submission | Open (roadmap P1) | `prisma/migrations/0_init/migration.sql:465-471` |
 | DB-07 | Database | `DATABASE_URL` not validated as pooled; `PrismaPg` pool `max` unset (defaults to 10) | WARNING | Medium | A port-5432 paste in Vercel exhausts Supabase connections in the low tens of instances | Open (roadmap P4) | `src/lib/env.ts:9`, `src/lib/prisma.ts:22` |
 | DB-08 | Database | `Customer` has no soft-delete and no deletion path; `orders.customerId` is RESTRICT | WARNING | Medium | A data-erasure request currently has no implementation | Open (roadmap P1) | `prisma/schema.prisma` |
@@ -42,6 +44,7 @@ Evidence convention: every finding cites `file:line` or a reproducible command. 
 | API-03 | API & Backend | Upload MIME is taken from the uploader's own PUT header; no content sniffing | WARNING | Low | Arbitrary bytes storable labelled `image/png` | Open (roadmap P2) | `src/lib/storage/validation.ts:38-42` |
 | API-04 | API & Backend | `product-images/sign` has no rate limit and `productId` is not a UUID | WARNING | Low | ADMIN-only, so low severity; asymmetric with the public route | Open (roadmap P2) | `src/app/api/admin/product-images/sign/route.ts:19` |
 | API-05 | API & Backend | Order pricing is N+1: 1–2 queries per cart item | WARNING | Low | A 10-item cart can occupy up to 20 of 10 pool slots | Open (roadmap P3) | `src/lib/orders/submit.ts:346` |
+| PM-04 | Auth & Permissions | STAFF (the default role for new invitees) could set final prices and payment status | WARNING | Medium | Financial mutation available to the least-privileged role | **FIXED** | `src/app/admin/orders/[id]/actions.ts:160,196` |
 | AUTH-02 | Auth | `setAdminLocaleAction` ungated with no runtime validation of its argument | WARNING | Low | Arbitrary string into a cookie via a public POST endpoint | **FIXED** | `src/app/admin/actions.ts:25` |
 | AUTH-03 | Auth | `PREVIEW_KEY` compared with `===` and accepted from a query string | WARNING | Low | Timing-comparable; key lands in access logs and Referer | **FIXED** (constant-time) | `src/proxy.ts:26` |
 | AUTH-04 | Auth | `AdminUser.lastLoginAt` is declared and rendered but never written | WARNING | Low | Admin UI always shows "n/a"; no signal for account compromise | Open (roadmap P2) | `prisma/schema.prisma:80` |

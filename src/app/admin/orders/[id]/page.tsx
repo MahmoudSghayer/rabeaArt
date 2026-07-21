@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { AdminRole } from "@/generated/prisma/enums";
 import { requireAdminPage } from "../../_lib/require";
 import { createTranslator, getAdminLocale, getAdminMessages } from "../../_lib/messages";
 import { pickItemLabel } from "../itemLabel";
@@ -88,7 +89,7 @@ async function loadOrder(id: string, locale: "ar" | "en"): Promise<OrderDetailDa
 }
 
 export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireAdminPage();
+  const admin = await requireAdminPage();
   const { id } = await params;
   const locale = await getAdminLocale();
 
@@ -120,7 +121,10 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
 
   return (
     <div className={pageStyles.page}>
-      <OrderDetailView order={order} />
+      {/* Financial controls (payment status, final price) are ADMIN-only — see actions.ts.
+          The server actions enforce it regardless; this just stops STAFF being shown a control
+          that would only ever fail. */}
+      <OrderDetailView order={order} canEditFinancials={admin.role !== AdminRole.STAFF} />
     </div>
   );
 }

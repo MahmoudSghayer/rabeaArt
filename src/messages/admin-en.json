@@ -136,7 +136,8 @@
     "waDraftTemplate": "Hi {name}, this is Rabea.art regarding order {ref}. Current status: {status}.{price}",
     "waDraftPriceLine": " Final price: {price}.",
     "transitionError": "Couldn't update the status. Please try again.",
-    "saveError": "Couldn't save the change. Please try again."
+    "saveError": "Couldn't save the change. Please try again.",
+    "financialsAdminOnly": "Changing payment status and final price requires an admin role."
   },
   "adminContactMethod": {
     "internal": "Internal"

@@ -154,7 +154,10 @@ export async function updateOrderPayAction(orderId: string, nextPayRaw: PaymentS
   const nextPay = parsed.data;
 
   try {
-    const admin = await requireRole(AdminRole.STAFF);
+    // ADMIN, not STAFF: payment status is a financial fact about the order, and STAFF is the
+    // default role every new invitee lands on (schema.prisma AdminUser.role). Marking an order
+    // paid should require a deliberate role grant, not membership.
+    const admin = await requireRole(AdminRole.ADMIN);
 
     await prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({ where: { id: orderId }, select: { pay: true } });
@@ -188,7 +191,9 @@ export async function updateFinalPriceAction(orderId: string, price: number | nu
   const finalPrice = parsed.data;
 
   try {
-    const admin = await requireRole(AdminRole.STAFF);
+    // ADMIN, not STAFF — see updateOrderPayAction. This sets what the customer is actually
+    // charged; it is the single most consequential number in the admin.
+    const admin = await requireRole(AdminRole.ADMIN);
 
     await prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({ where: { id: orderId }, select: { status: true } });

@@ -22,6 +22,8 @@ export interface ManagePanelProps {
   finalPrice: number | null;
   /** `YYYY-MM-DD` or null. */
   eta: string | null;
+  /** False for STAFF — payment status and final price require ADMIN (see actions.ts). */
+  canEditFinancials: boolean;
 }
 
 /**
@@ -31,7 +33,14 @@ export interface ManagePanelProps {
  * server-confirmed value and the error — including the short-item list from InventoryError —
  * renders under the field.
  */
-export function ManagePanel({ orderId, status, pay, finalPrice, eta }: ManagePanelProps) {
+export function ManagePanel({
+  orderId,
+  status,
+  pay,
+  finalPrice,
+  eta,
+  canEditFinancials,
+}: ManagePanelProps) {
   const t = useTranslations("adminOrderDetail");
   const tCommon = useTranslations("adminCommon");
   const tStatus = useTranslations("orderStatus");
@@ -133,7 +142,7 @@ export function ManagePanel({ orderId, status, pay, finalPrice, eta }: ManagePan
             value={payValue}
             onChange={(e) => changePay(e.target.value as PaymentStatus)}
             className={styles.select}
-            disabled={pending}
+            disabled={pending || !canEditFinancials}
           >
             {PAY_OPTIONS.map((p) => (
               <option key={p} value={p}>
@@ -158,9 +167,15 @@ export function ManagePanel({ orderId, status, pay, finalPrice, eta }: ManagePan
             dir="ltr"
             placeholder={tCommon("na")}
             className={styles.textInput}
-            disabled={pending}
+            disabled={pending || !canEditFinancials}
           />
         </label>
+
+        {/* Without this, a STAFF admin sees two greyed-out fields and no reason why — which
+            reads as a broken page rather than a deliberate permission boundary. */}
+        {!canEditFinancials && (
+          <p className={styles.fieldHint}>{t("financialsAdminOnly")}</p>
+        )}
 
         <label className={styles.field}>
           <span className={styles.fieldLabel}>{t("etaLabel")}</span>

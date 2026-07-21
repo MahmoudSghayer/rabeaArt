@@ -173,6 +173,7 @@ model Product {
   orderItems OrderItem[]
 
   @@index([type, archived])
+  @@index([categoryId])
   @@map("products")
 }
 
@@ -187,6 +188,9 @@ model ProductImage {
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  @@index([productId])
+  // Product-image orphan cleanup matches stored objects against this column.
+  @@index([path])
   @@map("product_images")
 }
 
@@ -332,8 +336,17 @@ model Order {
   history        OrderStatusHistory[]
   communications CommunicationLog[]
 
+  // Postgres does not auto-index foreign keys, and Prisma only creates what it is told — so
+  // every FK in this schema was unindexed until now. customerId drives the customers list and
+  // the customers CSV export (both group orders by customer).
+  @@index([customerId])
   @@index([status])
   @@index([createdAt])
+  // Almost every admin figure filters `archived: false` AND ranges on createdAt/status. The
+  // single-column indexes above stay: they still serve the unfiltered NEW-order sidebar count
+  // and plain createdAt sorts, which cannot use a composite led by `archived`.
+  @@index([archived, createdAt])
+  @@index([archived, status])
   @@map("orders")
 }
 
@@ -360,6 +373,10 @@ model OrderItem {
   variant ProductVariant? @relation(fields: [variantId], references: [id])
   files   OrderFile[]
 
+  @@index([orderId])
+  // `items: { some: { kind: { in: [...] } } }` on the overview and reports pages compiles to a
+  // correlated subquery over this table.
+  @@index([kind])
   @@map("order_items")
 }
 
@@ -376,6 +393,14 @@ model OrderFile {
   order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
 
+  @@index([orderId])
+  @@index([orderItemId])
+  // The nightly orphan-cleanup cron looks up one bucketPath per storage object it scans
+  // (api/cron/cleanup-uploads). Unindexed, that was a sequential scan per object, repeated for
+  // every retained file on every run — cost growing with total files kept, not with orphans.
+  @@index([bucketPath])
+  // Admin files grid sorts by newest with skip/take.
+  @@index([createdAt])
   @@map("order_files")
 }
 
@@ -390,6 +415,8 @@ model OrderStatusHistory {
   order   Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
   byAdmin AdminUser? @relation(fields: [byAdminId], references: [id])
 
+  @@index([orderId])
+  @@index([byAdminId])
   @@map("order_status_history")
 }
 
@@ -404,6 +431,8 @@ model CommunicationLog {
   order   Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   byAdmin AdminUser @relation(fields: [byAdminId], references: [id])
 
+  @@index([orderId])
+  @@index([byAdminId])
   @@map("communication_logs")
 }
 
@@ -418,6 +447,9 @@ model AuditLog {
 
   actor AdminUser @relation(fields: [actorId], references: [id])
 
+  @@index([actorId])
+  // Audit review is always "what happened recently", newest first.
+  @@index([at])
   @@map("audit_logs")
 }
 
@@ -431,6 +463,11 @@ model EmailLog {
   error             String?
   at                DateTime @default(now())
 
+  // This table had no index at all and grows one row per outbound email forever. Reports
+  // groupBy(status) over an `at` range, and lists the most recent failures.
+  @@index([at])
+  @@index([status, at])
+  @@index([orderId])
   @@map("email_logs")
 }
 

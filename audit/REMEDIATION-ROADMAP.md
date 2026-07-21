@@ -93,10 +93,16 @@ Each item lists: Priority · Finding ID · Action · Expected impact · Dependen
 - **Verification:** Sign in and confirm the TOTP challenge.
 
 ### 1.4 🔧 Raise financial mutations to ADMIN
-- **Priority:** P1 · **Finding:** PM-04 · **Complexity:** Small
-- `updateFinalPriceAction` and `updateOrderPayAction` are currently `requireRole(STAFF)` — and
-  STAFF is the default role for every new invitee.
-- **Verification:** Unit test asserting a STAFF caller receives `FORBIDDEN`.
+- **Priority:** P1 · **Finding:** PM-04 · **Complexity:** Small · **DONE**
+- Both raised to `requireRole(ADMIN)` (`orders/[id]/actions.ts:160,196`). The order-detail page
+  now passes `canEditFinancials` through `OrderDetailView` to `ManagePanel`, which disables both
+  controls for STAFF and renders a short explanation — otherwise a STAFF admin sees two
+  greyed-out fields with no reason why, which reads as a broken page rather than a deliberate
+  permission boundary.
+- Operational actions (status, ETA, archive, internal notes, WhatsApp log) deliberately remain
+  STAFF — that is the day-to-day job.
+- **Verified:** typecheck + lint clean, 348 tests pass, production build succeeds. Server-side
+  enforcement is unconditional in `requireRole` and independent of the UI gating.
 
 ### 1.5 ✅ Constrain `bucketPath` to its canonical shape
 - **Finding:** API-02 · **Complexity:** Small · **DONE**
@@ -176,14 +182,22 @@ Each item lists: Priority · Finding ID · Action · Expected impact · Dependen
 ## Phase 3 — Performance
 
 ### 3.1 🔧 Foreign-key indexes
-- **Priority:** P1 (cheap now, expensive later) · **Finding:** DB-03 · **Complexity:** Small
-- **Action:** One migration adding indexes on `orders(customerId)`, `order_items(orderId)`,
-  `order_files(orderId)`, `order_files(bucketPath)`, `order_status_history(orderId)`,
-  `communication_logs(orderId)`, `audit_logs(actorId)`, `products(categoryId)`,
-  `product_images(productId)`, plus composites `orders(archived, createdAt)`,
-  `orders(archived, status)` and `email_logs(status, at)`.
-- **Impact:** Removes sequential scans from every admin join and from the nightly cron.
-- **Verification:** `EXPLAIN ANALYZE` the customers-list and reports queries before and after.
+- **Priority:** P1 · **Finding:** DB-03 · **Complexity:** Small · **CODE DONE — needs manual apply**
+- `prisma/migrations/20260721000000_add_missing_indexes/migration.sql` adds **21 indexes**, with
+  `schema.prisma` updated to match. Every one is tied to a query that exists in the codebase
+  today; none is speculative.
+- **No drift:** the index set generated from `schema.prisma` is identical to the union of both
+  migrations — 39 names, exact match, verified with `prisma migrate diff --from-empty`.
+- Written with `IF NOT EXISTS` and wrapped in a transaction, so it is idempotent and safe to
+  paste into the Supabase SQL Editor — which is how schema changes actually reach this database
+  (`docs/SETUP-DATABASE.md`). Index names follow Prisma's convention so a future `migrate diff`
+  sees schema and database as consistent.
+- **Impact:** removes sequential scans from every admin join. The highest-value single entry is
+  `order_files(bucketPath)`: the nightly cron did one unindexed lookup per stored object, so its
+  cost grew with the number of files *kept*, not the number of orphans deleted.
+- ⚠️ **ACTION REQUIRED:** paste that file into Supabase and run it, then run the verification
+  query at the bottom of the file (expect 21 rows). Locking note is in the file header — plain
+  `CREATE INDEX` is fine at current table sizes; switch to `CONCURRENTLY` if these ever grow large.
 
 ### 3.2 🔧 Cache the catalog
 - **Priority:** P2 · **Findings:** CACHE-01, CACHE-02 · **Complexity:** Medium

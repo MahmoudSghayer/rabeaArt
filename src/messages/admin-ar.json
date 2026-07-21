@@ -136,7 +136,8 @@
     "waDraftTemplate": "مرحبًا {name}، معك ربيع.آرت بخصوص الطلب {ref}. الحالة الحالية: {status}.{price}",
     "waDraftPriceLine": " السعر النهائي: {price}.",
     "transitionError": "تعذّر تحديث الحالة. يرجى المحاولة مرة أخرى.",
-    "saveError": "تعذّر حفظ التغيير. يرجى المحاولة مرة أخرى."
+    "saveError": "تعذّر حفظ التغيير. يرجى المحاولة مرة أخرى.",
+    "financialsAdminOnly": "تعديل حالة الدفع والسعر النهائي يتطلب صلاحية مدير."
   },
   "adminContactMethod": {
     "internal": "داخلي"
