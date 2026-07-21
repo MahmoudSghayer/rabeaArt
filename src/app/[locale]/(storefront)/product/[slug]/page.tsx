@@ -10,6 +10,7 @@ import { grainedArt } from "@/components/storefront/art";
 import { canvasSurface } from "@/components/storefront/texture";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { Ornament, TexturedSection } from "@/components/decor";
+import { ProductJsonLd } from "@/components/storefront/ProductJsonLd";
 import { ProductView } from "./ProductView";
 import styles from "./page.module.css";
 
@@ -101,8 +102,21 @@ export default async function ProductPage({ params }: PageProps) {
   const catHref = { pathname: "/shop", query: { cat: isPaint ? "paintings" : "shirts" } };
   const name = pickText(product.name, locale === "en" ? "en" : "ar");
 
+  // localePrefix is "as-needed": Arabic (the default) carries no prefix, English lives at /en.
+  // schema.org requires an absolute URL, and it must match the one actually served.
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://rabea.art").replace(/\/$/, "");
+  const localePath = locale === "en" ? "/en" : "";
+  const productUrl = `${siteUrl}${localePath}/product/${product.slug}`;
+  const jsonLdLocale = locale === "en" ? "en" : "ar";
+
   return (
     <div className={styles.page}>
+      <ProductJsonLd
+        product={product}
+        locale={jsonLdLocale}
+        url={productUrl}
+        siteName="Rabea.art"
+      />
       <div className={styles.inner}>
         <nav className={styles.crumbs} aria-label={t("breadcrumbLabel")}>
           <Link href="/shop" className={styles.crumbLink}>
