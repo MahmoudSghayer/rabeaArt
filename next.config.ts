@@ -20,12 +20,33 @@ const SECURITY_HEADERS = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
 ];
 
+/**
+ * Pin the image optimizer to THIS Supabase project only.
+ *
+ * A wildcard (`*.supabase.co`) would accept any Supabase tenant on the internet, which turns
+ * /_next/image into an open image proxy: anyone can push arbitrary third-party images through
+ * our optimizer, on our bill and into our cache. Derived from NEXT_PUBLIC_SUPABASE_URL so it
+ * follows the project automatically; falls back to the wildcard only when that var is absent
+ * (CI builds run without real env — see .github/workflows/ci.yml).
+ */
+function supabaseImageHostname(): string {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!raw) return "*.supabase.co";
+  try {
+    return new URL(raw).hostname;
+  } catch {
+    return "*.supabase.co";
+  }
+}
+
 const nextConfig: NextConfig = {
+  // Don't advertise the framework/version; it's free reconnaissance for an attacker.
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.supabase.co",
+        hostname: supabaseImageHostname(),
         pathname: "/storage/v1/object/public/**",
       },
     ],

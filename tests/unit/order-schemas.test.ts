@@ -37,7 +37,7 @@ const customShirtItem = {
   qty: 1,
   notes: "Logo on sleeve please",
   files: [
-    { bucketPath: "order-uploads/draft-123/abc.jpg", originalName: "logo.jpg", mimeType: "image/jpeg", size: 1024 },
+    { bucketPath: "order-uploads/3fa85f64-5717-4562-b3fc-2c963f66afa6/f47ac10b-58cc-4372-a567-0e02b2c3d479.jpg", originalName: "logo.jpg", mimeType: "image/jpeg", size: 1024 },
   ],
 };
 
@@ -168,7 +168,7 @@ describe("orderItemSchema — file validation", () => {
       ...customShirtItem,
       files: [
         {
-          bucketPath: "order-uploads/draft-123/abc.jpg",
+          bucketPath: "order-uploads/3fa85f64-5717-4562-b3fc-2c963f66afa6/f47ac10b-58cc-4372-a567-0e02b2c3d479.jpg",
           originalName: "logo.jpg",
           mimeType: "image/jpeg",
           size: MAX_UPLOAD_BYTES + 1,
@@ -183,7 +183,7 @@ describe("orderItemSchema — file validation", () => {
       ...customShirtItem,
       files: [
         {
-          bucketPath: "order-uploads/draft-123/abc.jpg",
+          bucketPath: "order-uploads/3fa85f64-5717-4562-b3fc-2c963f66afa6/f47ac10b-58cc-4372-a567-0e02b2c3d479.jpg",
           originalName: "logo.jpg",
           mimeType: "image/jpeg",
           size: MAX_UPLOAD_BYTES,
@@ -193,14 +193,53 @@ describe("orderItemSchema — file validation", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects a bucketPath that doesn't start with 'order-uploads/'", () => {
-    const result = orderItemSchema.safeParse({
-      ...customShirtItem,
-      files: [
-        { bucketPath: "some-other-bucket/abc.jpg", originalName: "logo.jpg", mimeType: "image/jpeg", size: 1024 },
-      ],
+  /**
+   * bucketPath is client-supplied and is written straight into OrderFile, so it must match the
+   * exact shape randomObjectKey produces. A looser `startsWith("order-uploads/")` let a caller
+   * attach any path they liked to their own order — including one that would then be treated as
+   * "claimed" and skipped forever by the orphan-cleanup cron.
+   */
+  describe("bucketPath shape", () => {
+    const DRAFT = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+    const OBJ = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+
+    function parseWithPath(bucketPath: string) {
+      return orderItemSchema.safeParse({
+        ...customShirtItem,
+        files: [{ bucketPath, originalName: "logo.jpg", mimeType: "image/jpeg", size: 1024 }],
+      });
+    }
+
+    it("accepts the canonical order-uploads/{draftId}/{uuid}.{ext} form", () => {
+      expect(parseWithPath(`order-uploads/${DRAFT}/${OBJ}.jpg`).success).toBe(true);
     });
-    expect(result.success).toBe(false);
+
+    it("rejects a different bucket", () => {
+      expect(parseWithPath("some-other-bucket/abc.jpg").success).toBe(false);
+    });
+
+    it("rejects non-UUID path segments", () => {
+      expect(parseWithPath("order-uploads/draft-123/abc.jpg").success).toBe(false);
+      expect(parseWithPath(`order-uploads/${DRAFT}/abc.jpg`).success).toBe(false);
+    });
+
+    it("rejects traversal attempts", () => {
+      expect(parseWithPath("order-uploads/../../etc/passwd").success).toBe(false);
+      expect(parseWithPath(`order-uploads/${DRAFT}/../${OBJ}.jpg`).success).toBe(false);
+    });
+
+    it("rejects extra path depth beyond draft/object", () => {
+      expect(parseWithPath(`order-uploads/${DRAFT}/${OBJ}/${OBJ}.jpg`).success).toBe(false);
+    });
+
+    it("rejects a missing or oversized extension", () => {
+      expect(parseWithPath(`order-uploads/${DRAFT}/${OBJ}`).success).toBe(false);
+      expect(parseWithPath(`order-uploads/${DRAFT}/${OBJ}.${"a".repeat(11)}`).success).toBe(false);
+    });
+
+    it("rejects a query/fragment smuggled onto the end", () => {
+      expect(parseWithPath(`order-uploads/${DRAFT}/${OBJ}.jpg?x=1`).success).toBe(false);
+    });
   });
 
   it("rejects a disallowed mime type", () => {
@@ -208,7 +247,7 @@ describe("orderItemSchema — file validation", () => {
       ...customShirtItem,
       files: [
         {
-          bucketPath: "order-uploads/draft-123/abc.svg",
+          bucketPath: "order-uploads/3fa85f64-5717-4562-b3fc-2c963f66afa6/f47ac10b-58cc-4372-a567-0e02b2c3d479.svg",
           originalName: "logo.svg",
           mimeType: "image/svg+xml",
           size: 1024,
@@ -273,7 +312,7 @@ describe("getCartSnapshotForSubmit", () => {
       notes: "Logo on sleeve",
       files: [
         {
-          bucketPath: "order-uploads/draft-123/abc.jpg",
+          bucketPath: "order-uploads/3fa85f64-5717-4562-b3fc-2c963f66afa6/f47ac10b-58cc-4372-a567-0e02b2c3d479.jpg",
           originalName: "logo.jpg",
           mimeType: "image/jpeg",
           size: 1024,
@@ -340,7 +379,7 @@ describe("getCartSnapshotForSubmit", () => {
   it("strips previewDataUrl from custom item files", () => {
     const customShirtSnapshot = snapshot[2] as { files: Array<Record<string, unknown>> };
     expect(customShirtSnapshot.files).toEqual([
-      { bucketPath: "order-uploads/draft-123/abc.jpg", originalName: "logo.jpg", mimeType: "image/jpeg", size: 1024 },
+      { bucketPath: "order-uploads/3fa85f64-5717-4562-b3fc-2c963f66afa6/f47ac10b-58cc-4372-a567-0e02b2c3d479.jpg", originalName: "logo.jpg", mimeType: "image/jpeg", size: 1024 },
     ]);
     expect(customShirtSnapshot.files[0]).not.toHaveProperty("previewDataUrl");
   });

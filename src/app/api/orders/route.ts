@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { clientIp } from "@/lib/client-ip";
+import { log, requestIdFrom } from "@/lib/log";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { orderPayloadSchema } from "@/lib/orders/schemas";
 import { SubmitError, submitOrder } from "@/lib/orders/submit";
@@ -9,20 +11,10 @@ import { prisma } from "@/lib/prisma";
 /** Talks to Prisma (order transaction, rate-limit bucket) — must not run on the Edge runtime. */
 export const runtime = "nodejs";
 
-/** Best-effort client IP for rate-limit keying; falls back to a shared bucket if unavailable
- * (fails toward "rate limited together" rather than "unlimited"). Mirrors /api/uploads/sign. */
-function clientIp(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return "unknown";
-}
-
 export async function POST(request: NextRequest) {
+  const requestId = requestIdFrom(request.headers);
   try {
-    const ip = clientIp(request);
+    const ip = clientIp(request.headers);
     const rateLimit = await checkRateLimit({ key: `order-submit:${ip}`, limit: 5, windowSeconds: 600 });
     if (!rateLimit.allowed) {
       return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429 });
@@ -69,7 +61,14 @@ export async function POST(request: NextRequest) {
           },
         });
       } catch (emailErr) {
-        console.error("order-received email dispatch failed", emailErr);
+        // The order IS stored — only the customer's confirmation is missing. Nobody finds out
+        // unless this is alertable, so it carries the order ref for manual follow-up.
+        log.error("order confirmation email failed — customer was not notified", {
+          event: "order.email.failed",
+          requestId,
+          orderRef: result.ref,
+          error: emailErr,
+        });
       }
     })();
 
@@ -78,7 +77,11 @@ export async function POST(request: NextRequest) {
     if (err instanceof SubmitError) {
       return NextResponse.json({ code: err.code }, { status: 422 });
     }
-    console.error("POST /api/orders failed", err);
+    log.error("order submission failed", {
+      event: "order.submit.failed",
+      requestId,
+      error: err,
+    });
     return NextResponse.json({ error: "INTERNAL" }, { status: 500 });
   }
 }

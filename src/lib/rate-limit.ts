@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { log } from "@/lib/log";
 
 /**
  * Postgres-backed fixed-window rate limiter, keyed off the `RateLimitBucket` model (see
@@ -36,7 +37,15 @@ export async function checkRateLimit(opts: {
     });
     return { allowed: updated.count <= limit, remaining: Math.max(0, limit - updated.count) };
   } catch (err) {
-    console.error("checkRateLimit: DB check failed, failing open", err);
+    // Fail-open is the right availability trade-off, but it means the limiter silently switches
+    // itself off exactly when the DB is already struggling. Alert on this event — it is the
+    // difference between "we chose to degrade" and "we were unprotected and never knew".
+    log.error("rate limiter failed open — requests are currently unlimited", {
+      event: "ratelimit.fail_open",
+      key,
+      limit,
+      error: err,
+    });
     return { allowed: true, remaining: limit };
   }
 }

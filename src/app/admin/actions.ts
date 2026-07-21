@@ -2,8 +2,16 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { SupportedLocale } from "@/i18n/routing";
+import { routing, type SupportedLocale } from "@/i18n/routing";
+
+/**
+ * Server Actions are POST endpoints, so anyone can invoke this one with any argument — the
+ * `SupportedLocale` type is erased at runtime and guarantees nothing. Validate against the
+ * actual routing config so only a known locale can ever reach the cookie.
+ */
+const localeSchema = z.enum(routing.locales as unknown as [string, ...string[]]);
 
 /**
  * Signs the current admin out. Not gated by `requireRole` — logging out isn't a privileged
@@ -23,10 +31,18 @@ export async function logoutAction(): Promise<void> {
  * explicit `revalidatePath`/`redirect` is needed here.
  */
 export async function setAdminLocaleAction(locale: SupportedLocale): Promise<void> {
+  const parsed = localeSchema.safeParse(locale);
+  if (!parsed.success) return;
+
   const cookieStore = await cookies();
-  cookieStore.set("rabea_locale", locale, {
+  cookieStore.set("rabea_locale", parsed.data, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
+    // Deliberately NOT httpOnly: the storefront language switcher writes this same cookie from
+    // client JS (SiteHeader.tsx), and browsers refuse to let document.cookie overwrite an
+    // httpOnly cookie — setting it here would silently break that switcher. The value is a
+    // display preference constrained to "ar"|"en" above, so it carries nothing worth hiding.
+    secure: process.env.NODE_ENV === "production",
   });
 }

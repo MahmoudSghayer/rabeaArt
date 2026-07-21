@@ -1,0 +1,31 @@
+version: 2
+updates:
+  # npm dependencies. Grouped so a week's patch bumps arrive as one reviewable PR rather than
+  # a dozen, which is what makes a small team actually merge them.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      production-patches:
+        dependency-type: production
+        update-types: ["patch", "minor"]
+      dev-dependencies:
+        dependency-type: development
+        update-types: ["patch", "minor"]
+    ignore:
+      # Next.js majors change routing/runtime semantics (this project is already on the 16 line
+      # with a renamed proxy.ts); those land deliberately, not automatically.
+      - dependency-name: next
+        update-types: ["version-update:semver-major"]
+      - dependency-name: react
+        update-types: ["version-update:semver-major"]
+      - dependency-name: react-dom
+        update-types: ["version-update:semver-major"]
+
+  # Keep the CI actions themselves current — they are pinned to mutable @v4 tags today.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
