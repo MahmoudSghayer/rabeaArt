@@ -2,43 +2,82 @@
   font-family: var(--font-body);
   color: var(--color-ink);
   min-height: 70vh;
+  /* The confirmation hero's glow is parked outside its box. */
+  overflow: clip;
 }
 
 .inner {
   max-width: 1120px;
   margin-inline: auto;
-  padding: clamp(26px, 4vw, 48px) clamp(16px, 4vw, 40px) clamp(56px, 7vw, 84px);
+  padding: clamp(var(--space-7), 4vw, var(--space-12)) clamp(var(--space-4), 4vw, var(--space-10))
+    clamp(var(--space-16), 7vw, var(--space-24));
 }
 
 .pageTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(26px, 3.4vw, 38px);
-  margin: 0 0 4px;
+  font-size: var(--text-3xl);
+  margin: 0 0 var(--space-1);
 }
 
 .navSpacer {
   flex: 1;
 }
 
-/* ------------------------------------------------------------------ crumbs */
+/* ------------------------------------------------------------------ progress ribbon */
+
+/*
+  Three crumbs joined by 1.5px hairlines said "breadcrumbs". This says "a seam being sewn": a
+  running stitch in sienna behind the steps already completed, in pale ink ahead of them. Same
+  ribbon as the custom wizard's step bar — one vocabulary across both flows.
+*/
 .crumbs {
+  position: relative;
+  max-width: 620px;
+  margin-inline: auto;
+  margin-block-end: clamp(var(--space-7), 4vw, var(--space-10));
+}
+
+.crumbTrack,
+.crumbFill {
+  position: absolute;
+  inset-block-start: 15px;
+  inset-inline-start: 0;
+  block-size: 8px;
+  margin-block-start: -4px;
+  background-repeat: repeat-x;
+  background-position: center;
+  pointer-events: none;
+}
+
+.crumbTrack {
+  inline-size: 100%;
+  background-image: var(--texture-stitch);
+  opacity: 0.38;
+}
+
+/* inline-size is set by the component — the fill is the progress value. */
+.crumbFill {
+  background-image: var(--texture-stitch-sienna);
+  transition: inline-size var(--duration-lg) var(--ease-out-expo);
+}
+
+.crumbRow {
+  position: relative;
+  z-index: var(--z-base);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: clamp(26px, 4vw, 40px);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
 .crumbStep {
   display: flex;
+  flex-direction: column;
   align-items: center;
-}
-
-.crumbCell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
+  text-align: center;
+  min-width: 0;
 }
 
 .crumbNum {
@@ -47,29 +86,38 @@
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 700;
-  background: transparent;
-  color: #8a8070;
+  /* Opaque, so the thread reads as running BEHIND the nodes rather than through them. */
+  background: var(--color-card);
+  color: var(--color-ink-soft);
   border: 1.5px solid rgba(35, 32, 27, 0.25);
+  box-shadow: var(--shadow-1);
+  transition:
+    background var(--duration-md) var(--ease-standard),
+    color var(--duration-md) var(--ease-standard),
+    transform var(--duration-md) var(--ease-spring);
 }
 
 .crumbNumCurrent {
   background: var(--color-ink);
   color: var(--color-paper);
   border-color: var(--color-ink);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-3);
 }
 
 .crumbNumDone {
   background: var(--status-accepted-bg);
   color: var(--status-accepted-fg);
-  border-color: var(--status-accepted-bg);
+  border-color: rgba(63, 112, 72, 0.35);
 }
 
 .crumbLabel {
-  font-size: 13px;
+  font-size: var(--text-xs);
   font-weight: 500;
-  color: #8a8070;
+  color: var(--color-ink-soft);
+  line-height: 1.5;
 }
 
 .crumbLabelCurrent {
@@ -77,20 +125,15 @@
   color: var(--color-ink);
 }
 
-.crumbLine {
-  width: clamp(20px, 5vw, 58px);
-  height: 1.5px;
-  background: rgba(35, 32, 27, 0.2);
-  margin: 0 10px;
-}
-
 /* ------------------------------------------------------------------ empty */
 .emptyBox {
   text-align: center;
-  padding: clamp(48px, 8vw, 90px) 20px;
+  padding: clamp(var(--space-12), 8vw, var(--space-24)) var(--space-5);
   border: 1.5px dashed rgba(35, 32, 27, 0.22);
-  border-radius: 24px;
-  background: rgba(251, 247, 238, 0.6);
+  border-radius: var(--radius-panel);
+  background-color: rgba(251, 247, 238, 0.6);
+  background-image: var(--texture-grain);
+  box-shadow: var(--shadow-1);
 }
 
 .emptyIcon {
@@ -101,20 +144,21 @@
 .emptyTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 28px;
-  margin: 16px 0 6px;
+  font-size: var(--text-2xl);
+  margin: var(--space-4) 0 var(--space-2);
 }
 
 .emptySub {
-  font-size: 14px;
+  font-size: var(--text-base);
   color: #57503f;
-  margin: 0 0 24px;
+  margin: 0 auto var(--space-6);
   line-height: 1.9;
+  max-width: 46ch;
 }
 
 .emptyCtas {
   display: flex;
-  gap: 11px;
+  gap: var(--space-3);
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -123,8 +167,8 @@
   background: var(--color-ink);
   color: var(--color-paper);
   border-radius: var(--radius-pill);
-  padding: 12px 24px;
-  font-size: 14px;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
   font-weight: 600;
 }
 
@@ -135,10 +179,10 @@
 
 .ctaDashed {
   border: 1.5px solid rgba(183, 71, 42, 0.5);
-  color: var(--color-sienna);
+  color: var(--color-sienna-deep);
   border-radius: var(--radius-pill);
-  padding: 11px 22px;
-  font-size: 14px;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
   font-weight: 600;
   background: rgba(183, 71, 42, 0.05);
 }
@@ -150,8 +194,8 @@
 .ctaDashedNeutral {
   border: 1.5px solid rgba(35, 32, 27, 0.25);
   border-radius: var(--radius-pill);
-  padding: 12px 22px;
-  font-size: 14px;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
   font-weight: 600;
   background: rgba(251, 247, 238, 0.6);
   color: var(--color-ink);
@@ -159,14 +203,28 @@
 
 .ctaDashedNeutral:hover {
   border-color: var(--color-sienna);
-  color: var(--color-sienna);
+  color: var(--color-sienna-deep);
+}
+
+.ctaInk:focus-visible,
+.ctaDashed:focus-visible,
+.ctaDashedNeutral:focus-visible,
+.waBtn:focus-visible,
+.keepShoppingLink:focus-visible,
+.removeLink:focus-visible,
+.itemQtyBtn:focus-visible,
+.copyBtn:focus-visible,
+.consentBtn:focus-visible,
+.input:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 2px;
 }
 
 /* ------------------------------------------------------------------ review */
 .reviewGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: var(--space-6);
   align-items: start;
 }
 
@@ -179,28 +237,36 @@
 .itemsCol {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-4);
   min-width: 0;
 }
 
 .itemCard {
-  background: var(--color-card);
-  border: 1px solid rgba(35, 32, 27, 0.15);
-  border-radius: 18px;
-  padding: 14px;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
   display: flex;
-  gap: 14px;
+  gap: var(--space-4);
   align-items: flex-start;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--duration-md) var(--ease-standard);
+}
+
+.itemCard:hover {
+  box-shadow: var(--shadow-3);
 }
 
 .itemThumb {
   flex: none;
   width: 78px;
   height: 92px;
-  border-radius: 11px;
+  border-radius: var(--radius-input);
   background-size: cover;
   background-position: center;
   border: 1px solid rgba(35, 32, 27, 0.12);
+  box-shadow: var(--shadow-inset-press);
 }
 
 .itemBody {
@@ -210,14 +276,14 @@
 
 .itemNameRow {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: baseline;
   flex-wrap: wrap;
 }
 
 .itemName {
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--text-md);
 }
 
 .manualChip {
@@ -231,30 +297,30 @@
 }
 
 .itemOpts {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   color: #57503f;
-  margin-top: 5px;
+  margin-block-start: var(--space-1);
   line-height: 1.8;
 }
 
 .itemNotes {
-  font-size: 12px;
-  color: #8a8070;
-  margin-top: 5px;
+  font-size: var(--text-xs);
+  color: var(--color-ink-soft);
+  margin-block-start: var(--space-1);
   font-style: italic;
 }
 
 .itemFiles {
   display: flex;
-  gap: 6px;
-  margin-top: 8px;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
   flex-wrap: wrap;
 }
 
 .itemFileThumb {
   width: 34px;
   height: 34px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(35, 32, 27, 0.18);
   background-color: var(--color-paper-deep);
   background-size: cover;
@@ -264,8 +330,8 @@
 .itemActions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 11px;
+  gap: var(--space-3);
+  margin-block-start: var(--space-3);
   flex-wrap: wrap;
 }
 
@@ -273,33 +339,39 @@
   display: inline-flex;
   align-items: center;
   border: 1px solid rgba(35, 32, 27, 0.2);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .itemQtyBtn {
   border: none;
-  background: #f3ecdc;
+  background: var(--color-paper-deep);
   width: 30px;
   height: 30px;
-  font-size: 15px;
+  font-size: var(--text-md);
   cursor: pointer;
   color: #57503f;
   font-family: inherit;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.itemQtyBtn:hover {
+  background: var(--color-paper);
+  color: var(--color-sienna-deep);
 }
 
 .itemQtyVal {
   min-width: 34px;
   text-align: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--text-sm);
 }
 
 .removeLink {
   border: none;
   background: none;
   color: var(--color-sienna-deep);
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -310,42 +382,44 @@
 
 .itemPrice {
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--text-md);
   color: var(--color-ink);
 }
 
 .itemPriceMuted {
-  color: #8a8070;
+  color: var(--color-ink-soft);
 }
 
 .keepShoppingLink {
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: #8a8070;
-  margin-top: 4px;
+  color: var(--color-ink-soft);
+  margin-block-start: var(--space-1);
 }
 
 .aside {
-  background: var(--color-card);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   border: 1px solid rgba(35, 32, 27, 0.16);
-  border-radius: 20px;
-  padding: 22px;
+  border-radius: var(--radius-panel);
+  padding: var(--space-6);
   position: sticky;
   top: 120px;
+  box-shadow: var(--shadow-3);
 }
 
 .asideTitle {
   font-weight: 700;
-  font-size: 16px;
-  margin-bottom: 16px;
+  font-size: var(--text-md);
+  margin-block-end: var(--space-4);
 }
 
 .summaryRow {
   display: flex;
   justify-content: space-between;
-  font-size: 13.5px;
+  font-size: var(--text-base);
   color: #57503f;
-  padding: 7px 0;
+  padding: var(--space-2) 0;
 }
 
 .summaryRowTotal {
@@ -359,33 +433,34 @@
 
 .summaryTotal {
   font-weight: 700;
-  font-size: 17px;
-  color: var(--color-sienna);
+  font-size: var(--text-lg);
+  /* sienna-deep: this is text, and plain sienna sits under AA on textured surfaces. */
+  color: var(--color-sienna-deep);
 }
 
 .manualNote {
-  font-size: 12px;
+  font-size: var(--text-xs);
   background: var(--status-review-bg);
   color: #6d5316;
-  border-radius: 11px;
-  padding: 9px 13px;
+  border-radius: var(--radius-input);
+  padding: var(--space-2) var(--space-3);
   line-height: 1.8;
-  margin-top: 8px;
+  margin-block-start: var(--space-2);
 }
 
 .payNote {
   display: flex;
-  gap: 9px;
+  gap: var(--space-2);
   align-items: flex-start;
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--color-ink-soft);
   line-height: 1.8;
-  margin: 14px 0 18px;
+  margin: var(--space-4) 0 var(--space-5);
 }
 
 .payNote svg {
   flex: none;
-  margin-top: 3px;
+  margin-block-start: 3px;
 }
 
 /* ------------------------------------------------------------------ form */
@@ -395,23 +470,25 @@
 }
 
 .formSub {
-  font-size: 13.5px;
+  font-size: var(--text-base);
   color: #57503f;
-  margin: 0 0 26px;
+  margin: 0 0 var(--space-7);
   line-height: 1.9;
 }
 
 .formCard {
-  background: var(--color-card);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   border: 1px solid rgba(35, 32, 27, 0.16);
-  border-radius: 22px;
-  padding: clamp(18px, 3vw, 30px);
+  border-radius: var(--radius-panel);
+  padding: clamp(var(--space-5), 3vw, var(--space-8));
+  box-shadow: var(--shadow-3);
 }
 
 .fieldsGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 15px 16px;
+  gap: var(--space-4);
 }
 
 @media (min-width: 640px) {
@@ -427,28 +504,36 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: var(--space-2);
 }
 
 .fieldLabel {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   font-weight: 700;
   color: #3b372f;
 }
 
 .reqMark {
-  color: var(--color-sienna);
+  color: var(--color-sienna-deep);
 }
 
+/*
+  paper, not #fff. The storefront has no pure-white surface anywhere else, and a white field on
+  a cream card reads as a hole punched through the paper.
+*/
 .input {
   border: 1.5px solid rgba(35, 32, 27, 0.2);
   border-radius: var(--radius-input);
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
   font-family: inherit;
-  font-size: 14px;
-  background: #fff;
-  outline-color: var(--color-sienna);
+  font-size: var(--text-base);
+  background: var(--color-paper);
   color: var(--color-ink);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.input:hover {
+  border-color: rgba(35, 32, 27, 0.34);
 }
 
 .inputLtr {
@@ -467,42 +552,55 @@
 }
 
 .contactBlock {
-  margin-top: 18px;
+  margin-block-start: var(--space-5);
 }
 
 .contactBlock .fieldLabel {
   display: block;
-  margin-bottom: 9px;
+  margin-block-end: var(--space-2);
 }
 
 .contactRow {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .notesBlock {
-  margin-top: 18px;
+  margin-block-start: var(--space-5);
 }
 
 .textarea {
   resize: vertical;
   line-height: 1.9;
-  font-size: 13.5px;
+  font-size: var(--text-base);
 }
 
 .consents {
-  margin-top: 20px;
+  margin-block-start: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 11px;
-  border-top: 1px dashed rgba(35, 32, 27, 0.18);
-  padding-top: 18px;
+  gap: var(--space-3);
+  padding-block-start: var(--space-5);
+  position: relative;
+}
+
+/* A stitched seam separating the consents from the fields above them. */
+.consents::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 8px;
+  background-image: var(--texture-stitch);
+  background-repeat: repeat-x;
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .consentBtn {
   display: flex;
-  gap: 11px;
+  gap: var(--space-3);
   align-items: flex-start;
   background: none;
   border: none;
@@ -510,6 +608,7 @@
   font-family: inherit;
   text-align: start;
   padding: 0;
+  border-radius: var(--radius-sm);
 }
 
 .checkbox {
@@ -518,10 +617,13 @@
   height: 21px;
   border-radius: 7px;
   border: 1.5px solid rgba(35, 32, 27, 0.3);
-  background: #fff;
+  background: var(--color-paper);
   display: grid;
   place-items: center;
-  margin-top: 1px;
+  margin-block-start: 1px;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
 }
 
 .checkboxOn {
@@ -530,13 +632,13 @@
 }
 
 .consentText {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   line-height: 1.9;
   color: #3b372f;
 }
 
 .consentLink {
-  color: var(--color-sienna);
+  color: var(--color-sienna-deep);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -550,44 +652,96 @@
 }
 
 .errBanner {
-  margin-top: 16px;
-  font-size: 13px;
+  margin-block-start: var(--space-4);
+  font-size: var(--text-sm);
   color: var(--color-sienna-deep);
   background: #f6e2da;
-  border-radius: 11px;
-  padding: 11px 15px;
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
   font-weight: 600;
+  animation: rbNudge var(--duration-md) var(--ease-spring) both;
 }
 
 .formNavRow {
   display: flex;
-  gap: 11px;
-  margin-top: 24px;
+  gap: var(--space-3);
+  margin-block-start: var(--space-6);
   align-items: center;
   flex-wrap: wrap;
 }
 
 .submitHint {
   font-size: 11.5px;
-  color: #8a8070;
-  margin-top: 12px;
+  color: var(--color-ink-soft);
+  margin-block-start: var(--space-3);
   line-height: 1.8;
   text-align: center;
 }
 
 /* ------------------------------------------------------------------ confirmation */
+
+/*
+  Three tiers instead of five boxes:
+    1. an ink receipt head carrying the order ref — the one thing worth writing down,
+    2. a two-column body: what you ordered / what happens next,
+    3. a bare action row on paper.
+*/
 .doneWrap {
-  max-width: 720px;
+  max-width: 940px;
   margin-inline: auto;
-  animation: rbFadeUp 0.4s var(--ease-standard) both;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  animation: rbFadeUp var(--duration-lg) var(--ease-out-expo) both;
 }
 
-.doneBox {
+.doneHero {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
   text-align: center;
-  background: var(--color-card);
-  border: 1px solid rgba(35, 32, 27, 0.16);
-  border-radius: 24px;
-  padding: clamp(30px, 5vw, 52px) clamp(18px, 4vw, 40px);
+  background-color: var(--color-ink);
+  background-image: var(--surface-ink);
+  color: var(--color-paper);
+  border-radius: var(--radius-stage);
+  padding: clamp(var(--space-8), 5vw, var(--space-16)) clamp(var(--space-5), 4vw, var(--space-10));
+  box-shadow: var(--shadow-5);
+}
+
+.doneHeroGlow {
+  position: absolute;
+  z-index: var(--z-decor);
+  inline-size: min(460px, 80%);
+  block-size: 340px;
+  inset-block-start: -150px;
+  inset-inline-end: -100px;
+  background: radial-gradient(circle, rgba(51, 96, 90, 0.5), rgba(51, 96, 90, 0) 70%);
+  filter: blur(var(--blur-xl));
+  pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* The order is sewn shut: a finished seam across the head of the receipt. */
+.doneHeroSeam {
+  position: absolute;
+  z-index: var(--z-decor);
+  inset-inline: 0;
+  inset-block-start: 0;
+  height: 8px;
+  background-image: var(--texture-stitch-sienna);
+  background-repeat: repeat-x;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* Content sits above the glow. Listed by element rather than with :not(), which would have to
+   name two scoped class hashes to say the same thing. */
+.doneHero > div,
+.doneHero > h1,
+.doneHero > p {
+  position: relative;
+  z-index: var(--z-raised);
 }
 
 .doneIcon {
@@ -597,105 +751,147 @@
   background: var(--status-accepted-bg);
   display: grid;
   place-items: center;
-  margin: 0 auto 16px;
+  margin: 0 auto var(--space-4);
+  box-shadow: var(--shadow-3);
 }
 
 .doneTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(26px, 3.6vw, 36px);
-  margin: 0 0 6px;
+  font-size: var(--text-3xl);
+  margin: 0 0 var(--space-2);
+  color: var(--color-paper);
 }
 
 .doneGreeting {
-  font-size: 14px;
-  color: #57503f;
-  margin: 0 0 20px;
+  font-size: var(--text-base);
+  color: rgba(246, 240, 227, 0.82);
+  margin: 0 auto var(--space-6);
   line-height: 1.9;
+  max-width: 46ch;
 }
 
+/* The ticket. Paper on ink, the ref set in the accent face at display size. */
 .refBox {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  background: var(--color-ink);
-  color: var(--color-paper);
-  border-radius: 14px;
-  padding: 12px 20px;
-  margin-bottom: 8px;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  color: var(--color-ink);
+  border-radius: var(--radius-card);
+  padding: var(--space-3) var(--space-5);
+  box-shadow: var(--shadow-4);
 }
 
 .refLabel {
-  font-size: 12px;
-  opacity: 0.7;
+  font-size: var(--text-xs);
+  color: var(--color-ink-soft);
 }
 
 .refValue {
   font-family: var(--font-accent);
-  font-size: 22px;
+  font-size: var(--text-2xl);
   letter-spacing: 1px;
+  color: var(--color-sienna-deep);
 }
 
 .copyBtn {
-  border: 1px solid rgba(246, 240, 227, 0.3);
-  background: none;
-  color: var(--color-paper);
-  border-radius: 8px;
-  padding: 4px 10px;
-  font-size: 11px;
+  border: 1px solid rgba(35, 32, 27, 0.25);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .copyBtn:hover {
-  border-color: rgba(246, 240, 227, 0.7);
+  border-color: var(--color-sienna);
+  color: var(--color-sienna-deep);
 }
 
 .statusRow {
   display: flex;
   justify-content: center;
-  margin-bottom: 22px;
+  margin-block-start: var(--space-4);
 }
 
 .statusPill {
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 700;
   background: var(--status-new-bg);
   color: var(--status-new-fg);
   border-radius: var(--radius-pill);
-  padding: 5px 14px;
+  padding: var(--space-2) var(--space-4);
 }
 
+.doneGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (min-width: 860px) {
+  .doneGrid {
+    grid-template-columns: 1.15fr 1fr;
+  }
+}
+
+/* Shared head for the two body panels — an ornament and a label, not a third boxed title. */
+.panelHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-end: var(--space-3);
+}
+
+.panelMark {
+  flex: none;
+  color: var(--color-sienna-deep);
+}
+
+/*
+  The receipt. This was the site's ONLY pure-white surface (`background: #fff`), which made it
+  glare against everything around it — it is card stock now, like every other panel.
+*/
 .recapBox {
   text-align: start;
-  border: 1px solid rgba(35, 32, 27, 0.14);
-  border-radius: 16px;
-  padding: 16px 18px;
-  margin-bottom: 18px;
-  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  padding: var(--space-5);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  box-shadow: var(--shadow-2);
 }
 
 .recapTitle {
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 700;
-  color: #8a8070;
-  margin-bottom: 10px;
+  color: var(--color-ink-soft);
 }
 
 .recapRow {
   display: flex;
-  gap: 11px;
+  gap: var(--space-3);
   align-items: center;
-  padding: 7px 0;
-  border-bottom: 1px dashed rgba(35, 32, 27, 0.1);
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed rgba(35, 32, 27, 0.12);
 }
 
 .recapThumb {
   flex: none;
   width: 38px;
   height: 44px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background-size: cover;
   background-position: center;
   border: 1px solid rgba(35, 32, 27, 0.12);
@@ -707,17 +903,17 @@
 }
 
 .recapName {
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
 .recapOpts {
   font-size: 11.5px;
-  color: #8a8070;
+  color: var(--color-ink-soft);
 }
 
 .recapPrice {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   font-weight: 700;
   color: var(--color-ink);
 }
@@ -726,30 +922,59 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 12px;
-  font-size: 13.5px;
+  padding-block-start: var(--space-3);
+  font-size: var(--text-base);
   color: #57503f;
 }
 
+/* The timeline. Linen rather than card, so the two body panels differ by MATERIAL. */
 .nextBox {
   text-align: start;
-  background: #efe7d4;
-  border-radius: 16px;
-  padding: 16px 18px;
-  margin-bottom: 22px;
+  background-color: var(--color-paper-deep);
+  background-image: var(--surface-linen-band);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-2);
 }
 
 .nextTitle {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   font-weight: 700;
-  margin-bottom: 12px;
+}
+
+.nextList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .nextRow {
+  position: relative;
   display: flex;
-  gap: 11px;
+  gap: var(--space-3);
   align-items: flex-start;
-  padding: 5px 0;
+  padding-block: var(--space-2);
+}
+
+/* A thread running down from each node to the next — the steps are one continuous process. */
+.nextThread {
+  position: absolute;
+  inset-block-start: 30px;
+  inset-block-end: -2px;
+  inset-inline-start: 11px;
+  width: 8px;
+  margin-inline-start: -4px;
+  background-image: var(--texture-stitch);
+  background-repeat: repeat-y;
+  /* The stitch tile turned on its side — at its natural 16px width only half of it would show. */
+  background-size: 8px 16px;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.nextRow:last-child .nextThread {
+  display: none;
 }
 
 .nextNum {
@@ -761,8 +986,9 @@
   color: var(--color-paper);
   display: grid;
   place-items: center;
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 700;
+  box-shadow: var(--shadow-1);
 }
 
 .nextNumFirst {
@@ -770,33 +996,58 @@
 }
 
 .nextText {
-  font-size: 13px;
+  font-size: var(--text-sm);
   line-height: 1.8;
   color: #3b372f;
 }
 
 .doneCtas {
   display: flex;
-  gap: 11px;
+  gap: var(--space-3);
   justify-content: center;
   flex-wrap: wrap;
+  margin-block-start: var(--space-2);
 }
 
 .waBtn {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--space-2);
   background: var(--color-ink);
   color: var(--color-paper);
   border-radius: var(--radius-pill);
-  padding: 13px 24px;
-  font-size: 14px;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
   font-weight: 600;
+  box-shadow: var(--shadow-2);
 }
 
 .waBtn:hover {
   background: var(--color-teal);
   color: #fff;
+}
+
+/* ------------------------------------------------------------------ reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .doneWrap,
+  .errBanner {
+    animation: none;
+  }
+
+  .crumbNum,
+  .crumbFill,
+  .itemCard,
+  .itemQtyBtn,
+  .copyBtn,
+  .input,
+  .checkbox {
+    transition: none;
+  }
+
+  .crumbNumCurrent {
+    transform: none;
+  }
 }
 
 /**
@@ -813,6 +1064,18 @@
   from {
     opacity: 0;
     transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A validation message that simply appears is easy to miss; one that arrives is not. */
+@keyframes rbNudge {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;

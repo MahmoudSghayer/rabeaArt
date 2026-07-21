@@ -112,7 +112,12 @@ export function ShopControls({ query, activeOptions }: ShopControlsProps) {
       <div className={styles.bar}>
         <div className={styles.cats}>
           {CATS.map((cat) => (
-            <Chip key={cat} active={query.cat === cat} onClick={() => pickCat(cat)}>
+            <Chip
+              key={cat}
+              active={query.cat === cat}
+              onClick={() => pickCat(cat)}
+              className={styles.catChip}
+            >
               {catLabels[cat]}
             </Chip>
           ))}
@@ -237,6 +242,7 @@ export function ShopControls({ query, activeOptions }: ShopControlsProps) {
                   key={bucket}
                   active={query.price === bucket}
                   onClick={() => navigate({ price: query.price === bucket ? "" : bucket, page: 1 })}
+                  className={styles.bucketChip}
                 >
                   {bucketLabels[bucket]}
                 </Chip>
@@ -246,7 +252,11 @@ export function ShopControls({ query, activeOptions }: ShopControlsProps) {
 
           <div className={styles.group}>
             <div className={styles.groupLabel}>{t("fAvail")}</div>
-            <Chip active={query.stock} onClick={() => navigate({ stock: !query.stock, page: 1 })}>
+            <Chip
+              active={query.stock}
+              onClick={() => navigate({ stock: !query.stock, page: 1 })}
+              className={styles.availChip}
+            >
               {t("availOnly")}
             </Chip>
           </div>

@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { useCartStore, type NewCartItem } from "@/lib/cart/store";
 import { pickText, type CatalogLocale, type LocalizedText } from "@/lib/catalog/types";
 import { grainedArt } from "@/components/storefront/art";
+import { canvasSurface, printSurface, textured } from "@/components/storefront/texture";
+import { Ornament, type OrnamentName } from "@/components/decor";
 import { cx } from "@/lib/cx";
 import { Button } from "@/components/ui/Button";
 import { UploadDropzone } from "@/components/storefront/upload/UploadDropzone";
@@ -42,6 +44,16 @@ const ROUGH_SHIRT_BASE: Record<string, number> = {
   hoodie: 180,
 };
 const ROUGH_EMBROIDERY_ADD = 35;
+
+/**
+ * One ornament per flow, so the wizard header says which kind of piece is being made without
+ * relying on the title alone — same vocabulary as the homepage ordering steps.
+ */
+const FLOW_ORNAMENT: Record<WizardType, OrnamentName> = {
+  shirt: "fold",
+  painting: "frame",
+  other: "star",
+};
 
 const ORIENT_ICON: Record<string, { w: number; h: number }> = {
   portrait: { w: 13, h: 20 },
@@ -210,33 +222,36 @@ export function CustomWizard({
   // ---------------------------------------------------------------- success
   if (added) {
     return (
-      <div className={styles.successBox}>
-        <div className={styles.successIcon} aria-hidden="true">
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#3F7048"
-            strokeWidth="2.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        </div>
-        <h2 className={styles.successTitle}>{t("success.title")}</h2>
-        <p className={styles.successSub}>{t("success.sub")}</p>
-        <div className={styles.successCtas}>
-          <Link href="/order" className={styles.ctaAccent}>
-            {t("success.reviewCta")}
-          </Link>
-          <button type="button" onClick={restart} className={styles.ctaOutline}>
-            {t("success.againCta")}
-          </button>
-          <Link href="/shop" className={styles.ctaOutline}>
-            {t("success.shopCta")}
-          </Link>
+      <div className={styles.successStage}>
+        <span aria-hidden="true" className={styles.successSeam} />
+        <div className={styles.successBox}>
+          <div className={styles.successIcon} aria-hidden="true">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#3F7048"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+          <h2 className={styles.successTitle}>{t("success.title")}</h2>
+          <p className={styles.successSub}>{t("success.sub")}</p>
+          <div className={styles.successCtas}>
+            <Link href="/order" className={styles.ctaAccent}>
+              {t("success.reviewCta")}
+            </Link>
+            <button type="button" onClick={restart} className={styles.ctaOutline}>
+              {t("success.againCta")}
+            </button>
+            <Link href="/shop" className={styles.ctaOutline}>
+              {t("success.shopCta")}
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -244,11 +259,22 @@ export function CustomWizard({
 
   // ---------------------------------------------------------------- chooser
   if (!type) {
-    const cards: Array<{ id: WizardType; art: string }> = [
-      { id: "shirt", art: grainedArt("dawn") },
-      { id: "painting", art: grainedArt("rivers") },
+    /*
+      Each card is a different MATERIAL, not three crops of the same gradient: the shirt is a
+      hand-pulled print, the painting a stretched canvas, the open request a loose weave. That is
+      the whole promise of the page shown rather than described.
+    */
+    const cards: Array<{ id: WizardType; art: string; ornament: OrnamentName }> = [
+      { id: "shirt", art: printSurface(grainedArt("dawn")), ornament: "fold" },
+      { id: "painting", art: canvasSurface(grainedArt("rivers")), ornament: "frame" },
     ];
-    if (customOtherEnabled) cards.push({ id: "other", art: grainedArt("letters") });
+    if (customOtherEnabled) {
+      cards.push({
+        id: "other",
+        art: textured(grainedArt("letters"), "weaveSoft", "grain"),
+        ornament: "star",
+      });
+    }
 
     return (
       <div className={styles.chooserGrid}>
@@ -263,7 +289,17 @@ export function CustomWizard({
               setErr(null);
             }}
           >
-            <div className={styles.typeCardArt} style={{ backgroundImage: card.art }}>
+            {/*
+              `background`, not `backgroundImage`: printSurface() layers the halftone screen,
+              whose value carries its own `position / size` (see --texture-halftone), and a
+              position/size pair is only legal in the background SHORTHAND. Assigning it to
+              background-image drops the whole declaration and the tile renders empty.
+            */}
+            <div className={styles.typeCardArt} style={{ background: card.art }}>
+              <span aria-hidden="true" className={styles.typeCardScrim} />
+              <span aria-hidden="true" className={styles.typeCardMark}>
+                <Ornament name={card.ornament} size={20} />
+              </span>
               <span className={styles.typeCardTag}>{t(`chooser.${card.id}.tag`)}</span>
             </div>
             <div className={styles.typeCardBody}>
@@ -365,338 +401,362 @@ export function CustomWizard({
     </div>
   );
 
-  return (
-    <div className={styles.wizBox}>
-      <div className={styles.wizHead}>
-        <button type="button" className={styles.backChooserBtn} onClick={backToChooser}>
-          {arrowBack} {t("changeType")}
-        </button>
-        <span className={styles.flowTitle}>{t(`flowTitle.${type}`)}</span>
-        <div className={styles.wizHeadSpacer} />
-        <div className={styles.stepsBar}>
-          {stepsDef.map((label, i) => (
-            <span
-              key={label}
-              className={cx(
-                styles.stepPill,
-                i === step && styles.stepPillCurrent,
-                i < step && styles.stepPillDone,
-              )}
-            >
-              {i + 1} · {label}
-            </span>
-          ))}
-        </div>
-      </div>
+  // How far the thread has been pulled through the ribbon, 0–100.
+  const progressPct = last > 0 ? Math.round((step / last) * 100) : 0;
 
-      <div className={styles.wizBody}>
-        {/* Shirt — Base */}
-        {type === "shirt" && step === 0 && (
-          <div className={styles.stepCol}>
-            <div>
-              <div className={styles.fieldLabel}>{t("fields.shirtType")}</div>
-              <div className={styles.optGrid}>
-                {options.shirtTypes.map((o) => (
-                  <button
-                    key={o.code}
-                    type="button"
-                    className={cx(styles.optBtn, stype === o.code && styles.optBtnOn)}
-                    onClick={() => setStype(o.code)}
-                  >
-                    {pickText(o.label, locale)}
-                  </button>
-                ))}
-              </div>
+  return (
+    <div className={styles.wizStage}>
+      <span aria-hidden="true" className={styles.wizStageGlow} />
+      <div className={styles.wizBox}>
+        <div className={styles.wizHead}>
+          <div className={styles.wizHeadTop}>
+            <button type="button" className={styles.backChooserBtn} onClick={backToChooser}>
+              {arrowBack} {t("changeType")}
+            </button>
+            <span className={styles.flowTitle}>
+              <Ornament name={FLOW_ORNAMENT[type]} size={16} className={styles.flowMark} />
+              {t(`flowTitle.${type}`)}
+            </span>
+          </div>
+
+          {/*
+            The step bar as a progress RIBBON: a running stitch behind the pills, sienna up to
+            where you are and pale ink beyond it. The pills keep their "N · label" text — the
+            E2E suite matches that literally.
+          */}
+          <div className={styles.ribbon}>
+            <span aria-hidden="true" className={styles.ribbonTrack} />
+            <span
+              aria-hidden="true"
+              className={styles.ribbonFill}
+              style={{ inlineSize: `${progressPct}%` }}
+            />
+            <div className={styles.stepsBar}>
+              {stepsDef.map((label, i) => (
+                <span
+                  key={label}
+                  className={cx(
+                    styles.stepPill,
+                    i === step && styles.stepPillCurrent,
+                    i < step && styles.stepPillDone,
+                  )}
+                >
+                  {i + 1} · {label}
+                </span>
+              ))}
             </div>
-            <div>
-              <div className={styles.fieldLabel}>
-                {t("fields.fabricColor")}:{" "}
-                <span className={styles.fieldValue}>{pickText(colorObj?.name, locale)}</span>
-              </div>
-              <div className={styles.swatchRow}>
-                {options.colors.map((c) => (
-                  <button
-                    key={c.code}
-                    type="button"
-                    title={pickText(c.name, locale)}
-                    aria-pressed={color === c.code}
-                    className={cx(styles.swatch, color === c.code && styles.swatchOn)}
-                    style={{ background: c.hex }}
-                    onClick={() => setColor(c.code)}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className={styles.rowWrap}>
+          </div>
+        </div>
+
+        <div className={styles.wizBody}>
+          {/* Shirt — Base */}
+          {type === "shirt" && step === 0 && (
+            <div className={styles.stepCol}>
               <div>
-                <div className={styles.fieldLabel}>{tCommon("size")}</div>
-                <div className={styles.sizeRow}>
-                  {options.shirtSizes.map((s) => (
+                <div className={styles.fieldLabel}>{t("fields.shirtType")}</div>
+                <div className={styles.optGrid}>
+                  {options.shirtTypes.map((o) => (
                     <button
-                      key={s.code}
+                      key={o.code}
                       type="button"
-                      className={cx(styles.sizeBtn, size === s.code && styles.optBtnOn)}
-                      onClick={() => setSize(s.code)}
+                      className={cx(styles.optBtn, stype === o.code && styles.optBtnOn)}
+                      onClick={() => setStype(o.code)}
                     >
-                      {s.code}
+                      {pickText(o.label, locale)}
                     </button>
                   ))}
                 </div>
               </div>
-              {qtyStepper}
-            </div>
-          </div>
-        )}
-
-        {/* Shirt — Method */}
-        {type === "shirt" && step === 1 && (
-          <div className={styles.stepCol}>
-            <div>
-              <div className={styles.fieldLabel}>{tCommon("method")}</div>
-              <div className={styles.cardGrid}>
-                {options.methods.map((m) => (
-                  <button
-                    key={m.code}
-                    type="button"
-                    className={cx(styles.selCard, method === m.code && styles.selCardOn)}
-                    onClick={() => setMethod(m.code)}
-                  >
-                    <div className={styles.selCardTitle}>{pickText(m.label, locale)}</div>
-                    {(m.code === "print" || m.code === "embroidery") && (
-                      <div className={styles.selCardDesc}>{t(`methods.${m.code}.desc`)}</div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className={styles.fieldLabel}>{t("fields.placement")}</div>
-              <div className={styles.fieldHint}>{t("fields.placementHint")}</div>
-              <div className={styles.chipRow}>
-                {options.placements.map((p) => {
-                  const on = placement.includes(p.code);
-                  return (
-                    <button
-                      key={p.code}
-                      type="button"
-                      aria-pressed={on}
-                      className={cx(styles.pillBtn, on && styles.optBtnOn)}
-                      onClick={() =>
-                        setPlacement(on ? placement.filter((x) => x !== p.code) : [...placement, p.code])
-                      }
-                    >
-                      {on ? "✓ " : ""}
-                      {pickText(p.label, locale)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Painting — Base */}
-        {type === "painting" && step === 0 && (
-          <div className={styles.stepCol}>
-            <div>
-              <div className={styles.fieldLabel}>{t("fields.paintSize")}</div>
-              <div className={styles.sizeRow}>
-                {options.paintingSizes.map((s) => (
-                  <button
-                    key={s.code}
-                    type="button"
-                    className={cx(styles.psizeBtn, psize === s.code && styles.optBtnOn)}
-                    onClick={() => setPsize(s.code)}
-                  >
-                    {s.code === "custom" ? t("fields.customSizeLabel") : s.code}
-                  </button>
-                ))}
-              </div>
-              {psize === "custom" && (
-                <div className={styles.dimsRow}>
-                  <input
-                    value={dimsW}
-                    onChange={(e) => setDimsW(e.target.value.replace(/\D/g, ""))}
-                    placeholder={t("fields.widthPh")}
-                    inputMode="numeric"
-                    className={styles.dimInput}
-                  />
-                  <span className={styles.dimSep}>×</span>
-                  <input
-                    value={dimsH}
-                    onChange={(e) => setDimsH(e.target.value.replace(/\D/g, ""))}
-                    placeholder={t("fields.heightPh")}
-                    inputMode="numeric"
-                    className={styles.dimInput}
-                  />
-                  <span className={styles.dimUnit}>{t("fields.cm")}</span>
-                </div>
-              )}
-            </div>
-            <div>
-              <div className={styles.fieldLabel}>{t("fields.orientation")}</div>
-              <div className={styles.chipRow}>
-                {options.orientations.map((o) => {
-                  const icon = ORIENT_ICON[o.code] ?? { w: 13, h: 13 };
-                  return (
-                    <button
-                      key={o.code}
-                      type="button"
-                      className={cx(styles.orientBtn, orient === o.code && styles.optBtnOn)}
-                      onClick={() => setOrient(o.code)}
-                    >
-                      <span
-                        className={styles.orientIcon}
-                        style={{ width: icon.w, height: icon.h }}
-                        aria-hidden="true"
-                      />
-                      {pickText(o.label, locale)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <div className={styles.fieldLabel}>{t("fields.material")}</div>
-              <div className={styles.chipRow}>
-                {options.materials.map((m) => (
-                  <button
-                    key={m.code}
-                    type="button"
-                    className={cx(styles.psizeBtn, material === m.code && styles.optBtnOn)}
-                    onClick={() => setMaterial(m.code)}
-                  >
-                    {pickText(m.label, locale)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Painting — Style */}
-        {type === "painting" && step === 1 && (
-          <div>
-            <div className={styles.fieldLabel}>{t("fields.styleQ")}</div>
-            <div className={styles.cardGrid}>
-              {options.paintStyles.map((s) => (
-                <button
-                  key={s.code}
-                  type="button"
-                  className={cx(styles.selCard, pstyle === s.code && styles.selCardOn)}
-                  onClick={() => setPstyle(s.code)}
-                >
-                  <div className={styles.selCardTitle}>{pickText(s.label, locale)}</div>
-                  {(s.code === "printed" || s.code === "hand" || s.code === "interpret") && (
-                    <div className={styles.selCardDesc}>{t(`paintStyles.${s.code}.desc`)}</div>
-                  )}
-                </button>
-              ))}
-            </div>
-            <div className={styles.qtyBlock}>{qtyStepper}</div>
-          </div>
-        )}
-
-        {/* Other — Idea */}
-        {type === "other" && step === 0 && (
-          <div>
-            <div className={styles.fieldLabel}>{t("fields.otherQ")}</div>
-            <div className={styles.fieldHint}>{t("fields.otherHint")}</div>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={6}
-              placeholder={t("fields.otherPh")}
-              className={styles.textarea}
-            />
-          </div>
-        )}
-
-        {/* Upload step (all flows) */}
-        {step === uploadStep && (
-          <div className={styles.stepCol}>
-            <UploadDropzone manager={upload} />
-            {type !== "other" && (
               <div>
-                <div className={styles.fieldLabel}>{t("upload.instructions")}</div>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={4}
-                  placeholder={t("upload.instructionsPh")}
-                  className={styles.textarea}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Review step */}
-        {step === last && (
-          <div className={styles.stepCol}>
-            <div className={styles.reviewGrid}>
-              {reviewRows.map((row) => (
-                <div key={row.k} className={styles.reviewCell}>
-                  <div className={styles.reviewK}>{row.k}</div>
-                  <div className={styles.reviewV}>{row.v}</div>
+                <div className={styles.fieldLabel}>
+                  {t("fields.fabricColor")}:{" "}
+                  <span className={styles.fieldValue}>{pickText(colorObj?.name, locale)}</span>
                 </div>
-              ))}
-            </div>
-            {upload.files.length > 0 && (
-              <div>
-                <div className={styles.reviewFilesLabel}>
-                  {t("review.attached")} (<span dir="ltr">{upload.files.length}</span>)
-                </div>
-                <div className={styles.reviewThumbRow}>
-                  {upload.files.map((f) => (
-                    <div
-                      key={f.id}
-                      title={f.name}
-                      className={styles.reviewThumb}
-                      style={
-                        f.previewDataUrl ? { backgroundImage: `url(${f.previewDataUrl})` } : undefined
-                      }
+                <div className={styles.swatchRow}>
+                  {options.colors.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      title={pickText(c.name, locale)}
+                      aria-pressed={color === c.code}
+                      className={cx(styles.swatch, color === c.code && styles.swatchOn)}
+                      style={{ background: c.hex }}
+                      onClick={() => setColor(c.code)}
                     />
                   ))}
                 </div>
               </div>
-            )}
-            {notes.trim() && (
-              <div className={styles.reviewNotes}>
-                <div className={styles.reviewK}>{tCommon("notes")}</div>
-                <div className={styles.reviewNotesText}>{notes.trim()}</div>
+              <div className={styles.rowWrap}>
+                <div>
+                  <div className={styles.fieldLabel}>{tCommon("size")}</div>
+                  <div className={styles.sizeRow}>
+                    {options.shirtSizes.map((s) => (
+                      <button
+                        key={s.code}
+                        type="button"
+                        className={cx(styles.sizeBtn, size === s.code && styles.optBtnOn)}
+                        onClick={() => setSize(s.code)}
+                      >
+                        {s.code}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {qtyStepper}
               </div>
-            )}
-            <div className={styles.estRow}>
-              <div className={styles.estLine}>{estLine}</div>
-              <span className={styles.manualChip}>{tCommon("manualPrice")}</span>
             </div>
-          </div>
-        )}
-
-        {err && (
-          <div className={styles.errBanner} role="alert">
-            {t(`validation.${err}`)}
-          </div>
-        )}
-
-        <div className={styles.navRow}>
-          {step > 0 && (
-            <Button variant="outline" onClick={goBack}>
-              {tActions("back")}
-            </Button>
           )}
-          <div className={styles.navSpacer} />
-          {step < last && (
-            <Button variant="primary" onClick={goNext}>
-              {tActions("next")} {arrow}
-            </Button>
+
+          {/* Shirt — Method */}
+          {type === "shirt" && step === 1 && (
+            <div className={styles.stepCol}>
+              <div>
+                <div className={styles.fieldLabel}>{tCommon("method")}</div>
+                <div className={styles.cardGrid}>
+                  {options.methods.map((m) => (
+                    <button
+                      key={m.code}
+                      type="button"
+                      className={cx(styles.selCard, method === m.code && styles.selCardOn)}
+                      onClick={() => setMethod(m.code)}
+                    >
+                      <div className={styles.selCardTitle}>{pickText(m.label, locale)}</div>
+                      {(m.code === "print" || m.code === "embroidery") && (
+                        <div className={styles.selCardDesc}>{t(`methods.${m.code}.desc`)}</div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className={styles.fieldLabel}>{t("fields.placement")}</div>
+                <div className={styles.fieldHint}>{t("fields.placementHint")}</div>
+                <div className={styles.chipRow}>
+                  {options.placements.map((p) => {
+                    const on = placement.includes(p.code);
+                    return (
+                      <button
+                        key={p.code}
+                        type="button"
+                        aria-pressed={on}
+                        className={cx(styles.pillBtn, on && styles.optBtnOn)}
+                        onClick={() =>
+                          setPlacement(on ? placement.filter((x) => x !== p.code) : [...placement, p.code])
+                        }
+                      >
+                        {on ? "✓ " : ""}
+                        {pickText(p.label, locale)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           )}
+
+          {/* Painting — Base */}
+          {type === "painting" && step === 0 && (
+            <div className={styles.stepCol}>
+              <div>
+                <div className={styles.fieldLabel}>{t("fields.paintSize")}</div>
+                <div className={styles.sizeRow}>
+                  {options.paintingSizes.map((s) => (
+                    <button
+                      key={s.code}
+                      type="button"
+                      className={cx(styles.psizeBtn, psize === s.code && styles.optBtnOn)}
+                      onClick={() => setPsize(s.code)}
+                    >
+                      {s.code === "custom" ? t("fields.customSizeLabel") : s.code}
+                    </button>
+                  ))}
+                </div>
+                {psize === "custom" && (
+                  <div className={styles.dimsRow}>
+                    <input
+                      value={dimsW}
+                      onChange={(e) => setDimsW(e.target.value.replace(/\D/g, ""))}
+                      placeholder={t("fields.widthPh")}
+                      inputMode="numeric"
+                      className={styles.dimInput}
+                    />
+                    <span className={styles.dimSep}>×</span>
+                    <input
+                      value={dimsH}
+                      onChange={(e) => setDimsH(e.target.value.replace(/\D/g, ""))}
+                      placeholder={t("fields.heightPh")}
+                      inputMode="numeric"
+                      className={styles.dimInput}
+                    />
+                    <span className={styles.dimUnit}>{t("fields.cm")}</span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className={styles.fieldLabel}>{t("fields.orientation")}</div>
+                <div className={styles.chipRow}>
+                  {options.orientations.map((o) => {
+                    const icon = ORIENT_ICON[o.code] ?? { w: 13, h: 13 };
+                    return (
+                      <button
+                        key={o.code}
+                        type="button"
+                        className={cx(styles.orientBtn, orient === o.code && styles.optBtnOn)}
+                        onClick={() => setOrient(o.code)}
+                      >
+                        <span
+                          className={styles.orientIcon}
+                          style={{ width: icon.w, height: icon.h }}
+                          aria-hidden="true"
+                        />
+                        {pickText(o.label, locale)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <div className={styles.fieldLabel}>{t("fields.material")}</div>
+                <div className={styles.chipRow}>
+                  {options.materials.map((m) => (
+                    <button
+                      key={m.code}
+                      type="button"
+                      className={cx(styles.psizeBtn, material === m.code && styles.optBtnOn)}
+                      onClick={() => setMaterial(m.code)}
+                    >
+                      {pickText(m.label, locale)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Painting — Style */}
+          {type === "painting" && step === 1 && (
+            <div>
+              <div className={styles.fieldLabel}>{t("fields.styleQ")}</div>
+              <div className={styles.cardGrid}>
+                {options.paintStyles.map((s) => (
+                  <button
+                    key={s.code}
+                    type="button"
+                    className={cx(styles.selCard, pstyle === s.code && styles.selCardOn)}
+                    onClick={() => setPstyle(s.code)}
+                  >
+                    <div className={styles.selCardTitle}>{pickText(s.label, locale)}</div>
+                    {(s.code === "printed" || s.code === "hand" || s.code === "interpret") && (
+                      <div className={styles.selCardDesc}>{t(`paintStyles.${s.code}.desc`)}</div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className={styles.qtyBlock}>{qtyStepper}</div>
+            </div>
+          )}
+
+          {/* Other — Idea */}
+          {type === "other" && step === 0 && (
+            <div>
+              <div className={styles.fieldLabel}>{t("fields.otherQ")}</div>
+              <div className={styles.fieldHint}>{t("fields.otherHint")}</div>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={6}
+                placeholder={t("fields.otherPh")}
+                className={styles.textarea}
+              />
+            </div>
+          )}
+
+          {/* Upload step (all flows) */}
+          {step === uploadStep && (
+            <div className={styles.stepCol}>
+              <UploadDropzone manager={upload} />
+              {type !== "other" && (
+                <div>
+                  <div className={styles.fieldLabel}>{t("upload.instructions")}</div>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={4}
+                    placeholder={t("upload.instructionsPh")}
+                    className={styles.textarea}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Review step */}
           {step === last && (
-            <Button variant="accent" onClick={submitItem}>
-              {tActions("addToOrder")}
-            </Button>
+            <div className={styles.stepCol}>
+              <div className={styles.reviewGrid}>
+                {reviewRows.map((row) => (
+                  <div key={row.k} className={styles.reviewCell}>
+                    <div className={styles.reviewK}>{row.k}</div>
+                    <div className={styles.reviewV}>{row.v}</div>
+                  </div>
+                ))}
+              </div>
+              {upload.files.length > 0 && (
+                <div>
+                  <div className={styles.reviewFilesLabel}>
+                    {t("review.attached")} (<span dir="ltr">{upload.files.length}</span>)
+                  </div>
+                  <div className={styles.reviewThumbRow}>
+                    {upload.files.map((f) => (
+                      <div
+                        key={f.id}
+                        title={f.name}
+                        className={styles.reviewThumb}
+                        style={
+                          f.previewDataUrl ? { backgroundImage: `url(${f.previewDataUrl})` } : undefined
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {notes.trim() && (
+                <div className={styles.reviewNotes}>
+                  <div className={styles.reviewK}>{tCommon("notes")}</div>
+                  <div className={styles.reviewNotesText}>{notes.trim()}</div>
+                </div>
+              )}
+              <div className={styles.estRow}>
+                <div className={styles.estLine}>{estLine}</div>
+                <span className={styles.manualChip}>{tCommon("manualPrice")}</span>
+              </div>
+            </div>
           )}
+
+          {err && (
+            <div className={styles.errBanner} role="alert">
+              {t(`validation.${err}`)}
+            </div>
+          )}
+
+          <div className={styles.navRow}>
+            {step > 0 && (
+              <Button variant="outline" onClick={goBack}>
+                {tActions("back")}
+              </Button>
+            )}
+            <div className={styles.navSpacer} />
+            {step < last && (
+              <Button variant="primary" onClick={goNext}>
+                {tActions("next")} {arrow}
+              </Button>
+            )}
+            {step === last && (
+              <Button variant="accent" onClick={submitItem}>
+                {tActions("addToOrder")}
+              </Button>
+            )}
+            </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,62 @@
+/*
+  Eight hairline-separated rows were the longest flat run on the site. Each item is a card on
+  paper now, so the list reads as a stack of physical answers, and the open one lifts out of the
+  stack instead of merely un-hiding.
+*/
+
 .list {
-  border-block-start: 1px solid var(--color-line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .item {
-  border-block-end: 1px solid var(--color-line);
+  position: relative;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-1);
+  transition:
+    box-shadow var(--duration-md) var(--ease-standard),
+    border-color var(--duration-md) var(--ease-standard),
+    transform var(--duration-md) var(--ease-standard);
+}
+
+.item:hover {
+  box-shadow: var(--shadow-2);
+  border-color: color-mix(in srgb, var(--color-sienna) 34%, var(--color-line));
+}
+
+.itemOpen {
+  box-shadow: var(--shadow-4);
+  border-color: color-mix(in srgb, var(--color-sienna) 42%, var(--color-line));
+}
+
+/*
+  A running-stitch seam down the open item's inline-start edge — the mark the eye follows to know
+  which answer is showing. Inline-start, so it lands on the right in Arabic with no RTL override.
+
+  Drawn as a repeating gradient rather than with --texture-stitch-sienna: that tile is authored to
+  run horizontally (16x8, leaning dashes), and repeating it down an 8px column tiles a clipped
+  fragment. A vertical run of stitches is exactly a repeating linear gradient.
+
+  Inset 1px so it sits inside the border, and 20px from each end so it never crosses the corner
+  radius, which this card does not clip.
+*/
+.itemOpen::before {
+  content: "";
+  position: absolute;
+  inset-block: 20px;
+  inset-inline-start: 1px;
+  width: 3px;
+  border-radius: 2px;
+  background-image: repeating-linear-gradient(
+    180deg,
+    var(--color-sienna) 0 7px,
+    transparent 7px 13px
+  );
+  pointer-events: none;
 }
 
 .heading {
@@ -20,31 +73,98 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 17px 4px;
+  padding: var(--space-4) var(--space-5);
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-ink);
   text-align: start;
+  border-radius: var(--radius-card);
 }
 
 .question {
   flex: 1;
+  line-height: 1.7;
 }
 
+/* ---------- The +/− mark ---------- */
+
 .sign {
-  font-family: var(--font-accent);
-  font-size: 22px;
-  color: var(--color-sienna);
-  width: 22px;
-  text-align: center;
+  position: relative;
   flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-sienna) 10%, transparent);
+  transition:
+    background var(--duration-md) var(--ease-standard),
+    transform var(--duration-md) var(--ease-spring);
+}
+
+.itemOpen .sign {
+  background: color-mix(in srgb, var(--color-sienna) 18%, transparent);
+  transform: rotate(180deg);
+}
+
+.signBar {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  width: 12px;
+  height: 1.8px;
+  margin-block-start: -0.9px;
+  margin-inline-start: -6px;
+  border-radius: 2px;
+  background: var(--color-sienna-deep);
+  transition: transform var(--duration-md) var(--ease-standard);
+}
+
+/* Upright at rest (a plus); flat when open (a minus). */
+.signBarUpright {
+  transform: rotate(90deg);
+}
+
+.itemOpen .signBarUpright {
+  transform: rotate(0deg);
+}
+
+/* ---------- The animated panel ---------- */
+
+/*
+  `grid-template-rows: 0fr → 1fr` is the whole trick: a grid row CAN be transitioned between
+  fractional sizes, so the panel animates to its natural content height without JS measuring it.
+  The inner track needs `min-height: 0` or the 0fr row refuses to shrink below its content.
+
+  `visibility` carries the accessibility half. The panel is always in the DOM now, so a closed
+  one must be removed from the a11y tree; `visibility: hidden` does that and, unlike `display`,
+  can be delayed so the text is still painted while the row collapses.
+*/
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--duration-md) var(--ease-standard),
+    visibility 0s linear var(--duration-md);
+}
+
+.panelOpen {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition:
+    grid-template-rows var(--duration-md) var(--ease-standard),
+    visibility 0s linear 0s;
+}
+
+.panelInner {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .answer {
   margin: 0;
-  padding: 0 4px 19px;
-  font-size: 13.5px;
+  padding: 0 var(--space-5) var(--space-5);
+  font-size: var(--text-sm);
   line-height: 2.1;
   color: #57503f;
   max-width: 66ch;
@@ -53,4 +173,18 @@
 .trigger:focus-visible {
   outline: 2px solid var(--color-sienna);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .sign,
+  .signBar,
+  .panel,
+  .panelOpen {
+    transition: none;
+  }
+
+  .itemOpen .sign {
+    transform: none;
+  }
 }

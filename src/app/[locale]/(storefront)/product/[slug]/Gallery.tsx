@@ -65,14 +65,16 @@ export function Gallery({
         <div className={styles.stageInner}>
           {isPaint ? (
             <div className={styles.paintFrame} style={{ border: frameBorder }}>
-              <div
-                className={styles.paintArt}
-                style={{
-                  backgroundImage: artBackground,
-                  backgroundSize: zoom?.size,
-                  backgroundPosition: zoom?.pos,
-                }}
-              />
+              <div className={styles.paintMat}>
+                <div
+                  className={styles.paintArt}
+                  style={{
+                    backgroundImage: artBackground,
+                    backgroundSize: zoom?.size,
+                    backgroundPosition: zoom?.pos,
+                  }}
+                />
+              </div>
             </div>
           ) : (
             <div className={styles.shirtMock} style={{ border: printBorder }}>
@@ -87,6 +89,15 @@ export function Gallery({
             </div>
           )}
         </div>
+
+        {/*
+          The stage's own light: a soft key from the top inline-start corner and a floor shadow
+          under the piece. Placed in the markup rather than as a ::after on .stage so it paints
+          BELOW the fabric chip and the badge — a pseudo-element would be the last child and dim
+          both. Decorative, so aria-hidden and no focusable node.
+        */}
+        <span aria-hidden="true" className={styles.stageLight} />
+
         {!isPaint && fabricLabel && <div className={styles.fabricChip}>{fabricLabel}</div>}
         {badge && (
           <span

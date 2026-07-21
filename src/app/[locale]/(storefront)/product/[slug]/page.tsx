@@ -6,7 +6,10 @@ import { ProductType } from "@/generated/prisma/enums";
 import { getRelatedProducts } from "@/lib/catalog/queries";
 import { getCachedProductBySlug } from "@/lib/catalog/cached";
 import { pickText, type CatalogListItem, type CatalogProductDetail } from "@/lib/catalog/types";
+import { grainedArt } from "@/components/storefront/art";
+import { canvasSurface } from "@/components/storefront/texture";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { Ornament, TexturedSection } from "@/components/decor";
 import { ProductView } from "./ProductView";
 import styles from "./page.module.css";
 
@@ -60,11 +63,20 @@ export default async function ProductPage({ params }: PageProps) {
     return (
       <div className={styles.page}>
         <div className={styles.inner}>
+          {/* Same composed-still-life treatment as the shop's empty state, not the dashed box. */}
           <div className={styles.unavailable}>
-            <div className={styles.unavailableGlyph} aria-hidden="true">
-              ؟
+            <div aria-hidden="true" className={styles.unavailableStack}>
+              <span className={styles.unavailableFrame}>
+                <span
+                  className={styles.unavailableArt}
+                  style={{ backgroundImage: canvasSurface(grainedArt("still")) }}
+                />
+              </span>
+              <span className={styles.unavailableMark}>
+                <Ornament name="brush" size={24} strokeWidth={1.4} />
+              </span>
             </div>
-            <div className={styles.unavailableTitle}>{t("unavailableTitle")}</div>
+            <p className={styles.unavailableTitle}>{t("unavailableTitle")}</p>
             <p className={styles.unavailableSub}>{t("unavailableSub")}</p>
             <Link href="/shop" className={styles.backToShop}>
               {t("backToShop")}
@@ -105,24 +117,39 @@ export default async function ProductPage({ params }: PageProps) {
         </nav>
 
         <ProductView product={product} />
-
-        {related.length > 0 && (
-          <section className={styles.relatedSection}>
-            <div className={styles.relatedHead}>
-              <h2 className={styles.relatedTitle}>{t("related")}</h2>
-              <div className={styles.relatedSpacer} />
-              <Link href={catHref} className={styles.relatedAll}>
-                {t("relatedAll")} {t("arrow")}
-              </Link>
-            </div>
-            <div className={styles.relatedGrid}>
-              {related.map((item) => (
-                <ProductCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
+
+      {/*
+        The rail gets its own full-bleed band. It used to start abruptly after a stretch of empty
+        paper below the purchase panel, so the page just stopped; a linen band with a stitched
+        seam gives the page an ending and separates "this piece" from "other pieces".
+      */}
+      {related.length > 0 && (
+        <TexturedSection
+          as="section"
+          tone="deep"
+          edge="stitch"
+          glow="ochre"
+          className={styles.relatedBand}
+          innerClassName={styles.relatedInner}
+        >
+          <div className={styles.relatedHead}>
+            <span aria-hidden="true" className={styles.relatedMark}>
+              <Ornament name={isPaint ? "frame" : "fold"} size={18} strokeWidth={1.5} />
+            </span>
+            <h2 className={styles.relatedTitle}>{t("related")}</h2>
+            <div className={styles.relatedSpacer} />
+            <Link href={catHref} className={styles.relatedAll}>
+              {t("relatedAll")} <span aria-hidden="true">{t("arrow")}</span>
+            </Link>
+          </div>
+          <div className={styles.relatedGrid}>
+            {related.map((item) => (
+              <ProductCard key={item.id} item={item} />
+            ))}
+          </div>
+        </TexturedSection>
+      )}
     </div>
   );
 }

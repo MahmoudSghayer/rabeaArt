@@ -6,10 +6,12 @@ import { Link } from "@/i18n/navigation";
 import { ProductType } from "@/generated/prisma/enums";
 import { pickText, type CatalogProductDetail } from "@/lib/catalog/types";
 import { useCartStore } from "@/lib/cart/store";
-import { GRAIN, grainedArt } from "@/components/storefront/art";
+import { grainedArt } from "@/components/storefront/art";
+import { fabricSwatch, textured } from "@/components/storefront/texture";
 import { artKeyForSlug } from "@/components/storefront/product-art";
 import { pushRecent } from "@/components/storefront/RecentlyViewed";
 import { Chip } from "@/components/ui/Chip";
+import { Ornament } from "@/components/decor";
 import { cx } from "@/lib/cx";
 import { Gallery, type GalleryView } from "./Gallery";
 import styles from "./page.module.css";
@@ -149,11 +151,18 @@ export function ProductView({ product }: { product: CatalogProductDetail }) {
   const currency = tCommon("currency");
   const priceText = (value: number) => `${currency}${value}`;
 
-  // --- Gallery presentation, mirrored from the design ---
+  // --- Gallery presentation ---
+  //
+  // The stage is a MATERIAL now, not a flat fill: a shirt hangs against its own cloth (the
+  // selected colour under a soft weave), a painting sits on primed canvas. That is the whole
+  // reason `fabricSwatch`/`textured` exist — the same colour reads as fabric instead of a
+  // rectangle of paint. The art itself stays a plain gradient because the gallery re-sizes and
+  // re-positions it for the zoom views, and a background-size applies to every layer in the
+  // stack; its canvas/print grain is layered on a pseudo-element in CSS instead.
   const artBackground = grainedArt(artKeyForSlug(product.slug));
   const stageBackground = isShirt
-    ? `${GRAIN}, linear-gradient(180deg, ${selectedColor?.hex ?? "#EDE3CF"}, ${selectedColor?.hex ?? "#EDE3CF"})`
-    : `${GRAIN}, linear-gradient(180deg, #EFE7D4, #E4D6BC)`;
+    ? fabricSwatch(selectedColor?.hex ?? "#EDE3CF")
+    : textured("linear-gradient(180deg, #EFE7D4, #E4D6BC)", "canvas", "grain");
   const frameBorder =
     frameCode === "wood"
       ? "14px solid #8B6540"
@@ -323,243 +332,264 @@ export function ProductView({ product }: { product: CatalogProductDetail }) {
             </figure>
           )}
 
-          {isShirt && (
-            <>
-              {product.colors.length > 0 && (
-                <div className={styles.group}>
-                  <div className={styles.groupLabel}>
-                    {tCommon("color")}:{" "}
-                    <span className={styles.groupValue}>
-                      {selectedColor ? pickText(selectedColor.name, locale) : ""}
-                    </span>
+          {/*
+            Grouped panels, not one long column of pills.
+
+            Everything below the price used to be a single undifferentiated stack — swatches,
+            sizes, method, quantity, notes, summary, button, accordion — so the eye had no way to
+            tell "configure the piece" from "place the order". Three subtly elevated surfaces
+            separate those jobs; each carries a corner mark so they are told apart at a glance
+            without inventing new copy.
+          */}
+          <div className={styles.optionsPanel}>
+            <span aria-hidden="true" className={styles.panelMark}>
+              <Ornament name={isShirt ? "fold" : "frame"} size={18} strokeWidth={1.5} />
+            </span>
+
+            {isShirt && (
+              <>
+                {product.colors.length > 0 && (
+                  <div className={styles.group}>
+                    <div className={styles.groupLabel}>
+                      {tCommon("color")}:{" "}
+                      <span className={styles.groupValue}>
+                        {selectedColor ? pickText(selectedColor.name, locale) : ""}
+                      </span>
+                    </div>
+                    <div className={styles.swatches}>
+                      {product.colors.map((c) => (
+                        <button
+                          key={c.code}
+                          type="button"
+                          title={pickText(c.name, locale)}
+                          aria-label={pickText(c.name, locale)}
+                          aria-pressed={colorCode === c.code}
+                          onClick={() => pickColor(c.code)}
+                          className={cx(styles.swatch, colorCode === c.code && styles.swatchActive)}
+                          style={{ background: c.hex }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className={styles.swatches}>
-                    {product.colors.map((c) => (
-                      <button
-                        key={c.code}
-                        type="button"
-                        title={pickText(c.name, locale)}
-                        aria-label={pickText(c.name, locale)}
-                        aria-pressed={colorCode === c.code}
-                        onClick={() => pickColor(c.code)}
-                        className={cx(styles.swatch, colorCode === c.code && styles.swatchActive)}
-                        style={{ background: c.hex }}
-                      />
-                    ))}
+                )}
+
+                {product.shirtSizes.length > 0 && (
+                  <div className={styles.group}>
+                    <div className={styles.groupLabel}>
+                      {tCommon("size")}: <span className={styles.groupValue}>{sizeCode}</span>
+                      <span className={styles.groupHint}>{t("sizeHint")}</span>
+                    </div>
+                    <div className={styles.pillRow}>
+                      {product.shirtSizes.map((s) => {
+                        const available = sizeAvailable(product, colorCode, s.code, tracked);
+                        return (
+                          <Chip
+                            key={s.code}
+                            active={sizeCode === s.code}
+                            disabled={!available}
+                            onClick={() => available && setSizeCode(s.code)}
+                            className={styles.sizePill}
+                          >
+                            {s.code}
+                          </Chip>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className={styles.group}>
+                  <div className={styles.groupLabel}>{tCommon("method")}</div>
+                  <div className={styles.pillRow}>
+                    {ALL_METHODS.map((m) => {
+                      const available = product.availableMethods.includes(m);
+                      const hint = available ? (m === "embroidery" ? t("embHint") : "") : t("methodNA");
+                      return (
+                        <Chip
+                          key={m}
+                          active={method === m}
+                          disabled={!available}
+                          onClick={() => available && setMethod(m)}
+                          className={styles.methodPill}
+                        >
+                          {methodLabel(m)}
+                          {hint && <span className={styles.pillHint}>{hint}</span>}
+                        </Chip>
+                      );
+                    })}
                   </div>
                 </div>
-              )}
+              </>
+            )}
 
-              {product.shirtSizes.length > 0 && (
+            {isPaint && (
+              <>
                 <div className={styles.group}>
                   <div className={styles.groupLabel}>
-                    {tCommon("size")}: <span className={styles.groupValue}>{sizeCode}</span>
-                    <span className={styles.groupHint}>{t("sizeHint")}</span>
+                    {tCommon("size")}:{" "}
+                    <span className={styles.groupValue}>
+                      {selectedPaintSize ? pickText(selectedPaintSize.label, locale) : ""}
+                    </span>
                   </div>
                   <div className={styles.pillRow}>
-                    {product.shirtSizes.map((s) => {
-                      const available = sizeAvailable(product, colorCode, s.code, tracked);
+                    {product.paintingSizes.map((s) => {
+                      const active = sizeCode === s.code;
                       return (
                         <Chip
                           key={s.code}
-                          active={sizeCode === s.code}
-                          disabled={!available}
-                          onClick={() => available && setSizeCode(s.code)}
-                          className={styles.sizePill}
-                        >
-                          {s.code}
-                        </Chip>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className={styles.group}>
-                <div className={styles.groupLabel}>{tCommon("method")}</div>
-                <div className={styles.pillRow}>
-                  {ALL_METHODS.map((m) => {
-                    const available = product.availableMethods.includes(m);
-                    const hint = available ? (m === "embroidery" ? t("embHint") : "") : t("methodNA");
-                    return (
-                      <Chip
-                        key={m}
-                        active={method === m}
-                        disabled={!available}
-                        onClick={() => available && setMethod(m)}
-                        className={styles.methodPill}
-                      >
-                        {methodLabel(m)}
-                        {hint && <span className={styles.pillHint}>{hint}</span>}
-                      </Chip>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          )}
-
-          {isPaint && (
-            <>
-              <div className={styles.group}>
-                <div className={styles.groupLabel}>
-                  {tCommon("size")}:{" "}
-                  <span className={styles.groupValue}>
-                    {selectedPaintSize ? pickText(selectedPaintSize.label, locale) : ""}
-                  </span>
-                </div>
-                <div className={styles.pillRow}>
-                  {product.paintingSizes.map((s) => {
-                    const active = sizeCode === s.code;
-                    return (
-                      <Chip
-                        key={s.code}
-                        active={active}
-                        onClick={() => setSizeCode(s.code)}
-                        className={styles.paintSizePill}
-                      >
-                        <span>{pickText(s.label, locale)}</span>
-                        <span className={cx(styles.pillPrice, active && styles.pillPriceActive)} dir="ltr">
-                          {priceText(s.price)}
-                        </span>
-                      </Chip>
-                    );
-                  })}
-                </div>
-                <div className={styles.customHint}>
-                  {t("customSizeQ")}{" "}
-                  <Link
-                    href={{ pathname: "/custom", query: { type: "painting" } }}
-                    className={styles.customHintLink}
-                  >
-                    {t("customSizeLink")}
-                  </Link>
-                </div>
-              </div>
-
-              {product.frames.length > 0 && (
-                <div className={styles.group}>
-                  <div className={styles.groupLabel}>{tCommon("frame")}</div>
-                  <div className={styles.pillRow}>
-                    {product.frames.map((f) => {
-                      const active = frameCode === f.code;
-                      return (
-                        <Chip
-                          key={f.code}
                           active={active}
-                          onClick={() => setFrameCode(f.code)}
-                          className={styles.framePill}
+                          onClick={() => setSizeCode(s.code)}
+                          className={styles.paintSizePill}
                         >
-                          {pickText(f.label, locale)}
-                          {f.add > 0 ? (
-                            <span className={cx(styles.frameAdd, active && styles.frameAddActive)} dir="ltr">
-                              +{priceText(f.add)}
-                            </span>
-                          ) : (
-                            <span className={cx(styles.frameAdd, active && styles.frameAddActive)}>
-                              {t("free")}
-                            </span>
-                          )}
+                          <span>{pickText(s.label, locale)}</span>
+                          <span className={cx(styles.pillPrice, active && styles.pillPriceActive)} dir="ltr">
+                            {priceText(s.price)}
+                          </span>
                         </Chip>
                       );
                     })}
                   </div>
+                  <div className={styles.customHint}>
+                    {t("customSizeQ")}{" "}
+                    <Link
+                      href={{ pathname: "/custom", query: { type: "painting" } }}
+                      className={styles.customHintLink}
+                    >
+                      {t("customSizeLink")}
+                    </Link>
+                  </div>
                 </div>
-              )}
-            </>
-          )}
 
-          <div className={styles.qtyRow}>
-            <div>
-              <div className={styles.groupLabel}>{tCommon("qty")}</div>
-              <div className={styles.qtyBox}>
-                <button
-                  type="button"
-                  className={styles.qtyBtn}
-                  onClick={() => setQty((q) => Math.max(QTY_MIN, q - 1))}
-                  aria-label={t("qtyDec")}
-                >
-                  −
-                </button>
-                <span className={styles.qtyVal} dir="ltr">
-                  {qty}
-                </span>
-                <button
-                  type="button"
-                  className={styles.qtyBtn}
-                  onClick={() => setQty((q) => Math.min(QTY_MAX, q + 1))}
-                  aria-label={t("qtyInc")}
-                >
-                  +
-                </button>
+                {product.frames.length > 0 && (
+                  <div className={styles.group}>
+                    <div className={styles.groupLabel}>{tCommon("frame")}</div>
+                    <div className={styles.pillRow}>
+                      {product.frames.map((f) => {
+                        const active = frameCode === f.code;
+                        return (
+                          <Chip
+                            key={f.code}
+                            active={active}
+                            onClick={() => setFrameCode(f.code)}
+                            className={styles.framePill}
+                          >
+                            {pickText(f.label, locale)}
+                            {f.add > 0 ? (
+                              <span className={cx(styles.frameAdd, active && styles.frameAddActive)} dir="ltr">
+                                +{priceText(f.add)}
+                              </span>
+                            ) : (
+                              <span className={cx(styles.frameAdd, active && styles.frameAddActive)}>
+                                {t("free")}
+                              </span>
+                            )}
+                          </Chip>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className={styles.orderPanel}>
+            <span aria-hidden="true" className={styles.panelMark}>
+              <Ornament name="ribbon" size={18} strokeWidth={1.5} />
+            </span>
+
+            <div className={styles.qtyRow}>
+              <div>
+                <div className={styles.groupLabel}>{tCommon("qty")}</div>
+                <div className={styles.qtyBox}>
+                  <button
+                    type="button"
+                    className={styles.qtyBtn}
+                    onClick={() => setQty((q) => Math.max(QTY_MIN, q - 1))}
+                    aria-label={t("qtyDec")}
+                  >
+                    −
+                  </button>
+                  <span className={styles.qtyVal} dir="ltr">
+                    {qty}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.qtyBtn}
+                    onClick={() => setQty((q) => Math.min(QTY_MAX, q + 1))}
+                    aria-label={t("qtyInc")}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div className={styles.notesWrap}>
+                <label htmlFor={notesId} className={styles.groupLabel}>
+                  {tCommon("notes")} <span className={styles.groupHint}>({t("optional")})</span>
+                </label>
+                <input
+                  id={notesId}
+                  value={notes}
+                  maxLength={NOTES_MAX}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={t("notesPh")}
+                  className={styles.notesInput}
+                />
               </div>
             </div>
-            <div className={styles.notesWrap}>
-              <label htmlFor={notesId} className={styles.groupLabel}>
-                {tCommon("notes")} <span className={styles.groupHint}>({t("optional")})</span>
-              </label>
-              <input
-                id={notesId}
-                value={notes}
-                maxLength={NOTES_MAX}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder={t("notesPh")}
-                className={styles.notesInput}
-              />
-            </div>
-          </div>
 
-          <div className={styles.summaryCard}>
-            <div className={styles.summaryText}>{summary}</div>
-            <div className={styles.summaryTotal}>
-              {totalPrice === null ? (
-                tCommon("manualPrice")
-              ) : (
-                <span dir="ltr">{priceText(totalPrice)}</span>
-              )}
+            <div className={styles.summaryCard}>
+              <div className={styles.summaryText}>{summary}</div>
+              <div className={styles.summaryTotal}>
+                {totalPrice === null ? (
+                  tCommon("manualPrice")
+                ) : (
+                  <span dir="ltr">{priceText(totalPrice)}</span>
+                )}
+              </div>
             </div>
-          </div>
 
-          {!soldOut ? (
-            <div className={styles.addRow}>
-              <button
-                type="button"
-                onClick={handleAdd}
-                disabled={!canAdd}
-                className={cx(styles.addBtn, added && styles.addBtnAdded)}
+            {!soldOut ? (
+              <div className={styles.addRow}>
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  disabled={!canAdd}
+                  className={cx(styles.addBtn, added && styles.addBtnAdded)}
+                >
+                  {addLabel}
+                </button>
+                <Link href="/order" className={styles.goOrder}>
+                  {tActions("viewOrder")}
+                </Link>
+              </div>
+            ) : (
+              <div className={styles.addRow}>
+                <span className={styles.soldOutPill}>{tCommon("outOfStock")}</span>
+                <Link href="/custom" className={styles.soldOutCta}>
+                  {t("soldOutCta")}
+                </Link>
+              </div>
+            )}
+
+            <div className={styles.prepLine}>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#33605A"
+                strokeWidth="2"
+                className={styles.prepIcon}
+                aria-hidden="true"
               >
-                {addLabel}
-              </button>
-              <Link href="/order" className={styles.goOrder}>
-                {tActions("viewOrder")}
-              </Link>
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+              <span>
+                {prepText ? `${tCommon("prep")}: ${prepText} · ${t("payShort")}` : t("payShort")}
+              </span>
             </div>
-          ) : (
-            <div className={styles.addRow}>
-              <span className={styles.soldOutPill}>{tCommon("outOfStock")}</span>
-              <Link href="/custom" className={styles.soldOutCta}>
-                {t("soldOutCta")}
-              </Link>
-            </div>
-          )}
-
-          <div className={styles.prepLine}>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#33605A"
-              strokeWidth="2"
-              className={styles.prepIcon}
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 7v5l3 2" />
-            </svg>
-            <span>
-              {prepText ? `${tCommon("prep")}: ${prepText} · ${t("payShort")}` : t("payShort")}
-            </span>
           </div>
 
           <div className={styles.accWrap}>

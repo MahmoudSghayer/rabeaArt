@@ -4,36 +4,81 @@
   min-height: 70vh;
 }
 
-.inner {
+/*
+  Two columns: the document and its margin.
+
+  The reading column is `minmax(0, 1fr)` rather than a fixed 780px on purpose. A fixed track will
+  not shrink when the viewport cannot afford it, and a sticky sidebar next to a track that refuses
+  to shrink is the classic way a page starts scrolling sideways. The `fr` absorbs every shortfall;
+  `.column`'s own max-width keeps the measure at 780px when there is room.
+*/
+.shell {
+  max-width: 1160px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 48px);
+  padding-block: clamp(28px, 4vw, 52px) clamp(56px, 7vw, 88px);
+}
+
+/*
+  Parked off the inline-start (the right edge, in Arabic) so it warms the title rather than the
+  table of contents. z-index 0 keeps it under both columns, which are raised to 1 — a positioned
+  child would otherwise paint over the static column's text.
+*/
+.shellGlow {
+  position: absolute;
+  z-index: 0;
+  inset-block-start: -60px;
+  inset-inline-start: -120px;
+  inline-size: min(460px, 55%);
+  block-size: 340px;
+  background: radial-gradient(circle, rgba(201, 155, 63, 0.3) 0%, rgba(201, 155, 63, 0) 70%);
+  filter: blur(var(--blur-xl));
+  pointer-events: none;
+}
+
+.column {
+  position: relative;
+  z-index: var(--z-base);
   max-width: 780px;
+  width: 100%;
   margin-inline: auto;
-  padding: clamp(32px, 5vw, 56px) clamp(16px, 4vw, 40px) clamp(56px, 7vw, 84px);
   animation: rbFadeUp var(--duration-entrance) var(--ease-standard) both;
 }
 
 .tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 26px;
+  gap: var(--space-2);
+  margin-block-end: var(--space-6);
 }
 
 .tab {
   border: 1.5px solid color-mix(in srgb, var(--color-ink) 22%, transparent);
-  background: var(--color-card);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   color: var(--color-ink);
   border-radius: var(--radius-pill);
   padding: 10px 20px;
-  font-size: 13.5px;
+  font-size: var(--text-sm);
   font-weight: 700;
-  transition: border-color var(--duration-fast) var(--ease-standard),
-    background var(--duration-fast) var(--ease-standard),
+  box-shadow: var(--shadow-1);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
     color var(--duration-fast) var(--ease-standard);
+}
+
+.tab:hover {
+  box-shadow: var(--shadow-2);
 }
 
 .tabActive {
   border-color: var(--color-ink);
-  background: var(--color-ink);
+  background-color: var(--color-ink);
+  background-image: var(--surface-ink);
   color: var(--color-paper);
+  box-shadow: var(--shadow-3);
 }
 
 .tab:focus-visible {
@@ -44,35 +89,163 @@
 .title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(30px, 4vw, 46px);
-  margin: 0 0 6px;
+  font-size: var(--text-4xl);
+  margin: 0 0 var(--space-2);
   line-height: 1.3;
 }
 
 .updated {
-  font-size: 12px;
-  color: #8a8070;
-  margin-bottom: 28px;
+  font-size: var(--text-xs);
+  /* ink-soft rather than #8a8070: the old value measured under the AA floor on paper. */
+  color: var(--color-ink-soft);
+  margin-block-end: var(--space-7);
 }
 
+/* ---------- The document sheet ---------- */
+
+.sheet {
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-3);
+  padding: clamp(20px, 3.4vw, 40px);
+}
+
+/* ---------- Contact box ---------- */
+
 .contactBox {
-  background: var(--color-paper-deep);
-  border-radius: 16px;
-  padding: 18px 20px;
-  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  background-color: var(--color-paper-deep);
+  background-image: var(--texture-linen);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--text-sm);
   line-height: 2;
   color: #57503f;
-  margin-top: 8px;
+  margin-block-start: var(--space-6);
+  box-shadow: var(--shadow-1);
+}
+
+.contactMark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: rgba(183, 71, 42, 0.1);
+  color: var(--color-sienna-deep);
 }
 
 .contactBox a {
-  color: var(--color-sienna);
+  /* sienna-deep, not sienna: this is a link — see the contrast note in tokens.css. */
+  color: var(--color-sienna-deep);
   font-weight: 600;
+  border-block-end: 1.5px solid color-mix(in srgb, var(--color-sienna) 40%, transparent);
 }
 
 .contactBox a:focus-visible {
   outline: 2px solid var(--color-sienna);
   outline-offset: 2px;
+}
+
+/* ---------- Margin table of contents ---------- */
+
+/*
+  Hidden outright below 1080px rather than merely visually hidden: an off-screen but focusable
+  list of six links sitting between the header and the document is worse for a keyboard user than
+  no list at all, and the tab switcher above already covers cross-document navigation.
+*/
+.toc {
+  display: none;
+}
+
+.tocCard {
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-lg);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-4) var(--space-3);
+}
+
+.tocList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tocLink {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--color-ink-soft);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.tocLink:hover {
+  background: color-mix(in srgb, var(--color-sienna) 9%, transparent);
+  color: var(--color-sienna-deep);
+}
+
+.tocLink:focus-visible {
+  outline: 2px solid var(--color-sienna);
+  outline-offset: 1px;
+}
+
+.tocNum {
+  flex: none;
+  font-family: var(--font-accent);
+  font-size: var(--text-sm);
+  color: var(--color-sienna-deep);
+}
+
+.tocText {
+  flex: 1;
+  text-wrap: pretty;
+}
+
+@media (min-width: 1080px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr) 224px;
+    align-items: start;
+  }
+
+  .toc {
+    display: block;
+    position: sticky;
+    z-index: var(--z-base);
+    /* Clears the sticky header (announcement strip + 66px bar) plus a breath of space. */
+    inset-block-start: 118px;
+    align-self: start;
+    /* A long enough document must never push the card past the fold. */
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .column {
+    animation: none;
+  }
+
+  .tab,
+  .tocLink {
+    transition: none;
+  }
 }
 
 /**

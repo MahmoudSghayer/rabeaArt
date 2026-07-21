@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { useCartItems, useCartStore } from "@/lib/cart/store";
 import type { CatalogLocale } from "@/lib/catalog/types";
 import { cx } from "@/lib/cx";
+import { Ornament } from "@/components/decor";
 import { Button } from "@/components/ui/Button";
 import type { OptionLabelMaps } from "../custom/fallback-options";
 import { DetailsForm } from "./DetailsForm";
@@ -110,10 +111,21 @@ export function OrderFlow({
   return (
     <div className={styles.page}>
       <div className={styles.inner}>
+        {/*
+          The three steps as a stitched progress ribbon rather than crumbs joined by hairlines:
+          a running stitch in sienna up to where you are, in pale ink beyond it. Same ribbon the
+          custom wizard uses, so the two flows read as one studio.
+        */}
         <nav className={styles.crumbs} aria-label={crumbLabels.join(" / ")}>
-          {crumbLabels.map((label, i) => (
-            <div key={label} className={styles.crumbStep}>
-              <div className={styles.crumbCell}>
+          <span aria-hidden="true" className={styles.crumbTrack} />
+          <span
+            aria-hidden="true"
+            className={styles.crumbFill}
+            style={{ inlineSize: `${step * 50}%` }}
+          />
+          <div className={styles.crumbRow}>
+            {crumbLabels.map((label, i) => (
+              <div key={label} className={styles.crumbStep}>
                 <span
                   className={cx(
                     styles.crumbNum,
@@ -127,9 +139,8 @@ export function OrderFlow({
                   {label}
                 </span>
               </div>
-              {i < 2 && <span className={styles.crumbLine} aria-hidden="true" />}
-            </div>
-          ))}
+            ))}
+          </div>
         </nav>
 
         {showEmpty && (
@@ -321,9 +332,19 @@ export function OrderFlow({
           />
         )}
 
+        {/*
+          The confirmation screen used to stack five near-identical rounded boxes — ref, status,
+          recap, next steps, actions — so nothing was more important than anything else. It is
+          now three tiers: an ink RECEIPT HEAD carrying the one thing worth writing down (the
+          order ref), a two-column body pairing what was ordered with what happens next, and a
+          bare action row on paper. Hierarchy by surface and size, not by five outlines.
+        */}
         {showDone && submitted && (
           <div className={styles.doneWrap}>
-            <div className={styles.doneBox}>
+            <section className={styles.doneHero}>
+              <span aria-hidden="true" className={styles.doneHeroGlow} />
+              <span aria-hidden="true" className={styles.doneHeroSeam} />
+
               <div className={styles.doneIcon} aria-hidden="true">
                 <svg
                   width="28"
@@ -346,6 +367,7 @@ export function OrderFlow({
                 })}
               </p>
 
+              {/* The ticket. This is the hero of the screen — everything else supports it. */}
               <div className={styles.refBox}>
                 <span className={styles.refLabel}>{t("confirmation.refLabel")}</span>
                 <span className={styles.refValue} dir="ltr">
@@ -358,11 +380,16 @@ export function OrderFlow({
               <div className={styles.statusRow}>
                 <span className={styles.statusPill}>{t("confirmation.statusNew")}</span>
               </div>
+            </section>
 
-              <div className={styles.recapBox}>
-                <div className={styles.recapTitle}>
-                  {t("confirmation.itemsTitle")} (
-                  <span dir="ltr">{computeCartTotals(submitted.items).count}</span>)
+            <div className={styles.doneGrid}>
+              <section className={styles.recapBox}>
+                <div className={styles.panelHead}>
+                  <Ornament name="press" size={16} className={styles.panelMark} />
+                  <span className={styles.recapTitle}>
+                    {t("confirmation.itemsTitle")} (
+                    <span dir="ltr">{computeCartTotals(submitted.items).count}</span>)
+                  </span>
                 </div>
                 {submitted.items.map((item) => {
                   const priced = item.unitPrice != null;
@@ -401,49 +428,61 @@ export function OrderFlow({
                     )}
                   </span>
                 </div>
-              </div>
+              </section>
 
-              <div className={styles.nextBox}>
-                <div className={styles.nextTitle}>{t("confirmation.nextTitle")}</div>
-                {[
-                  t("confirmation.next1"),
-                  t("confirmation.next2", {
-                    method: t(`confirmation.contactMethodNames.${submitted.contact}`),
-                  }),
-                  t("confirmation.next3"),
-                ].map((text, i) => (
-                  <div key={text} className={styles.nextRow}>
-                    <span className={cx(styles.nextNum, i === 0 && styles.nextNumFirst)}>{i + 1}</span>
-                    <span className={styles.nextText}>{text}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className={styles.doneCtas}>
-                <a
-                  href={waHrefFor(
-                    whatsapp,
-                    t("confirmation.waMessage", {
-                      name: submitted.customerName,
-                      ref: submitted.ref,
+              {/* What happens next, as a stitched timeline rather than a third grey box. */}
+              <section className={styles.nextBox}>
+                <div className={styles.panelHead}>
+                  <Ornament name="needle" size={16} className={styles.panelMark} />
+                  <span className={styles.nextTitle}>{t("confirmation.nextTitle")}</span>
+                </div>
+                <ol className={styles.nextList}>
+                  {[
+                    t("confirmation.next1"),
+                    t("confirmation.next2", {
+                      method: t(`confirmation.contactMethodNames.${submitted.contact}`),
                     }),
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.waBtn}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.2 1.2-1.7 1.2-.4.1-1 .1-1.6-.1a13 13 0 0 1-5.9-5.2c-.6-1-1-2.2-.6-3 .2-.4.6-.9 1-.9h.7c.2 0 .5-.1.7.5l.8 2c.1.2 0 .4-.1.6l-.5.7c-.1.2-.2.4 0 .7.5.9 1.3 1.7 2.2 2.3.3.2.5.2.7 0l.9-1c.2-.3.4-.2.7-.1l1.9.9c.3.2.5.3.5.5s.1.5-.2.9Z" />
-                  </svg>
-                  {t("confirmation.waCta")}
-                </a>
-                <a href={mailtoFor(email, t("confirmation.mailSubject", { ref: submitted.ref }))} className={styles.ctaDashedNeutral}>
-                  {t("confirmation.mailCta")}
-                </a>
-                <Link href="/shop" className={styles.ctaDashedNeutral}>
-                  {tActions("continueShopping")}
-                </Link>
-              </div>
+                    t("confirmation.next3"),
+                  ].map((text, i) => (
+                    <li key={text} className={styles.nextRow}>
+                      <span aria-hidden="true" className={styles.nextThread} />
+                      <span className={cx(styles.nextNum, i === 0 && styles.nextNumFirst)}>
+                        {i + 1}
+                      </span>
+                      <span className={styles.nextText}>{text}</span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            </div>
+
+            <div className={styles.doneCtas}>
+              <a
+                href={waHrefFor(
+                  whatsapp,
+                  t("confirmation.waMessage", {
+                    name: submitted.customerName,
+                    ref: submitted.ref,
+                  }),
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.waBtn}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.2 1.2-1.7 1.2-.4.1-1 .1-1.6-.1a13 13 0 0 1-5.9-5.2c-.6-1-1-2.2-.6-3 .2-.4.6-.9 1-.9h.7c.2 0 .5-.1.7.5l.8 2c.1.2 0 .4-.1.6l-.5.7c-.1.2-.2.4 0 .7.5.9 1.3 1.7 2.2 2.3.3.2.5.2.7 0l.9-1c.2-.3.4-.2.7-.1l1.9.9c.3.2.5.3.5.5s.1.5-.2.9Z" />
+                </svg>
+                {t("confirmation.waCta")}
+              </a>
+              <a
+                href={mailtoFor(email, t("confirmation.mailSubject", { ref: submitted.ref }))}
+                className={styles.ctaDashedNeutral}
+              >
+                {t("confirmation.mailCta")}
+              </a>
+              <Link href="/shop" className={styles.ctaDashedNeutral}>
+                {tActions("continueShopping")}
+              </Link>
             </div>
           </div>
         )}

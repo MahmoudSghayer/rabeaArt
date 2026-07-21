@@ -1,175 +1,502 @@
+/*
+  Shop listing.
+
+  Before the redesign this was the flattest page on the site: a heading, a filter bar and a card
+  grid, all on bare paper with no background treatment at all. Two things fix that — the category
+  gets a MATERIAL band of its own (linen, not paper) carrying the studio's marks, and the empty
+  state stops being the shared dashed rectangle that appears in four other places.
+*/
+
 .page {
   font-family: var(--font-body);
   color: var(--color-ink);
   min-height: 70vh;
 }
 
-.inner {
-  max-width: 1280px;
-  margin-inline: auto;
-  padding: clamp(28px, 4vw, 48px) clamp(16px, 4vw, 40px) clamp(56px, 7vw, 84px);
+/* ---------- Category hero band ---------- */
+
+/*
+  The band is a TexturedSection (tone="deep" + stitched top seam). Its own bottom edge is faded
+  into the page's paper here rather than ruled: a hairline under a textured band reads as a box,
+  a fade reads as one sheet laid over another.
+*/
+.heroBand {
+  position: relative;
 }
 
-.headerRow {
-  display: flex;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 8px;
+.heroBand::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 64px;
+  z-index: 0;
+  background: linear-gradient(180deg, rgba(246, 240, 227, 0) 0%, var(--color-paper) 100%);
+  pointer-events: none;
 }
 
-.headerSpacer {
-  flex: 1;
+.heroInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+  padding-block: clamp(36px, 4.5vw, 64px) clamp(40px, 5vw, 64px);
+}
+
+.heroText {
+  min-width: 0;
 }
 
 .kicker {
-  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid rgba(35, 32, 27, 0.16);
+  border-radius: var(--radius-pill);
+  /* sienna-deep, not sienna: this is text on a tinted band — see the note in tokens.css. */
+  color: var(--color-sienna-deep);
+  background-color: color-mix(in srgb, var(--color-card) 68%, transparent);
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 1px;
+  box-shadow: var(--shadow-1);
+}
+
+.kickerMark {
+  flex: none;
   color: var(--color-sienna);
 }
 
 .title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(32px, 4.4vw, 52px);
-  margin: 8px 0 4px;
-  line-height: 1.25;
+  font-size: var(--text-4xl);
+  margin: var(--space-4) 0 var(--space-2);
+  line-height: 1.22;
+  letter-spacing: -0.5px;
 }
 
 .subtitle {
   margin: 0;
-  font-size: 14px;
-  color: #8a8070;
+  font-size: var(--text-lg);
+  line-height: 1.8;
+  color: var(--color-ink-soft);
+  max-width: 46ch;
+  text-wrap: pretty;
 }
 
 .customLink {
-  border: 1.5px dashed rgba(183, 71, 42, 0.55);
-  color: var(--color-sienna);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-6);
+  border: 1px solid rgba(183, 71, 42, 0.42);
+  color: var(--color-sienna-deep);
   border-radius: var(--radius-pill);
-  padding: 10px 18px;
-  font-size: 13.5px;
-  font-weight: 600;
-  background: rgba(183, 71, 42, 0.05);
-  transition: background var(--duration-fast) var(--ease-standard);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-base);
+  font-weight: 700;
+  background-color: color-mix(in srgb, var(--color-card) 72%, transparent);
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--duration-md) var(--ease-spring),
+    box-shadow var(--duration-md) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
 }
 
 .customLink:hover {
-  background: rgba(183, 71, 42, 0.12);
+  transform: translateY(-2px);
+  border-color: var(--color-sienna);
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-3);
+}
+
+.customLink:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 3px;
+}
+
+/* ---------- Hero marks (decorative) ---------- */
+
+/*
+  Two mounted pieces and a category glyph. Purely decorative — aria-hidden in the markup, no
+  focusable node — but it is what stops the band being a coloured rectangle with a heading in it.
+*/
+.heroArt {
+  position: relative;
+  inline-size: clamp(210px, 26vw, 310px);
+  block-size: clamp(200px, 24vw, 272px);
+  flex: none;
+}
+
+.heroPlate {
+  position: absolute;
+  display: block;
+  padding: 9px;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-line);
+}
+
+.heroPlateBack {
+  inset-inline-start: 0;
+  inset-block-start: 2%;
+  inline-size: 58%;
+  border-radius: 5px;
+  transform: rotate(-6deg);
+  box-shadow: var(--shadow-4);
+}
+
+.heroPlateFront {
+  inset-inline-end: 2%;
+  inset-block-end: 0;
+  inline-size: 54%;
+  border-radius: var(--radius-input);
+  transform: rotate(6deg);
+  box-shadow: var(--shadow-5);
+}
+
+.heroPlateArt {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(35, 32, 27, 0.12);
+}
+
+.heroPlateFront .heroPlateArt {
+  aspect-ratio: 1;
+  border-radius: 6px;
+}
+
+/*
+  The halftone screen goes on a pseudo-element with the `background` SHORTHAND, because
+  --texture-halftone carries its own position/size — shorthand syntax, not a valid <image>. Fed
+  to `background-image` (which is what printSurface() builds) the whole declaration is invalid
+  and the art disappears; that is why this one is hand-rolled instead of using the helper.
+*/
+.heroPlateArtPrint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--texture-halftone);
+  pointer-events: none;
+}
+
+/* The category glyph, pinned where the two pieces overlap so it ties them together. */
+.heroBadge {
+  position: absolute;
+  inset-inline-start: 46%;
+  inset-block-start: 34%;
+  z-index: var(--z-raised);
+  display: grid;
+  place-items: center;
+  inline-size: 52px;
+  block-size: 52px;
+  margin-inline-start: -26px;
+  border-radius: var(--radius-pill);
+  color: var(--color-sienna-deep);
+  background-color: color-mix(in srgb, var(--color-paper) 80%, transparent);
+  border: 1px solid rgba(183, 71, 42, 0.3);
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  box-shadow: var(--shadow-2);
+}
+
+/*
+  Single column below the fold-point, with the marks moved under the copy at a smaller size
+  rather than dropped. A band with nothing but a heading in it is most of the way back to the
+  flat page this replaced, and 200px still fits the narrowest phone without widening the page.
+*/
+@media (max-width: 860px) {
+  .heroInner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+
+  .heroArt {
+    inline-size: 208px;
+    block-size: 176px;
+  }
+}
+
+/* ---------- Listing body ---------- */
+
+.inner {
+  position: relative;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: clamp(16px, 2.5vw, 28px) clamp(16px, 4vw, 40px) clamp(56px, 7vw, 84px);
 }
 
 .countLine {
-  font-size: 12.5px;
-  color: #8a8070;
-  margin: 14px 2px 16px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+  margin: var(--space-5) var(--space-1) var(--space-5);
+}
+
+/*
+  A hairline that fades out at both ends, so the count reads as a caption on the grid rather than
+  a ruled divider. Symmetric on purpose — a one-sided fade would have to be flipped for LTR.
+*/
+.countRule {
+  flex: 1;
+  block-size: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(35, 32, 27, 0) 0%,
+    var(--color-line) 45%,
+    var(--color-line) 55%,
+    rgba(35, 32, 27, 0) 100%
+  );
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 235px), 1fr));
-  gap: 22px;
+  gap: var(--space-6);
 }
 
+/* ---------- Empty state ---------- */
+
+/*
+  Not the shared dashed box.
+
+  A search with no matches is the moment the shop most needs to look like a studio rather than a
+  broken query, so this is a composed still-life: two mounted pieces set aside, a pair of shears,
+  on a grained card. Same idea as the homepage's empty featured band, different arrangement, so
+  the two do not read as one repeated template.
+*/
 .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
   text-align: center;
-  padding: 70px 20px;
-  border: 1.5px dashed rgba(35, 32, 27, 0.22);
-  border-radius: var(--radius-card-lg);
-  background: rgba(251, 247, 238, 0.6);
+  /* Constrained: full-measure, an empty state is mostly a very wide expanse of nothing. */
+  max-width: 720px;
+  margin-inline: auto;
+  padding: clamp(40px, 6vw, 64px) var(--space-6);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  box-shadow: var(--shadow-2);
 }
 
-.emptyGlyph {
-  font-family: var(--font-display);
-  font-size: 46px;
-  color: var(--color-sienna);
-  line-height: 1;
+.emptyStack {
+  position: relative;
+  inline-size: 168px;
+  block-size: 148px;
+  margin-block-end: var(--space-2);
+}
+
+.emptyPlate {
+  position: absolute;
+  display: block;
+  padding: 8px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+}
+
+.emptyPlateBack {
+  inset-inline-start: 2px;
+  inset-block-start: 0;
+  inline-size: 88px;
+  border-radius: 4px;
+  transform: rotate(-7deg);
+  box-shadow: var(--shadow-3);
+}
+
+.emptyPlateFront {
+  inset-inline-end: 2px;
+  inset-block-end: 0;
+  inline-size: 84px;
+  border-radius: var(--radius-sm);
+  transform: rotate(5deg);
+  box-shadow: var(--shadow-4);
+}
+
+.emptyArt {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: 2px;
+  opacity: 0.72;
+  box-shadow: inset 0 0 0 1px rgba(35, 32, 27, 0.12);
+}
+
+/* Halftone via the `background` shorthand — see the note on .heroPlateArtPrint. */
+.emptyArtPrint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--texture-halftone);
+  pointer-events: none;
+}
+
+.emptyMark {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 38%;
+  z-index: var(--z-raised);
+  display: grid;
+  place-items: center;
+  inline-size: 46px;
+  block-size: 46px;
+  margin-inline-start: -23px;
+  border-radius: var(--radius-pill);
+  color: var(--color-sienna-deep);
+  background: var(--color-card);
+  border: 1px solid rgba(183, 71, 42, 0.28);
+  box-shadow: var(--shadow-2);
+  transform: rotate(-10deg);
 }
 
 .emptyTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 24px;
-  margin: 12px 0 6px;
+  font-size: var(--text-2xl);
+  margin: 0;
 }
 
 .emptySub {
-  font-size: 13.5px;
-  color: #8a8070;
-  margin: 0 0 18px;
+  font-size: var(--text-base);
+  line-height: 1.9;
+  color: var(--color-ink-soft);
+  margin: 0;
+  max-width: 44ch;
+  text-wrap: pretty;
 }
 
 .emptyReset {
   display: inline-block;
+  margin-block-start: var(--space-2);
   border: none;
   background: var(--color-ink);
   color: var(--color-paper);
   border-radius: var(--radius-pill);
-  padding: 11px 22px;
-  font-size: 13.5px;
-  font-weight: 600;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
+  font-weight: 700;
+  box-shadow: var(--shadow-2);
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    transform var(--duration-md) var(--ease-spring),
+    box-shadow var(--duration-md) var(--ease-standard);
 }
 
 .emptyReset:hover {
-  background: var(--color-sienna);
+  background: var(--color-sienna-deep);
   color: #fff3e4;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-4);
 }
+
+.emptyReset:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 3px;
+}
+
+/* ---------- Pagination ---------- */
 
 .pagination {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-top: 36px;
+  gap: var(--space-3);
+  margin-top: clamp(32px, 4vw, 48px);
   flex-wrap: wrap;
 }
 
 .pageArrow {
-  border: 1px solid rgba(35, 32, 27, 0.2);
-  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   color: var(--color-ink);
   border-radius: var(--radius-pill);
-  padding: 8px 16px;
-  font-size: 13px;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
   font-weight: 600;
+  box-shadow: var(--shadow-1);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .pageArrow:hover {
   border-color: var(--color-sienna);
-  color: var(--color-sienna);
+  color: var(--color-sienna-deep);
+  box-shadow: var(--shadow-2);
+}
+
+.pageArrow:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 3px;
 }
 
 .pageArrowDisabled {
   opacity: 0.4;
   pointer-events: none;
+  box-shadow: none;
 }
 
 .pageNumbers {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .pageNum {
   display: grid;
   place-items: center;
-  min-width: 32px;
-  height: 32px;
+  min-width: 34px;
+  height: 34px;
   border-radius: var(--radius-pill);
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-ink);
+  transition: background var(--duration-fast) var(--ease-standard);
 }
 
 .pageNum:hover {
   background: var(--color-paper-deep);
 }
 
+.pageNum:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 2px;
+}
+
 .pageNumActive {
   background: var(--color-ink);
   color: var(--color-paper);
+  box-shadow: var(--shadow-2);
 }
 
 .pageEllipsis {
-  padding: 0 4px;
-  color: #8a8070;
+  padding: 0 var(--space-1);
+  color: var(--color-ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customLink,
+  .emptyReset,
+  .pageArrow,
+  .pageNum {
+    transition: none;
+  }
+
+  .customLink:hover,
+  .emptyReset:hover {
+    transform: none;
+  }
 }

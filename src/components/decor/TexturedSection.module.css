@@ -67,33 +67,46 @@
 }
 
 /*
-  Torn deckle edge. The mask is applied to a thin overlay strip rather than to .band itself,
-  because masking the band would clip its children — including anything that intentionally
-  overhangs, like a floating card.
+  Torn deckle edge.
+
+  These strips must sit INSIDE the band. They were originally placed just outside it
+  (`inset-block-start: -11px`) so the band's own texture would extend past its edge in a torn
+  shape — but `.band` carries `overflow: clip` to contain the glow, which clipped them away
+  entirely. `edge="deckle"` was silently doing nothing at all, on every band that asked for it.
+
+  So instead of the band bleeding outward, the surrounding page colour is painted INWARD through
+  the deckle mask, tearing a strip out of the band's top and bottom edges. Same read, and it
+  survives the clip. `--deckle-bleed` lets a caller match whatever actually sits above and below;
+  it defaults to the page's paper.
 */
 .edge-deckle::before,
 .edge-deckle::after {
   content: "";
   position: absolute;
   inset-inline: 0;
-  height: 12px;
-  background: inherit;
+  height: 11px;
+  z-index: var(--z-decor);
+  background-color: var(--deckle-bleed, var(--color-paper));
+  mask-image: var(--texture-deckle);
+  mask-size: 400px 16px;
+  mask-repeat: repeat-x;
   pointer-events: none;
 }
 
 .edge-deckle::before {
-  inset-block-start: -11px;
-  mask-image: var(--texture-deckle);
-  mask-size: 400px 16px;
-  mask-repeat: repeat-x;
+  inset-block-start: 0;
 }
 
 .edge-deckle::after {
-  inset-block-end: -11px;
-  mask-image: var(--texture-deckle);
-  mask-size: 400px 16px;
-  mask-repeat: repeat-x;
+  inset-block-end: 0;
   transform: scaleY(-1);
+}
+
+@media (forced-colors: active) {
+  .edge-deckle::before,
+  .edge-deckle::after {
+    display: none;
+  }
 }
 
 /* A running-stitch seam along the top edge — the embroidery equivalent of a rule. */
@@ -117,7 +130,15 @@
 */
 .glow {
   position: absolute;
-  z-index: var(--z-decor);
+  /*
+    BEHIND the content, not above it.
+
+    This sat at --z-decor (2) while .inner sits at --z-base (1), so the glow tinted the text it
+    was meant to sit behind — worst in a band's top inline corner, which is exactly where a
+    section heading or a sticky sub-nav tends to live. z-index 0 keeps it inside the band's
+    isolated stacking context and under everything in .inner.
+  */
+  z-index: 0;
   inline-size: min(520px, 60%);
   block-size: 420px;
   inset-block-start: -140px;

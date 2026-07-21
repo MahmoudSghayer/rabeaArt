@@ -2,176 +2,378 @@
   font-family: var(--font-body);
   color: var(--color-ink);
   min-height: 70vh;
+  /* The intro's ambient wash and the card watermarks both overhang their boxes. */
+  overflow: clip;
 }
 
 .inner {
   max-width: 1080px;
   margin-inline: auto;
-  padding: clamp(32px, 5vw, 60px) clamp(16px, 4vw, 40px) clamp(56px, 7vw, 84px);
+  padding: clamp(32px, 5vw, 60px) clamp(16px, 4vw, 40px) clamp(40px, 6vw, 64px);
 }
 
+/* ---------- Intro ---------- */
+
+.introWrap {
+  position: relative;
+  isolation: isolate;
+  margin-block-end: var(--space-9);
+}
+
+.introAmbient {
+  /* Behind the copy. AmbientField defaults to the decor layer, which would paint over it. */
+  z-index: 0;
+  /* Reach past the text block so the wash reads as light in the room, not a rectangle. */
+  inset: -60px -8% -40px;
+  /*
+    AmbientField clips itself to its own box, so inside a measured column its blur ends on a hard
+    rectangle — a visible seam across the page. Fading the field's own edges is what turns it back
+    into light.
+  */
+  mask-image: radial-gradient(75% 75% at 50% 45%, #000 30%, transparent 100%);
+}
+
+/*
+  Above the ambient field unconditionally. AmbientField parks itself on the decor layer and the
+  `z-index: 0` override above depends on this module winning the cascade, which is bundle-order —
+  raising the copy instead means the text is on top either way.
+*/
 .intro {
+  position: relative;
+  z-index: var(--z-raised);
   text-align: center;
-  margin-bottom: 34px;
   animation: rbFadeUp var(--duration-entrance) var(--ease-standard) both;
 }
 
 .kicker {
-  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid rgba(35, 32, 27, 0.2);
+  border-radius: var(--radius-pill);
+  padding: 7px 14px;
+  font-size: var(--text-xs);
   font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--color-sienna);
+  letter-spacing: 0.6px;
+  /* sienna-deep, not sienna: this is text — see the contrast note in tokens.css. */
+  color: var(--color-sienna-deep);
+  background: rgba(251, 247, 238, 0.7);
 }
 
 .title {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(32px, 4.6vw, 54px);
-  margin: 10px 0 8px;
+  margin: var(--space-3) 0 var(--space-2);
   line-height: 1.3;
 }
 
 .sub {
   margin-inline: auto;
-  font-size: 14.5px;
+  font-size: var(--text-base);
   color: #57503f;
   line-height: 2;
   max-width: 54ch;
 }
 
+/* ---------- Channel cards ---------- */
+
 .cardsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: var(--space-4);
+  margin-block-end: var(--space-5);
 }
 
 /*
- * .card layers on top of the shared ui/Card primitive (cardStyles.card + .padded, applied
- * alongside this class in page.tsx) — only the link behaviour and hover lift live here.
- * .waCard can't reuse cardStyles.card's background/border (it needs the inverted dark
- * colourway), so it repeats Card's shape tokens (radius/shadow) directly instead of overriding
- * cardStyles.card's colours, which would depend on fragile cross-module CSS ordering.
- */
-.card,
-.waCard {
+  Reveal owns the entrance; the card inside owns the hover lift. Two modules declaring `transform`
+  on the same node resolves by bundle order, which is not something to rely on.
+*/
+.cardCell {
   display: block;
-  transition: transform var(--duration-standard) var(--ease-standard);
 }
 
-.card:hover,
-.waCard:hover {
+/*
+  These no longer layer on the shared ui/Card primitive. Each card overrides Card's radius,
+  shadow, background AND border to carry its own accent, at which point inheriting from it is a
+  cross-module ordering bet for no reuse. The shape tokens are the same ones Card uses.
+*/
+.card {
+  position: relative;
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  padding: var(--space-6);
+  border-radius: var(--radius-card-lg);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  box-shadow: var(--shadow-2);
+  transition:
+    transform var(--duration-md) var(--ease-standard),
+    box-shadow var(--duration-md) var(--ease-standard),
+    border-color var(--duration-md) var(--ease-standard);
+}
+
+/* A seam of the card's own colour along its top edge — four cards, four different threads. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 3px;
+  /* Symmetric, so it needs no RTL variant. */
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--card-accent) 8%, transparent),
+    var(--card-accent) 38%,
+    var(--card-accent) 62%,
+    color-mix(in srgb, var(--card-accent) 8%, transparent)
+  );
+  pointer-events: none;
+}
+
+/*
+  Only the two links lift on hover; the informational cards are not interactive and should not
+  pretend to be.
+*/
+.card:hover:not(.cardStatic) {
   transform: translateY(-4px);
+  box-shadow: var(--shadow-5);
+  border-color: color-mix(in srgb, var(--card-accent) 45%, var(--color-line));
 }
 
-.card:focus-visible,
-.waCard:focus-visible {
+.card:focus-visible {
   outline: 2px solid var(--color-sienna);
   outline-offset: 2px;
 }
 
-.waCard {
-  background: var(--color-ink);
-  color: var(--color-paper);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+/* The oversized studio glyph, bled off the outer corner. */
+.cardMark {
+  position: absolute;
+  inset-block-start: -26px;
+  inset-inline-end: -30px;
+  color: var(--card-accent);
+  opacity: 0.1;
+  pointer-events: none;
+  transition: transform var(--duration-lg) var(--ease-out-expo);
+}
+
+.card:hover .cardMark {
+  transform: rotate(-8deg) scale(1.06);
+}
+
+.cardIcon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--card-accent) 12%, transparent);
+  color: var(--card-ink);
 }
 
 .cardTitle {
+  position: relative;
   font-weight: 700;
-  font-size: 16px;
-  margin: 12px 0 4px;
-}
-
-.cardSubDark {
-  font-size: 12.5px;
-  opacity: 0.75;
-  line-height: 1.8;
+  font-size: var(--text-md);
+  margin: var(--space-4) 0 var(--space-1);
 }
 
 .cardSub {
-  font-size: 12.5px;
-  color: #8a8070;
+  position: relative;
+  font-size: var(--text-xs);
+  /* ink-soft, not the old #8a8070: that measured 3.6:1 on card stock, under the AA floor. */
+  color: var(--color-ink-soft);
   line-height: 1.8;
 }
 
-.cardValueOchre,
-.cardValueSienna,
-.cardValueTeal {
-  font-size: 14px;
+.cardValue {
+  position: relative;
+  font-size: var(--text-base);
   font-weight: 600;
-  margin-top: 10px;
+  margin-block-start: var(--space-3);
+  color: var(--card-ink);
 }
 
-.cardValueOchre {
-  color: var(--color-ochre);
+/* ---------- Per-card identity ---------- */
+
+/*
+  --card-accent is the FILL (seam, medallion tint, watermark); --card-ink is the accessible text
+  partner for it. They differ for sienna on purpose — see the contrast note in tokens.css.
+*/
+
+.cardWa {
+  --card-accent: var(--color-ochre);
+  --card-ink: var(--color-ochre);
+  background-color: var(--color-ink);
+  background-image: var(--surface-ink);
+  border-color: rgba(246, 240, 227, 0.14);
+  color: var(--color-paper);
+  box-shadow: var(--shadow-4);
 }
 
-.cardValueSienna {
-  color: var(--color-sienna);
+.cardWa .cardSub {
+  color: rgba(246, 240, 227, 0.72);
 }
 
-.cardValueTeal {
-  color: var(--color-teal);
+.cardWa .cardMark {
+  opacity: 0.16;
 }
+
+.cardMail {
+  --card-accent: var(--color-sienna);
+  --card-ink: var(--color-sienna-deep);
+}
+
+.cardIg {
+  --card-accent: var(--color-teal);
+  --card-ink: var(--color-teal);
+}
+
+.cardHours {
+  --card-accent: var(--color-ochre);
+  --card-ink: color-mix(in srgb, var(--color-ochre) 62%, var(--color-ink));
+}
+
+/* ---------- Pickup note ---------- */
 
 .pickupNote {
   display: flex;
-  gap: 10px;
+  gap: var(--space-3);
   align-items: flex-start;
-  background: color-mix(in srgb, var(--color-teal) 8%, transparent);
+  background-color: color-mix(in srgb, var(--color-teal) 8%, transparent);
+  background-image: var(--texture-grain);
   border: 1px dashed color-mix(in srgb, var(--color-teal) 50%, transparent);
-  border-radius: 14px;
-  padding: 13px 17px;
-  font-size: 13px;
+  border-radius: var(--radius-input);
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--text-sm);
   line-height: 1.9;
   color: #2e5550;
-  margin-bottom: 44px;
+  box-shadow: var(--shadow-1);
 }
 
 .pickupIcon {
   flex: none;
-  margin-top: 4px;
+  margin-block-start: 4px;
 }
 
-.faqWrap {
-  max-width: 840px;
-  margin-inline: auto;
+/* ---------- FAQ band ---------- */
+
+/* The sticky header is ~100px tall; without this the #faq jump lands under it. */
+.faqBand {
+  scroll-margin-block-start: 112px;
+}
+
+.faqInner {
+  max-width: 880px;
+  padding-block: clamp(44px, 6vw, 76px);
+}
+
+.faqHead {
+  text-align: center;
+  margin-block-end: var(--space-8);
+}
+
+.faqMark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto var(--space-4);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-card);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-2);
+  color: var(--color-sienna-deep);
+  transform: rotate(-10deg);
 }
 
 .faqTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(26px, 3.4vw, 40px);
-  margin: 0 0 6px;
-  text-align: center;
+  font-size: var(--text-3xl);
+  margin: 0 0 var(--space-2);
+  line-height: 1.3;
 }
 
 .faqSub {
-  text-align: center;
-  font-size: 13.5px;
-  color: #8a8070;
-  margin: 0 0 22px;
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+  margin: 0;
 }
 
+/* ---------- Still-a-question box ---------- */
+
 .stillBox {
+  position: relative;
   text-align: center;
-  margin-top: 30px;
-  background: var(--color-paper-deep);
-  border-radius: 18px;
-  padding: 24px;
+  margin-block-start: var(--space-10);
+  background-color: var(--color-ink);
+  background-image: var(--surface-ink);
+  color: var(--color-paper);
+  border-radius: var(--radius-panel);
+  padding: var(--space-10) var(--space-6) var(--space-8);
+  box-shadow: var(--shadow-5);
+}
+
+/* The needle sits on the box's edge, half in and half out, like a pin through paper. */
+.stillMark {
+  position: absolute;
+  inset-block-start: -26px;
+  inset-inline-start: 50%;
+  margin-inline-start: -26px;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-paper-deep);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-3);
+  color: var(--color-sienna-deep);
+  transform: rotate(-24deg);
+  pointer-events: none;
 }
 
 .stillQ {
+  font-family: var(--font-display);
   font-weight: 700;
-  font-size: 15px;
-  margin-bottom: 6px;
+  font-size: var(--text-xl);
+  margin-block-end: var(--space-2);
 }
 
 .stillSub {
-  font-size: 13px;
-  color: #57503f;
-  margin-bottom: 16px;
+  font-size: var(--text-sm);
+  color: rgba(246, 240, 227, 0.75);
+  margin-block-end: var(--space-5);
+  line-height: 1.9;
+}
+
+/* ---------- Motion gating ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .card,
+  .cardMark {
+    animation: none;
+    transition: none;
+  }
+
+  .card:hover:not(.cardStatic) {
+    transform: none;
+  }
+
+  .card:hover .cardMark {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .cardMark {
+    display: none;
+  }
 }
 
 /**

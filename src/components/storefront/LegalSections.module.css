@@ -1,28 +1,107 @@
+/*
+  Six heading-and-paragraph pairs on bare paper was the emptiest layout on the site. The numeral
+  is a struck medallion hanging in the section's own margin now, and the rule between sections is
+  a run of stitches rather than a hairline — the same vocabulary the rest of the storefront uses.
+*/
+
 .section {
-  margin-bottom: 26px;
+  position: relative;
+  padding-inline-start: 62px;
+  padding-block-end: var(--space-7);
+  margin-block-end: var(--space-7);
+  /*
+    The header is sticky and ~100px tall, so a TOC jump would otherwise land the heading
+    underneath it. This is the one thing an in-page table of contents cannot do without.
+  */
+  scroll-margin-block-start: 118px;
+}
+
+.section:last-child {
+  padding-block-end: 0;
+  margin-block-end: 0;
+}
+
+/* A stitched seam between sections instead of a ruled line. */
+.section:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  height: 8px;
+  background-image: var(--texture-stitch);
+  background-repeat: repeat-x;
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .heading {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 21px;
-  margin: 0 0 10px;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
+  font-size: var(--text-xl);
+  margin: 0 0 var(--space-3);
+  line-height: 1.45;
+}
+
+.headingText {
+  display: inline;
 }
 
 .num {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-paper);
+  background-image: var(--texture-grain);
+  box-shadow: var(--shadow-1);
   font-family: var(--font-accent);
-  font-size: 16px;
-  color: var(--color-sienna);
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1;
+  /* sienna-deep, not sienna: see the contrast note in tokens.css. */
+  color: var(--color-sienna-deep);
+  transition:
+    background-color var(--duration-md) var(--ease-standard),
+    color var(--duration-md) var(--ease-standard),
+    border-color var(--duration-md) var(--ease-standard);
+}
+
+/* Jumped to from the table of contents: the medallion inks in, so the eye lands on it. */
+.section:target .num {
+  background-color: var(--color-sienna);
+  background-image: var(--texture-press);
+  border-color: var(--color-sienna);
+  color: #fff3e4;
 }
 
 .body {
-  font-size: 14px;
+  font-size: var(--text-base);
   line-height: 2.2;
   color: #3b372f;
   margin: 0;
   text-wrap: pretty;
   white-space: pre-line;
+}
+
+@media (max-width: 560px) {
+  .section {
+    padding-inline-start: 50px;
+  }
+
+  .num {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .num {
+    transition: none;
+  }
 }

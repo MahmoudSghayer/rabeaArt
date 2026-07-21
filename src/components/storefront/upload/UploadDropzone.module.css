@@ -1,78 +1,242 @@
+/**
+ * The upload step is the emotional centre of the custom flow — it is the moment a person hands
+ * over their idea. It used to be a 2px dashed rectangle, which is the visual language of a
+ * placeholder, not of a studio taking delivery of your artwork.
+ *
+ * Everything here is built from the shared texture system: a thread-stitch seam instead of a
+ * dashed rule, canvas under the thumbnails, and upload progress drawn as a running stitch being
+ * pulled closed.
+ */
+
 .wrap {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--space-5);
 }
+
+/* ------------------------------------------------------------------ dropzone */
 
 .dropzone {
-  border: 2px dashed rgba(183, 71, 42, 0.5);
-  border-radius: 18px;
-  padding: clamp(24px, 4vw, 40px);
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--radius-panel);
+  padding: clamp(var(--space-7), 5vw, var(--space-12)) var(--space-5);
   text-align: center;
   cursor: pointer;
-  background: rgba(183, 71, 42, 0.04);
-  color: var(--color-sienna);
-  transition: background var(--duration-fast) var(--ease-standard);
+  color: var(--color-sienna-deep);
+  background-color: rgba(183, 71, 42, 0.05);
+  background-image: var(--texture-canvas), var(--texture-grain);
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--duration-md) var(--ease-spring),
+    box-shadow var(--duration-md) var(--ease-standard),
+    background-color var(--duration-md) var(--ease-standard);
 }
 
-.dropzone:hover,
+/*
+  The seam. Four stitch runs pinned to the four edges — a real embroidered border rather than
+  `border: dashed`, which is the browser's idea of "unfinished" and reads as such.
+*/
+.dropSeam {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.8;
+  background-image: var(--texture-stitch-sienna), var(--texture-stitch-sienna),
+    var(--texture-stitch-sienna), var(--texture-stitch-sienna);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-position: left top, left bottom, left top, right top;
+  /*
+    The tile's OWN size (16×8), never `100% 8px`. Sizing a 16px stitch tile to the full width
+    stretches its two dashes into one continuous hairline — which is precisely the ruled line
+    this was meant to replace. The vertical runs get the tile turned on its side.
+  */
+  background-size: 16px 8px, 16px 8px, 8px 16px, 8px 16px;
+  transition: opacity var(--duration-md) var(--ease-standard);
+}
+
+/* Parked at zero opacity so the lift has something to bloom into on drag-over. */
+.dropGlow {
+  position: absolute;
+  inset: -10%;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(60% 60% at 50% 50%, rgba(183, 71, 42, 0.3), rgba(183, 71, 42, 0) 70%);
+  transition: opacity var(--duration-md) var(--ease-standard);
+}
+
+.dropzone:hover {
+  background-color: rgba(183, 71, 42, 0.08);
+  box-shadow: var(--shadow-2);
+}
+
+/*
+  The real lift. A drop target has to answer "yes, let go here" before the pointer releases —
+  so the plate rises, the glow blooms and the seam brightens, all at once.
+*/
+.dropzoneOver {
+  transform: translateY(-5px);
+  background-color: rgba(183, 71, 42, 0.12);
+  box-shadow: var(--shadow-5), var(--shadow-glow-sienna);
+}
+
+.dropzoneOver .dropGlow {
+  opacity: 1;
+}
+
+.dropzoneOver .dropSeam {
+  opacity: 1;
+}
+
+.dropzoneOver .dropSheetFront {
+  transform: rotate(-2deg) translateY(-6px);
+}
+
+.dropzoneOver .dropSheetBack {
+  transform: rotate(7deg) translateY(3px);
+}
+
 .dropzone:focus-visible {
-  background: rgba(183, 71, 42, 0.09);
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 3px;
 }
 
-.dropzone:focus-visible {
-  outline: 2px solid var(--color-sienna);
-  outline-offset: 2px;
-}
-
-.dropzone svg {
+/* The icon rests on two stacked sheets of paper — an inbox, not an arrow floating in space. */
+.dropPlate {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 84px;
+  block-size: 84px;
   margin-inline: auto;
+  margin-block-end: var(--space-4);
+}
+
+.dropSheetBack,
+.dropSheetFront {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line);
+  transition: transform var(--duration-lg) var(--ease-spring);
+}
+
+.dropSheetBack {
+  background-color: var(--color-paper-deep);
+  background-image: var(--texture-linen);
+  transform: rotate(9deg);
+  box-shadow: var(--shadow-1);
+}
+
+.dropSheetFront {
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  transform: rotate(-3deg);
+  box-shadow: var(--shadow-2);
+}
+
+.dropIcon {
+  position: relative;
 }
 
 .dropTitle {
   font-weight: 700;
-  font-size: 15.5px;
-  margin: 12px 0 5px;
+  font-size: var(--text-md);
+  margin-block: 0 var(--space-1);
   color: var(--color-ink);
 }
 
 .dropHint {
-  font-size: 12.5px;
-  color: #8a8070;
+  font-size: var(--text-xs);
+  color: var(--color-ink-soft);
 }
 
 .hiddenInput {
   display: none;
 }
 
+/* ------------------------------------------------------------------ errors */
+
 .errorBanner {
-  font-size: 12.5px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
   color: var(--color-sienna-deep);
   background: #f6e2da;
-  border-radius: 10px;
-  padding: 9px 14px;
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
+  line-height: 1.7;
 }
+
+.errorMark {
+  flex: none;
+  margin-block-start: 2px;
+}
+
+/* ------------------------------------------------------------------ thumbnails */
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .tile {
-  background: #fff;
-  border: 1px solid rgba(35, 32, 27, 0.16);
-  border-radius: 14px;
-  padding: 8px;
   position: relative;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-2);
+  box-shadow: var(--shadow-1);
+  transition:
+    box-shadow var(--duration-md) var(--ease-standard),
+    border-color var(--duration-md) var(--ease-standard);
+}
+
+.tile:hover {
+  box-shadow: var(--shadow-3);
+}
+
+.tileDone {
+  border-color: rgba(63, 112, 72, 0.45);
+}
+
+.tileError {
+  border-color: rgba(143, 48, 24, 0.5);
+}
+
+/* A mounted print: the photo sits inside a shallow frame with the weave laid over it. */
+.thumbFrame {
+  position: relative;
+  display: block;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-inset-press);
 }
 
 .thumb {
+  display: block;
   aspect-ratio: 4 / 3;
-  border-radius: 9px;
   background-color: var(--color-paper-deep);
+  background-image: var(--surface-canvas);
   background-size: cover;
   background-position: center;
+}
+
+.thumbWeave {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--texture-canvas);
+  opacity: 0.75;
+  /* An inner shadow, so the print reads as recessed into the mount rather than pasted on top. */
+  box-shadow: inset 0 0 0 1px rgba(35, 32, 27, 0.12);
 }
 
 .removeBtn {
@@ -86,16 +250,26 @@
   background: rgba(35, 32, 27, 0.8);
   color: var(--color-paper);
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--text-sm);
   line-height: 1;
   display: grid;
   place-items: center;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.removeBtn:hover {
+  background: var(--color-sienna-deep);
+}
+
+.removeBtn:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 2px;
 }
 
 .fileName {
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 600;
-  margin: 8px 2px 2px;
+  margin: var(--space-2) 2px 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -105,36 +279,52 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-2);
   margin: 0 2px;
 }
 
 .fileSize {
   font-size: 10px;
-  color: #8a8070;
+  color: var(--color-ink-soft);
 }
 
 .fileExt {
   font-size: 9.5px;
-  background: #efe7d4;
+  background: var(--color-paper-deep);
   border-radius: var(--radius-pill);
   padding: 2px 7px;
   color: #57503f;
   font-weight: 700;
 }
 
+/* ------------------------------------------------------------------ progress as a seam */
+
 .progressTrack {
-  height: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--color-paper-deep);
-  margin-top: 7px;
+  position: relative;
+  height: 8px;
+  margin-top: var(--space-2);
   overflow: hidden;
 }
 
+/* The path the needle will take — the same stitch, in ink, faint. */
+.progressTrack::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--texture-stitch);
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.35;
+}
+
 .progressFill {
-  height: 100%;
-  background: var(--color-sienna);
-  border-radius: var(--radius-pill);
-  transition: width var(--duration-fast) var(--ease-standard);
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  background-image: var(--texture-stitch-sienna);
+  background-repeat: repeat-x;
+  background-position: center;
+  transition: width var(--duration-md) var(--ease-standard);
 }
 
 .fileError {
@@ -143,4 +333,36 @@
   font-weight: 600;
   margin: 6px 2px 0;
   line-height: 1.6;
+}
+
+/* ------------------------------------------------------------------ reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .dropzone,
+  .dropSeam,
+  .dropGlow,
+  .dropSheetBack,
+  .dropSheetFront,
+  .progressFill,
+  .removeBtn,
+  .tile {
+    transition: none;
+  }
+
+  /* The drag-over state still has to READ as different — it just must not move. */
+  .dropzoneOver {
+    transform: none;
+  }
+
+  .dropzoneOver .dropSheetFront,
+  .dropzoneOver .dropSheetBack {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .dropSeam {
+    border: 2px dashed;
+    background-image: none;
+  }
 }

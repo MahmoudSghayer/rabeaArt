@@ -1,9 +1,15 @@
 .page {
   font-family: var(--font-body);
   color: var(--color-ink);
+  /* The hero glow and the story sheet's ambient field both overhang their boxes; without this
+     the overhang widens the document and the page scrolls sideways. */
+  overflow: clip;
 }
 
+/* ---------- Hero ---------- */
+
 .hero {
+  position: relative;
   max-width: 1180px;
   margin-inline: auto;
   padding: clamp(36px, 6vw, 72px) clamp(16px, 4vw, 40px) clamp(40px, 6vw, 64px);
@@ -11,50 +17,81 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: clamp(30px, 5vw, 64px);
   align-items: center;
+}
+
+/* Behind everything in the hero, including the frame's own glow. */
+.heroAmbient {
+  z-index: 0;
+  /*
+    AmbientField clips itself to its own box, so inside a measured column its blur ends on a hard
+    rectangle — a visible seam across the page. Fading the field's own edges is what turns it back
+    into light. Centre opaque, edges transparent: the mask shows what it covers in black.
+  */
+  mask-image: radial-gradient(80% 80% at 50% 45%, #000 35%, transparent 100%);
+}
+
+/*
+  Above the ambient field unconditionally. AmbientField parks itself on the decor layer and the
+  `z-index: 0` override above depends on this module winning the cascade, which is bundle-order —
+  raising the content instead means it is on top either way.
+*/
+.heroText {
+  position: relative;
+  z-index: var(--z-raised);
   animation: rbFadeUp var(--duration-entrance) var(--ease-standard) both;
 }
 
 .kicker {
-  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid rgba(35, 32, 27, 0.2);
+  border-radius: var(--radius-pill);
+  padding: 7px 14px;
+  font-size: var(--text-xs);
   font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--color-sienna);
+  letter-spacing: 0.6px;
+  /* sienna-deep, not sienna: this is text — see the contrast note in tokens.css. */
+  color: var(--color-sienna-deep);
+  background: rgba(251, 247, 238, 0.7);
 }
 
 .title {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(34px, 4.8vw, 58px);
-  margin: 12px 0 10px;
+  margin: var(--space-4) 0 var(--space-2);
   line-height: 1.35;
 }
 
 .artistLine {
   font-family: var(--font-accent);
   font-style: italic;
-  font-size: 16px;
+  font-size: var(--text-md);
   color: #8a8070;
-  margin-bottom: 16px;
+  margin-block-end: var(--space-4);
 }
 
 .intro {
-  font-size: 15px;
+  font-size: var(--text-base);
   line-height: 2.1;
   color: #57503f;
-  margin: 0 0 14px;
+  margin: 0 0 var(--space-4);
   max-width: 56ch;
   text-wrap: pretty;
 }
 
 .intro:last-child {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .heroArtWrap {
   position: relative;
+  z-index: var(--z-raised);
   max-width: 430px;
   justify-self: center;
   width: 100%;
+  animation: rbFadeUp var(--duration-xl) 0.12s var(--ease-standard) both;
 }
 
 .heroGlow {
@@ -68,16 +105,20 @@
     color-mix(in srgb, var(--color-sienna) 22%, transparent),
     transparent 70%
   );
-  filter: blur(18px);
+  filter: blur(var(--blur-lg));
+  pointer-events: none;
 }
 
 .heroFrame {
   position: relative;
   transform: rotate(2deg);
-  background: var(--color-card);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   border: 1px solid var(--color-line);
   padding: 12px 12px 44px;
-  box-shadow: var(--shadow-card);
+  /* Elevation scale rather than the flat legacy card shadow: the frame is the nearest object on
+     the page and should sit further off the paper than anything behind it. */
+  box-shadow: var(--shadow-5);
 }
 
 .heroArt {
@@ -96,116 +137,334 @@
   font-family: var(--font-accent);
   font-style: italic;
   color: #8a8070;
-  font-size: 13.5px;
+  font-size: var(--text-sm);
 }
 
-.valuesBand {
-  background: var(--color-paper-deep);
-  border-block: 1px solid var(--color-line);
-  padding: clamp(40px, 6vw, 64px) clamp(16px, 4vw, 40px);
+/* A brush pinned to the frame's corner — the studio's mark on its own portrait. */
+.heroTack {
+  position: absolute;
+  inset-block-start: -14px;
+  inset-inline-start: -12px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-paper);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-3);
+  color: var(--color-sienna-deep);
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+
+@media (max-width: 560px) {
+  .heroTack {
+    display: none;
+  }
+}
+
+/* ---------- Values band ---------- */
+
+.valuesInner {
+  max-width: 1180px;
+  padding-block: clamp(44px, 6vw, 72px);
 }
 
 .valuesGrid {
-  max-width: 1180px;
-  margin-inline: auto;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: 18px;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The Reveal wrapper: entrance only, so it never competes with the card's hover transform. */
+.valueCell {
+  display: block;
 }
 
 .valueCard {
-  background: var(--color-card);
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  padding: 22px;
+  border-radius: var(--radius-card-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-2);
+  transition:
+    transform var(--duration-md) var(--ease-standard),
+    box-shadow var(--duration-md) var(--ease-standard);
+}
+
+.valueCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-4);
+}
+
+/*
+  An oversized ghost of the card's own glyph, bled off the far bottom corner — not the top one,
+  where it would sit directly behind the small medallion of the same glyph and read as smudged
+  double-vision.
+*/
+.valueMark {
+  position: absolute;
+  inset-block-end: -34px;
+  inset-inline-end: -30px;
+  color: var(--color-sienna);
+  opacity: 0.09;
+  pointer-events: none;
+}
+
+.valueHead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
 .valueNum {
   font-family: var(--font-accent);
-  font-size: 34px;
-  color: color-mix(in srgb, var(--color-sienna) 85%, transparent);
+  font-size: 38px;
+  color: var(--color-sienna-deep);
   line-height: 1;
 }
 
+.valueIcon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: rgba(183, 71, 42, 0.08);
+  color: var(--color-sienna-deep);
+}
+
 .valueTitle {
+  position: relative;
   font-weight: 700;
-  font-size: 15.5px;
-  margin: 11px 0 7px;
+  font-size: var(--text-base);
+  margin: var(--space-3) 0 7px;
 }
 
 .valueDesc {
-  font-size: 13px;
+  position: relative;
+  font-size: var(--text-sm);
   line-height: 1.9;
   color: #57503f;
 }
 
-.story {
-  max-width: 820px;
+/* ---------- Story ---------- */
+
+.storyInner {
+  max-width: 940px;
+  padding-block: clamp(44px, 6vw, 76px);
+}
+
+/*
+  The story used to be bare text on bare paper — the flattest stretch of the page. It is a sheet
+  now: card stock, a real shadow, and a slow drift of thread fibres behind the copy.
+*/
+.storySheet {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-3);
+  padding: clamp(24px, 4vw, 52px);
+}
+
+.storyAmbient {
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.storyBody {
+  position: relative;
+  z-index: var(--z-raised);
+  max-width: 62ch;
   margin-inline: auto;
-  padding: clamp(44px, 6vw, 72px) clamp(16px, 4vw, 40px);
 }
 
 .storyTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(26px, 3.4vw, 38px);
-  margin: 0 0 20px;
+  font-size: var(--text-3xl);
+  margin: 0 0 var(--space-5);
+  line-height: 1.3;
 }
 
 .storyText {
-  font-size: 15px;
+  font-size: var(--text-base);
   line-height: 2.2;
   color: #3b372f;
-  margin: 0 0 16px;
+  margin: 0 0 var(--space-4);
   text-wrap: pretty;
 }
 
 .pullQuote {
+  position: relative;
   border-inline-start: 3px solid var(--color-ochre);
-  padding: 6px 18px;
-  margin: 22px 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-ochre) 10%, transparent),
+    transparent 65%
+  );
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  padding: var(--space-4) var(--space-6) var(--space-4) var(--space-5);
+  margin: var(--space-6) 0;
 }
 
-.pullQuote span {
+/* The gradient must fade away from the ruled edge in both directions. */
+[dir="rtl"] .pullQuote {
+  background: linear-gradient(
+    270deg,
+    color-mix(in srgb, var(--color-ochre) 10%, transparent),
+    transparent 65%
+  );
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+
+.pullQuote span:last-child {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: var(--text-xl);
   line-height: 1.9;
   color: var(--color-ink-soft);
   font-style: italic;
 }
 
+.pullMark {
+  position: absolute;
+  inset-block-start: -12px;
+  inset-inline-end: var(--space-5);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-card);
+  border: 1px solid var(--color-line);
+  color: var(--color-ochre);
+  box-shadow: var(--shadow-1);
+  pointer-events: none;
+}
+
+/* ---------- Timeline ---------- */
+
 .timeline {
-  margin-top: 34px;
+  position: relative;
+  margin-block-start: var(--space-9);
+  padding-block-start: var(--space-5);
   border-block-start: 1px solid var(--color-line);
 }
 
+/*
+  The thread running the length of the timeline.
+
+  --texture-thread is authored horizontally (a 40x8 tile of two twisted sine paths), so the rail
+  holds a long horizontal strip and rotates it a quarter turn. The strip is deliberately longer
+  than any plausible timeline and the rail clips it, which avoids needing to know the list height
+  in CSS. Scrolling the background by exactly one tile makes the thread appear to pay out down
+  the page — motion nobody should consciously notice, which is the point.
+*/
+.timelineThread {
+  position: absolute;
+  inset-block: var(--space-5) 0;
+  inset-inline-start: 18px;
+  width: 8px;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.timelineThread::before {
+  content: "";
+  position: absolute;
+  /* Physical, not logical: the rotation below is defined in physical coordinates. */
+  left: 0;
+  top: 0;
+  height: 8px;
+  width: 2400px;
+  background-image: var(--texture-thread);
+  background-repeat: repeat-x;
+  opacity: 0.75;
+  transform-origin: 0 0;
+  /* Rotate about the top-left corner, then push back in by the rail's width. */
+  transform: translateX(8px) rotate(90deg);
+  animation: rbThreadRun 14s linear infinite;
+}
+
+.timelineList {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .timelineRow {
+  position: relative;
   display: flex;
-  gap: 18px;
-  padding: 15px 2px;
-  border-block-end: 1px dashed color-mix(in srgb, var(--color-ink) 14%, transparent);
+  gap: var(--space-4);
   align-items: baseline;
+  padding-block: var(--space-4);
+  padding-inline: 48px 2px;
+}
+
+/* A knot tied on the thread at each date. */
+.timelineKnot {
+  position: absolute;
+  inset-block-start: 22px;
+  inset-inline-start: 15px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-card);
+  border: 2px solid var(--color-sienna);
+  box-shadow: 0 0 0 4px var(--color-card);
+  pointer-events: none;
 }
 
 .timelineYear {
   flex: none;
   font-family: var(--font-accent);
-  font-size: 19px;
-  color: var(--color-sienna);
+  font-size: var(--text-xl);
+  color: var(--color-sienna-deep);
   min-width: 52px;
+}
+
+.timelineText {
+  flex: 1;
 }
 
 .timelineTitle {
   font-weight: 700;
-  font-size: 14.5px;
+  font-size: var(--text-base);
 }
 
 .timelineDesc {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: #57503f;
   line-height: 1.8;
-  margin-top: 3px;
+  margin-block-start: 3px;
 }
+
+@media (max-width: 480px) {
+  .timelineRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+}
+
+/* ---------- CTA ---------- */
 
 .ctaSection {
   max-width: 1280px;
@@ -215,32 +474,97 @@
 }
 
 .ctaBanner {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
   border: 1px solid var(--color-line);
-  border-radius: 26px;
-  background: linear-gradient(180deg, var(--color-card), #f1e7d2);
-  padding: clamp(32px, 5vw, 56px) 24px;
+  border-radius: var(--radius-panel);
+  background-color: var(--color-card);
+  background-image: var(--texture-halftone), linear-gradient(180deg, var(--color-card), #f1e7d2);
+  padding: clamp(38px, 5vw, 62px) var(--space-6);
+  box-shadow: var(--shadow-3);
+}
+
+.ctaGlow {
+  position: absolute;
+  z-index: var(--z-decor);
+  inset-block-start: -160px;
+  inset-inline-end: -120px;
+  width: min(460px, 70%);
+  height: 380px;
+  background: radial-gradient(circle, rgba(183, 71, 42, 0.22) 0%, rgba(183, 71, 42, 0) 70%);
+  filter: blur(var(--blur-xl));
+  pointer-events: none;
+}
+
+.ctaMark {
+  position: relative;
+  z-index: var(--z-base);
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto var(--space-4);
+  border-radius: var(--radius-pill);
+  background: rgba(183, 71, 42, 0.09);
+  color: var(--color-sienna-deep);
 }
 
 .ctaTitle {
+  position: relative;
+  z-index: var(--z-base);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(28px, 4vw, 46px);
-  margin: 0 0 10px;
+  font-size: var(--text-4xl);
+  margin: 0 0 var(--space-3);
   line-height: 1.4;
 }
 
 .ctaSub {
-  font-size: 14px;
+  position: relative;
+  z-index: var(--z-base);
+  font-size: var(--text-base);
   color: #57503f;
-  margin: 0 0 24px;
+  margin: 0 0 var(--space-6);
   line-height: 1.9;
 }
 
 .ctaActions {
+  position: relative;
+  z-index: var(--z-base);
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   justify-content: center;
   flex-wrap: wrap;
+}
+
+/* ---------- Motion gating ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .heroText,
+  .heroArtWrap {
+    animation: none;
+  }
+
+  .timelineThread::before {
+    animation: none;
+  }
+
+  .valueCard {
+    transition: none;
+  }
+
+  .valueCard:hover {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .heroGlow,
+  .ctaGlow,
+  .valueMark {
+    display: none;
+  }
 }
 
 /**
@@ -261,5 +585,15 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* One tile of --texture-thread is 40px wide; scrolling by exactly that loops seamlessly. */
+@keyframes rbThreadRun {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 40px;
   }
 }

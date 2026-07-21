@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import type { SupportedLocale } from "@/i18n/routing";
 import { grainedArt } from "@/components/storefront/art";
 import { resolveArtKey } from "@/components/storefront/product-art";
+import { Ornament } from "@/components/decor";
 import styles from "./RecentlyViewed.module.css";
 
 const STORAGE_KEY = "rabea_recent";
@@ -119,7 +120,10 @@ export function RecentlyViewed() {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.heading}>{t("recent")}</div>
+      <div className={styles.heading}>
+        <Ornament name="spool" size={15} strokeWidth={1.5} className={styles.headingMark} />
+        {t("recent")}
+      </div>
       <div className={styles.strip}>
         {items.map((item) => (
           <Link key={item.slug} href={`/product/${item.slug}`} className={styles.card}>

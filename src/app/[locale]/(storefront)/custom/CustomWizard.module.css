@@ -1,89 +1,209 @@
 /* ------------------------------------------------------------------ chooser */
+
+/*
+  Three cards, three MATERIALS — print, canvas, loose weave (see CustomWizard.tsx). Before, the
+  only art on this page was a 130px gradient band that disappeared the moment you chose a type;
+  the surface now carries through into the wizard stage behind it.
+*/
 .chooserGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: var(--space-5);
 }
 
 .typeCard {
+  position: relative;
   text-align: start;
-  border: 1.5px solid rgba(35, 32, 27, 0.18);
-  background: var(--color-card);
-  border-radius: 20px;
+  border: 1px solid var(--color-line);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border-radius: var(--radius-panel);
   padding: 0;
   cursor: pointer;
   font-family: inherit;
   overflow: hidden;
-  transition: transform var(--duration-standard) var(--ease-standard),
-    border-color var(--duration-standard) var(--ease-standard);
+  box-shadow: var(--shadow-2);
+  transition:
+    transform var(--duration-md) var(--ease-spring),
+    box-shadow var(--duration-md) var(--ease-standard),
+    border-color var(--duration-md) var(--ease-standard);
 }
 
 .typeCard:hover,
 .typeCard:focus-visible {
-  transform: translateY(-4px);
-  border-color: var(--color-sienna);
+  transform: translateY(-6px);
+  border-color: rgba(183, 71, 42, 0.45);
+  box-shadow: var(--shadow-5);
+}
+
+.typeCard:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 3px;
 }
 
 .typeCardArt {
-  height: 130px;
   position: relative;
-  background-size: cover;
-  background-position: center;
+  aspect-ratio: 16 / 10;
+}
+
+/* A stitched seam where the art meets the card body — the two halves are sewn together. */
+.typeCardArt::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 8px;
+  background-image: var(--texture-stitch);
+  background-repeat: repeat-x;
+  opacity: 0.55;
+}
+
+.typeCardScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(200deg, rgba(35, 32, 27, 0) 45%, rgba(35, 32, 27, 0.5) 100%);
+  pointer-events: none;
+}
+
+/* The studio's mark, pressed into the top corner of the piece. */
+.typeCardMark {
+  position: absolute;
+  inset-block-start: var(--space-3);
+  inset-inline-end: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-pill);
+  color: var(--color-paper);
+  background: rgba(35, 32, 27, 0.42);
+  border: 1px solid rgba(246, 240, 227, 0.35);
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
 }
 
 .typeCardTag {
   position: absolute;
-  bottom: 10px;
-  inset-inline-start: 12px;
+  inset-block-end: var(--space-3);
+  inset-inline-start: var(--space-3);
   background: rgba(35, 32, 27, 0.75);
   color: var(--color-paper);
   border-radius: var(--radius-pill);
-  padding: 4px 12px;
-  font-size: 11px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
   font-weight: 700;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
 }
 
 .typeCardBody {
-  padding: 16px 18px 18px;
+  padding: var(--space-5) var(--space-5) var(--space-6);
 }
 
 .typeCardTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 21px;
-  margin-bottom: 6px;
+  font-size: var(--text-xl);
+  margin-block-end: var(--space-2);
   color: var(--color-ink);
 }
 
 .typeCardDesc {
-  font-size: 12.5px;
+  font-size: var(--text-sm);
   color: #57503f;
   line-height: 1.8;
 }
 
 .typeCardStart {
-  margin-top: 12px;
-  font-size: 13px;
+  margin-block-start: var(--space-3);
+  font-size: var(--text-sm);
   font-weight: 700;
-  color: var(--color-sienna);
+  /* sienna-deep: this is text on a card surface — see the contrast note in tokens.css. */
+  color: var(--color-sienna-deep);
+  transition: transform var(--duration-md) var(--ease-standard);
+}
+
+.typeCard:hover .typeCardStart {
+  transform: translateX(0.3em);
 }
 
 /* ------------------------------------------------------------------ wizard shell */
+
+/*
+  A layered panel on a textured stage.
+
+  The wizard used to be one long cream card sitting directly on the page — the same surface as
+  everything around it, so nothing said "you are inside a process now". The stage is linen, the
+  panel is frosted paper floating on it, and the elevation between them does the talking.
+*/
+.wizStage {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  border-radius: var(--radius-stage);
+  padding: clamp(var(--space-3), 1.8vw, var(--space-6));
+  border: 1px solid var(--color-line);
+  background-color: var(--color-paper-deep);
+  background-image: var(--surface-linen-band);
+  box-shadow: var(--shadow-2);
+}
+
+.wizStageGlow {
+  position: absolute;
+  z-index: var(--z-decor);
+  inline-size: min(460px, 70%);
+  block-size: 320px;
+  inset-block-start: -150px;
+  inset-inline-end: -110px;
+  background: radial-gradient(circle, rgba(201, 155, 63, 0.34), rgba(201, 155, 63, 0) 70%);
+  filter: blur(var(--blur-xl));
+  pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
 .wizBox {
-  background: var(--color-card);
-  border: 1px solid rgba(35, 32, 27, 0.16);
-  border-radius: 24px;
+  position: relative;
+  z-index: var(--z-raised);
+  border-radius: var(--radius-panel);
   overflow: hidden;
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  /* Frosted, not opaque: the linen underneath stays faintly readable, which is what makes this
+     a pane resting on the stage rather than a hole cut through it. */
+  background-color: rgba(243, 236, 220, 0.82);
+  background-image: var(--texture-grain);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  box-shadow: var(--shadow-4);
+  animation: rbFadeUp var(--duration-lg) var(--ease-out-expo) both;
 }
 
 .wizHead {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) clamp(var(--space-4), 3vw, var(--space-7)) var(--space-5);
+  background: rgba(237, 227, 207, 0.55);
+}
+
+/* A running-stitch seam instead of a 1px rule. */
+.wizHead::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 8px;
+  background-image: var(--texture-stitch);
+  background-repeat: repeat-x;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.wizHeadTop {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 16px clamp(16px, 3vw, 28px);
-  border-bottom: 1px solid rgba(35, 32, 27, 0.12);
-  background: #f3ecdc;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
@@ -92,33 +212,79 @@
   background: none;
   cursor: pointer;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   font-weight: 600;
-  color: #8a8070;
+  color: var(--color-ink-soft);
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .backChooserBtn:hover {
-  color: var(--color-sienna);
+  color: var(--color-sienna-deep);
+}
+
+.backChooserBtn:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 2px;
 }
 
 .flowTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-weight: 700;
-  font-size: 14.5px;
+  font-size: var(--text-base);
   color: var(--color-ink);
-  margin-inline-start: 4px;
 }
 
-.wizHeadSpacer {
-  flex: 1;
+.flowMark {
+  color: var(--color-sienna-deep);
+}
+
+/* ---------- progress ribbon ---------- */
+
+/*
+  The step bar is a length of thread with the pills pinned along it: sienna where the thread has
+  already been pulled through, pale ink where it has not. A row of disconnected chips could only
+  say "four things"; a ribbon says "you are here, and this is how far is left".
+*/
+.ribbon {
+  position: relative;
+}
+
+.ribbonTrack,
+.ribbonFill {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  block-size: 8px;
+  margin-block-start: -4px;
+  pointer-events: none;
+  background-repeat: repeat-x;
+  background-position: center;
+}
+
+.ribbonTrack {
+  inline-size: 100%;
+  background-image: var(--texture-stitch);
+  opacity: 0.38;
+}
+
+/* inline-size comes from the component — the fill is the progress value. */
+.ribbonFill {
+  background-image: var(--texture-stitch-sienna);
+  transition: inline-size var(--duration-lg) var(--ease-out-expo);
 }
 
 .stepsBar {
+  position: relative;
+  z-index: var(--z-base);
   display: flex;
-  gap: 6px;
+  gap: var(--space-2);
   align-items: center;
   flex-wrap: wrap;
 }
@@ -126,77 +292,111 @@
 .stepPill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   border-radius: var(--radius-pill);
-  padding: 5px 11px;
-  font-size: 11.5px;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
   font-weight: 700;
-  background: transparent;
-  color: #8a8070;
-  border: 1px solid rgba(35, 32, 27, 0.2);
+  background: var(--color-card);
+  color: var(--color-ink-soft);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-1);
+  transition:
+    background var(--duration-md) var(--ease-standard),
+    color var(--duration-md) var(--ease-standard),
+    transform var(--duration-md) var(--ease-spring),
+    box-shadow var(--duration-md) var(--ease-standard);
 }
 
 .stepPillCurrent {
   background: var(--color-ink);
   color: var(--color-paper);
   border-color: var(--color-ink);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-3);
 }
 
 .stepPillDone {
   background: var(--status-accepted-bg);
   color: var(--status-accepted-fg);
-  border-color: var(--status-accepted-bg);
+  border-color: rgba(63, 112, 72, 0.35);
+}
+
+/*
+  Once the pills wrap, a line through their vertical centre cuts across two rows of text. Below
+  this breakpoint the thread moves ABOVE the pills and reads as a plain progress rail instead.
+*/
+@media (max-width: 780px) {
+  .ribbon {
+    padding-block-start: var(--space-5);
+  }
+
+  .ribbonTrack,
+  .ribbonFill {
+    inset-block-start: 0;
+    margin-block-start: 0;
+  }
 }
 
 .wizBody {
-  padding: clamp(20px, 3.5vw, 32px);
+  padding: clamp(var(--space-5), 3.5vw, var(--space-8));
 }
 
 .stepCol {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: var(--space-6);
 }
 
 .rowWrap {
   display: flex;
-  gap: 26px;
+  gap: var(--space-7);
   flex-wrap: wrap;
 }
 
 /* ------------------------------------------------------------------ fields */
 .fieldLabel {
-  font-size: 13.5px;
+  font-size: var(--text-base);
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-block-end: var(--space-3);
 }
 
 .fieldValue {
-  color: var(--color-sienna);
+  /* sienna-deep: text, not fill. */
+  color: var(--color-sienna-deep);
 }
 
 .fieldHint {
-  font-size: 12px;
-  color: #8a8070;
-  margin: -6px 0 10px;
+  font-size: var(--text-xs);
+  color: var(--color-ink-soft);
+  margin: calc(var(--space-2) * -1) 0 var(--space-3);
 }
 
 .optGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-  gap: 10px;
+  gap: var(--space-3);
 }
 
+/*
+  Every option control shares one surface recipe: card-coloured (never pure white — the storefront
+  has no pure white), a hairline border, and a hover that reaches for sienna.
+*/
 .optBtn {
   border: 1.5px solid rgba(35, 32, 27, 0.2);
-  background: #fff;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   color: #3b372f;
-  border-radius: 13px;
-  padding: 13px 10px;
-  font-size: 13px;
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-3);
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .optBtn:hover,
@@ -205,18 +405,32 @@
 .pillBtn:hover,
 .orientBtn:hover {
   border-color: var(--color-sienna);
+  box-shadow: var(--shadow-1);
+}
+
+.optBtn:focus-visible,
+.sizeBtn:focus-visible,
+.psizeBtn:focus-visible,
+.pillBtn:focus-visible,
+.orientBtn:focus-visible,
+.selCard:focus-visible,
+.qtyBtn:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 2px;
 }
 
 /* Shared selected state for all option-button shapes. */
 .optBtnOn {
-  background: var(--color-ink);
+  background-color: var(--color-ink);
+  background-image: var(--texture-press);
   border-color: var(--color-ink);
   color: var(--color-paper);
+  box-shadow: var(--shadow-2);
 }
 
 .swatchRow {
   display: flex;
-  gap: 9px;
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
@@ -229,122 +443,163 @@
   outline-offset: 2px;
   cursor: pointer;
   padding: 0;
+  transition:
+    outline-color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.swatch:hover {
+  transform: scale(1.08);
 }
 
 .swatchOn {
   outline-color: var(--color-sienna);
 }
 
+/* Keyboard focus must remain distinguishable from the selected ring. */
+.swatch:focus-visible {
+  outline: 3px solid var(--color-sienna-deep);
+  outline-offset: 3px;
+}
+
 .sizeRow {
   display: flex;
-  gap: 7px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .sizeBtn {
   border: 1.5px solid rgba(35, 32, 27, 0.2);
-  background: #fff;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   color: #3b372f;
-  border-radius: 11px;
+  border-radius: var(--radius-input);
   min-width: 46px;
-  padding: 9px 11px;
-  font-size: 13.5px;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .psizeBtn {
   border: 1.5px solid rgba(35, 32, 27, 0.2);
-  background: #fff;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   color: #3b372f;
-  border-radius: 12px;
-  padding: 10px 17px;
-  font-size: 13.5px;
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .pillBtn {
   border: 1.5px solid rgba(35, 32, 27, 0.2);
-  background: #fff;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   color: #3b372f;
   border-radius: var(--radius-pill);
-  padding: 9px 18px;
-  font-size: 13px;
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .qtyBox {
   display: inline-flex;
   align-items: center;
   border: 1.5px solid rgba(35, 32, 27, 0.22);
-  border-radius: 12px;
+  border-radius: var(--radius-input);
   overflow: hidden;
-  background: #fff;
+  background: var(--color-card);
+  box-shadow: var(--shadow-1);
 }
 
 .qtyBtn {
   border: none;
-  background: var(--color-card);
+  background: var(--color-paper-deep);
   width: 40px;
   height: 42px;
-  font-size: 19px;
+  font-size: var(--text-xl);
   cursor: pointer;
   color: #57503f;
   font-family: inherit;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.qtyBtn:hover {
+  background: var(--color-paper);
+  color: var(--color-sienna-deep);
 }
 
 .qtyVal {
   min-width: 44px;
   text-align: center;
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--text-md);
 }
 
 .qtyBlock {
-  margin-top: 16px;
+  margin-block-start: var(--space-4);
 }
 
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .selCard {
   text-align: start;
   border: 1.5px solid rgba(35, 32, 27, 0.2);
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px 18px;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border-radius: var(--radius-card);
+  padding: var(--space-4) var(--space-5);
   cursor: pointer;
   font-family: inherit;
+  transition:
+    border-color var(--duration-md) var(--ease-standard),
+    box-shadow var(--duration-md) var(--ease-standard),
+    transform var(--duration-md) var(--ease-spring);
 }
 
 .selCard:hover {
   border-color: var(--color-sienna);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
 }
 
 .selCardTitle {
-  font-size: 15px;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--color-ink);
-  margin-bottom: 5px;
+  margin-block-end: var(--space-1);
 }
 
 .selCardDesc {
-  font-size: 12px;
+  font-size: var(--text-xs);
   line-height: 1.8;
-  color: #8a8070;
+  color: var(--color-ink-soft);
 }
 
 .selCardOn {
-  background: var(--color-ink);
+  background-color: var(--color-ink);
+  background-image: var(--texture-press);
   border-color: var(--color-ink);
+  box-shadow: var(--shadow-3);
 }
 
 .selCardOn .selCardTitle {
@@ -357,51 +612,61 @@
 
 .chipRow {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .dimsRow {
   display: flex;
-  gap: 10px;
+  gap: var(--space-3);
   align-items: center;
-  margin-top: 12px;
+  margin-block-start: var(--space-3);
   flex-wrap: wrap;
 }
 
 .dimInput {
   width: 110px;
   border: 1.5px solid rgba(35, 32, 27, 0.22);
-  border-radius: 11px;
-  padding: 10px 13px;
+  border-radius: var(--radius-input);
+  padding: var(--space-3);
   font-family: inherit;
-  font-size: 13.5px;
-  background: #fff;
-  outline-color: var(--color-sienna);
+  font-size: var(--text-base);
+  background: var(--color-card);
+  resize: vertical;
+}
+
+.dimInput:focus-visible,
+.textarea:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 1px;
 }
 
 .dimSep {
-  color: #8a8070;
+  color: var(--color-ink-soft);
 }
 
 .dimUnit {
-  font-size: 12.5px;
-  color: #8a8070;
+  font-size: var(--text-xs);
+  color: var(--color-ink-soft);
 }
 
 .orientBtn {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--space-2);
   border: 1.5px solid rgba(35, 32, 27, 0.2);
-  background: #fff;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   color: #3b372f;
-  border-radius: 12px;
-  padding: 10px 16px;
-  font-size: 13px;
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .orientIcon {
@@ -414,12 +679,12 @@
   width: 100%;
   box-sizing: border-box;
   border: 1.5px solid rgba(35, 32, 27, 0.22);
-  border-radius: 14px;
-  padding: 14px 16px;
+  border-radius: var(--radius-input);
+  padding: var(--space-4);
   font-family: inherit;
-  font-size: 14px;
-  background: #fff;
-  outline-color: var(--color-sienna);
+  font-size: var(--text-base);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
   resize: vertical;
   line-height: 1.9;
 }
@@ -428,59 +693,63 @@
 .reviewGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .reviewCell {
-  background: #fff;
-  border: 1px solid rgba(35, 32, 27, 0.13);
-  border-radius: 12px;
-  padding: 11px 14px;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-1);
 }
 
 .reviewK {
-  font-size: 11px;
-  color: #8a8070;
-  margin-bottom: 3px;
+  font-size: var(--text-xs);
+  color: var(--color-ink-soft);
+  margin-block-end: 3px;
 }
 
 .reviewV {
-  font-size: 13.5px;
+  font-size: var(--text-base);
   font-weight: 700;
 }
 
 .reviewFilesLabel {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   font-weight: 700;
-  color: #8a8070;
-  margin-bottom: 9px;
+  color: var(--color-ink-soft);
+  margin-block-end: var(--space-2);
 }
 
 .reviewThumbRow {
   display: flex;
-  gap: 9px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .reviewThumb {
   width: 64px;
   height: 64px;
-  border-radius: 11px;
+  border-radius: var(--radius-input);
   border: 1px solid rgba(35, 32, 27, 0.18);
   background-color: var(--color-paper-deep);
   background-size: cover;
   background-position: center;
+  box-shadow: var(--shadow-1);
 }
 
 .reviewNotes {
-  background: #fff;
-  border: 1px solid rgba(35, 32, 27, 0.13);
-  border-radius: 12px;
-  padding: 12px 15px;
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
 }
 
 .reviewNotesText {
-  font-size: 13px;
+  font-size: var(--text-sm);
   line-height: 1.9;
 }
 
@@ -488,15 +757,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   flex-wrap: wrap;
-  background: #efe7d4;
-  border-radius: 14px;
-  padding: 14px 18px;
+  background-color: #efe7d4;
+  background-image: var(--texture-linen);
+  border-radius: var(--radius-card);
+  padding: var(--space-4) var(--space-5);
 }
 
 .estLine {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: #57503f;
   line-height: 1.8;
 }
@@ -504,28 +774,29 @@
 .manualChip {
   background: var(--status-review-bg);
   color: var(--status-review-fg);
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 700;
   border-radius: var(--radius-pill);
-  padding: 6px 13px;
+  padding: var(--space-1) var(--space-3);
   white-space: nowrap;
 }
 
 /* ------------------------------------------------------------------ nav + errors */
 .errBanner {
-  margin-top: 16px;
-  font-size: 13px;
+  margin-block-start: var(--space-4);
+  font-size: var(--text-sm);
   color: var(--color-sienna-deep);
   background: #f6e2da;
-  border-radius: 11px;
-  padding: 10px 15px;
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
   font-weight: 600;
+  animation: rbNudge var(--duration-md) var(--ease-spring) both;
 }
 
 .navRow {
   display: flex;
-  gap: 11px;
-  margin-top: 26px;
+  gap: var(--space-3);
+  margin-block-start: var(--space-7);
   align-items: center;
 }
 
@@ -534,13 +805,42 @@
 }
 
 /* ------------------------------------------------------------------ success */
+
+.successStage {
+  position: relative;
+  overflow: clip;
+  border-radius: var(--radius-stage);
+  padding: clamp(var(--space-3), 1.8vw, var(--space-6));
+  border: 1px solid var(--color-line);
+  background-color: var(--color-paper-deep);
+  background-image: var(--surface-linen-band);
+  box-shadow: var(--shadow-2);
+}
+
+/* A finished seam across the top of the stage — the piece is closed. */
+.successSeam {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  height: 8px;
+  background-image: var(--texture-stitch-sienna);
+  background-repeat: repeat-x;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .successBox {
+  position: relative;
   text-align: center;
-  background: var(--color-card);
-  border: 1px solid rgba(35, 32, 27, 0.16);
-  border-radius: 24px;
-  padding: clamp(36px, 6vw, 60px) 24px;
-  animation: rbFadeUp 0.4s var(--ease-standard) both;
+  background-color: rgba(251, 247, 238, 0.86);
+  background-image: var(--texture-grain);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border: 1px solid rgba(35, 32, 27, 0.14);
+  border-radius: var(--radius-panel);
+  padding: clamp(var(--space-9), 6vw, var(--space-16)) var(--space-6);
+  box-shadow: var(--shadow-4);
+  animation: rbFadeUp var(--duration-lg) var(--ease-out-expo) both;
 }
 
 .successIcon {
@@ -550,26 +850,28 @@
   background: var(--status-accepted-bg);
   display: grid;
   place-items: center;
-  margin: 0 auto 18px;
+  margin: 0 auto var(--space-5);
+  box-shadow: var(--shadow-2);
 }
 
 .successTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 28px;
-  margin: 0 0 8px;
+  font-size: var(--text-2xl);
+  margin: 0 0 var(--space-2);
 }
 
 .successSub {
-  font-size: 14px;
+  font-size: var(--text-base);
   color: #57503f;
-  margin: 0 0 24px;
+  margin: 0 auto var(--space-6);
   line-height: 1.9;
+  max-width: 46ch;
 }
 
 .successCtas {
   display: flex;
-  gap: 11px;
+  gap: var(--space-3);
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -578,8 +880,8 @@
   background: var(--color-sienna);
   color: #fff3e4;
   border-radius: var(--radius-pill);
-  padding: 13px 26px;
-  font-size: 14px;
+  padding: var(--space-3) var(--space-7);
+  font-size: var(--text-base);
   font-weight: 700;
   box-shadow: var(--shadow-cta);
 }
@@ -589,12 +891,18 @@
   color: #fff3e4;
 }
 
+.ctaAccent:focus-visible,
+.ctaOutline:focus-visible {
+  outline: 2px solid var(--color-sienna-deep);
+  outline-offset: 2px;
+}
+
 .ctaOutline {
   border: 1.5px solid rgba(35, 32, 27, 0.25);
   background: rgba(251, 247, 238, 0.6);
   border-radius: var(--radius-pill);
-  padding: 12px 24px;
-  font-size: 14px;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -603,7 +911,44 @@
 
 .ctaOutline:hover {
   border-color: var(--color-sienna);
-  color: var(--color-sienna);
+  color: var(--color-sienna-deep);
+}
+
+/* ------------------------------------------------------------------ reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .wizBox,
+  .successBox,
+  .errBanner {
+    animation: none;
+  }
+
+  .typeCard,
+  .typeCardStart,
+  .selCard,
+  .swatch,
+  .stepPill,
+  .ribbonFill,
+  .optBtn,
+  .sizeBtn,
+  .psizeBtn,
+  .pillBtn,
+  .orientBtn,
+  .qtyBtn {
+    transition: none;
+  }
+
+  .typeCard:hover,
+  .typeCard:focus-visible,
+  .selCard:hover,
+  .swatch:hover,
+  .stepPillCurrent {
+    transform: none;
+  }
+
+  .typeCard:hover .typeCardStart {
+    transform: none;
+  }
 }
 
 /**
@@ -620,6 +965,18 @@
   from {
     opacity: 0;
     transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A validation message that simply appears is easy to miss; one that arrives is not. */
+@keyframes rbNudge {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;

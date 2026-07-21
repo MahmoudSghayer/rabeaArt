@@ -2,12 +2,14 @@
   font-family: var(--font-body);
   position: sticky;
   inset-block-start: 0;
-  z-index: 60;
+  z-index: var(--z-header);
 }
 
 .announcement {
+  position: relative;
   margin: 0;
-  background: var(--color-ink);
+  background-color: var(--color-ink);
+  background-image: var(--surface-ink);
   color: var(--color-paper);
   font-size: 12.5px;
   letter-spacing: 0.2px;
@@ -16,11 +18,27 @@
   line-height: 1.6;
 }
 
+/*
+  Deeper glass than before. The header floats over textured paper now rather than a flat fill,
+  so it needs real blur and a touch of saturation to read as a pane of glass instead of a
+  translucent rectangle — and a soft shadow beneath, since a sticky bar with only a hairline
+  border looks pasted on once the content scrolling under it has texture.
+*/
 .header {
-  background: color-mix(in srgb, var(--color-paper) 90%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--color-paper) 82%, transparent);
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.35);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.35);
   border-block-end: 1px solid var(--color-line);
+  box-shadow: 0 1px 0 rgba(255, 252, 245, 0.5) inset, var(--shadow-2);
+}
+
+/* Backdrop blur is expensive to composite per scroll frame on phones. */
+@media (hover: none) {
+  .header {
+    background: color-mix(in srgb, var(--color-paper) 96%, transparent);
+    backdrop-filter: blur(var(--blur-sm));
+    -webkit-backdrop-filter: blur(var(--blur-sm));
+  }
 }
 
 .bar {
