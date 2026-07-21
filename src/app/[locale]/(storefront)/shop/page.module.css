@@ -172,10 +172,13 @@
 }
 
 /*
-  The halftone screen goes on a pseudo-element with the `background` SHORTHAND, because
-  --texture-halftone carries its own position/size — shorthand syntax, not a valid <image>. Fed
-  to `background-image` (which is what printSurface() builds) the whole declaration is invalid
-  and the art disappears; that is why this one is hand-rolled instead of using the helper.
+  The halftone screen goes on its own pseudo-element so it can sit above the art without the
+  art's own transitions moving it. It is a separate layer for compositing reasons only.
+
+  (Historical note: this used to be hand-rolled because --texture-halftone carried its own
+  position/size, which is `background` shorthand syntax and illegal inside `background-image`.
+  That is fixed — the token is a bare url() now — so `background-image` and printSurface() are
+  both safe here. Kept as-is because the pseudo-element layering is still wanted.)
 */
 .heroPlateArtPrint::after {
   content: "";

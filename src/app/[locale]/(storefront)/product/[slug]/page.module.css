@@ -175,9 +175,12 @@
 }
 
 /*
-  The halftone dot screen a print would actually lay down. `background` shorthand, not
-  `background-image`: --texture-halftone carries its own position/size, which is shorthand syntax
-  and not a valid <image> — fed to background-image the declaration is invalid and dropped whole.
+  The halftone dot screen a print would actually lay down, on its own pseudo-element so it
+  composites over the shirt art rather than joining that element's own background stack.
+
+  `background` here is the plain shorthand setting a single image; `background-image` would work
+  equally well. (--texture-halftone once carried its own position/size, which is legal only in
+  the shorthand; it is a bare url() now, so neither form is a trap.)
 */
 .shirtArt::after {
   content: "";
