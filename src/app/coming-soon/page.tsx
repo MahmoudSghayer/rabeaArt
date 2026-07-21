@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { CONTACT_INFO } from "@/components/storefront/contact-info";
+import { resolveContactInfo } from "@/components/storefront/contact-settings";
 import styles from "./ComingSoon.module.css";
 
 /**
@@ -14,7 +14,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function ComingSoonPage() {
+export default async function ComingSoonPage() {
+  // resolveContactInfo falls back to the hardcoded defaults if the DB is unreachable,
+  // which preserves this page's "renders with zero dependencies" guarantee.
+  const contact = await resolveContactInfo();
+
   return (
     <div className={styles.wrap} dir="rtl" lang="ar">
       <div className={styles.blobA} aria-hidden />
@@ -44,12 +48,12 @@ export default function ComingSoonPage() {
         </p>
         <a
           className={styles.ig}
-          href={`https://instagram.com/${CONTACT_INFO.instagram.replace(/^@/, "")}`}
+          href={`https://instagram.com/${contact.instagram.replace(/^@/, "")}`}
           target="_blank"
           rel="noopener noreferrer"
           dir="ltr"
         >
-          Instagram · {CONTACT_INFO.instagram}
+          Instagram · {contact.instagram}
         </a>
         <div className={styles.credit} dir="ltr">
           <a href="https://devora.design" target="_blank" rel="noopener noreferrer">

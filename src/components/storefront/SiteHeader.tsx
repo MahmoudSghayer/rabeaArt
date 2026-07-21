@@ -19,11 +19,16 @@ export interface SiteHeaderAnnouncement {
 
 export interface SiteHeaderProps {
   /**
-   * Announcement bar text per locale. Falls back to `header.announcementDefault` when omitted —
-   * real settings-driven announcements land once the Settings model is wired up (see
-   * prisma/schema.prisma `Settings`).
+   * Announcement bar text per locale, from admin -> Settings.
+   *
+   * Three distinct states, all reachable from the admin form:
+   *   - an object  -> show that text (falling back to the default message if the current
+   *                   locale's field was left blank, so a half-filled form never shows nothing)
+   *   - `null`     -> the admin switched the bar OFF; render no bar at all
+   *   - `undefined`-> caller did not resolve settings (e.g. the DB was unreachable); keep the
+   *                   old behaviour and show the default message
    */
-  announcement?: SiteHeaderAnnouncement;
+  announcement?: SiteHeaderAnnouncement | null;
 }
 
 const NAV_ITEMS: { id: NavId; href: NavHref }[] = [
@@ -46,7 +51,10 @@ export function SiteHeader({ announcement }: SiteHeaderProps) {
   const cartCount = useCartCount();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const announcementText = announcement?.[locale] ?? t("announcementDefault");
+  // `null` means the admin turned the bar off; `undefined` means we could not resolve
+  // settings, which must NOT silently hide a bar the admin believes is on.
+  const announcementHidden = announcement === null;
+  const announcementText = announcement?.[locale] || t("announcementDefault");
 
   function isActive(id: NavId): boolean {
     if (id === "home") return pathname === "/";
@@ -70,7 +78,7 @@ export function SiteHeader({ announcement }: SiteHeaderProps) {
 
   return (
     <div className={styles.wrap}>
-      <p className={styles.announcement}>{announcementText}</p>
+      {!announcementHidden && <p className={styles.announcement}>{announcementText}</p>}
       <header className={styles.header}>
         <div className={styles.bar}>
           <Link href="/" className={styles.logo} aria-label={tBrand("wordmark")}>

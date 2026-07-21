@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
-import { getCachedActiveOptions, getCachedSettings } from "@/lib/catalog/cached";
+import { getCachedActiveOptions } from "@/lib/catalog/cached";
 import type { CatalogActiveOptions } from "@/lib/catalog/types";
-import { CONTACT_INFO } from "@/components/storefront/contact-info";
+import { resolveContactInfo } from "@/components/storefront/contact-settings";
 import { buildOptionLabelMaps } from "../custom/fallback-options";
 import { OrderFlow } from "./OrderFlow";
 
@@ -23,15 +23,15 @@ export default async function OrderPage({ params }: { params: Promise<{ locale: 
     activeOptions = null;
   }
 
-  let whatsapp: string = CONTACT_INFO.whatsapp;
-  let email: string = CONTACT_INFO.email;
-  try {
-    const settings = await getCachedSettings();
-    whatsapp = settings.whatsapp;
-    email = settings.email;
-  } catch {
-    // Keep the CONTACT_INFO fallbacks.
-  }
+  // Shared resolver, so this page cannot drift from the footer / contact page. It also treats a
+  // blank Settings field as "fall back", which the previous inline version did not.
+  const contact = await resolveContactInfo();
 
-  return <OrderFlow labels={buildOptionLabelMaps(activeOptions)} whatsapp={whatsapp} email={email} />;
+  return (
+    <OrderFlow
+      labels={buildOptionLabelMaps(activeOptions)}
+      whatsapp={contact.whatsapp}
+      email={contact.email}
+    />
+  );
 }
