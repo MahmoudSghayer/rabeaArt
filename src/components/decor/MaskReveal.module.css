@@ -34,32 +34,47 @@
 /* ---------- Directions ---------- */
 
 /*
+  How these work, because the polarity is easy to invert (and was, once — the tiles rendered
+  completely blank because `.shown` moved the mask to its HIDDEN position):
+
+  Each mask is twice the element's size along the axis of travel, one half opaque and one half
+  transparent. `mask-position` slides that oversized mask across the element:
+
+    - a position that puts the TRANSPARENT half over the element = hidden (the rest state)
+    - a position that puts the OPAQUE half over the element      = revealed (`.shown`)
+
+  With `mask-size: 100% 200%` and a top-transparent / bottom-opaque gradient, Y=0% shows the
+  mask's top half (transparent, hidden) and Y=100% shows its bottom half (opaque, revealed). As
+  Y grows, the opaque region climbs in from the bottom edge — the content wipes upward, which is
+  what `up` means.
+
   `start`/`end` use logical sides so the sweep follows writing direction: on this RTL site the
-  content uncovers from the right, which is the direction the reader's eye already travels.
+  content uncovers from the right, the way the reader's eye already travels.
 */
 
 .dir-up {
-  mask-image: linear-gradient(to top, #000 50%, transparent 50%);
+  mask-image: linear-gradient(to bottom, transparent 50%, #000 50%);
   mask-size: 100% 200%;
-  mask-position: 100% 100%;
+  mask-position: 0% 0%;
 }
 
 .dir-up.shown {
-  mask-position: 100% 0%;
+  mask-position: 0% 100%;
 }
 
 .dir-down {
   mask-image: linear-gradient(to bottom, #000 50%, transparent 50%);
   mask-size: 100% 200%;
-  mask-position: 100% 0%;
+  mask-position: 0% 100%;
 }
 
 .dir-down.shown {
-  mask-position: 100% 100%;
+  mask-position: 0% 0%;
 }
 
+/* Horizontal: reveal sweeping from the physical left. */
 .dir-start {
-  mask-image: linear-gradient(to left, #000 50%, transparent 50%);
+  mask-image: linear-gradient(to right, transparent 50%, #000 50%);
   mask-size: 200% 100%;
   mask-position: 0% 0%;
 }
@@ -68,6 +83,7 @@
   mask-position: 100% 0%;
 }
 
+/* Horizontal: reveal sweeping from the physical right. */
 .dir-end {
   mask-image: linear-gradient(to right, #000 50%, transparent 50%);
   mask-size: 200% 100%;
@@ -78,7 +94,7 @@
   mask-position: 0% 0%;
 }
 
-/* RTL flips the physical gradient so the logical intent survives. */
+/* RTL swaps which physical side `start` and `end` mean. */
 [dir="rtl"] .dir-start {
   mask-image: linear-gradient(to right, #000 50%, transparent 50%);
   mask-position: 100% 0%;
@@ -89,7 +105,7 @@
 }
 
 [dir="rtl"] .dir-end {
-  mask-image: linear-gradient(to left, #000 50%, transparent 50%);
+  mask-image: linear-gradient(to right, transparent 50%, #000 50%);
   mask-position: 0% 0%;
 }
 

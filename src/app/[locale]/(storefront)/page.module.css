@@ -6,6 +6,36 @@
 
 /* ---------- Hero ---------- */
 
+/*
+  The hero's text column was the emptiest area above the fold — a heading and three buttons on
+  bare paper. Slow colour washes give it depth without competing with the copy for attention.
+*/
+.heroAmbient {
+  /* Sits behind everything in the hero, including the existing glows. */
+  z-index: 0;
+}
+
+/*
+  A loose thread trailing across the floating pieces, so the three cards read as one composition
+  rather than three unrelated objects. Drawn as a wavy stroke, not an image.
+*/
+.heroThread {
+  position: absolute;
+  inset-block-end: 12%;
+  inset-inline: 4% 12%;
+  height: 8px;
+  background-image: var(--texture-thread);
+  background-repeat: repeat-x;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (max-width: 860px) {
+  .heroThread {
+    display: none;
+  }
+}
+
 .hero {
   position: relative;
   max-width: 1280px;
@@ -288,42 +318,146 @@
 
 /* ---------- Featured products ---------- */
 
-.featured {
-  max-width: 1280px;
-  margin-inline: auto;
-  padding: clamp(48px, 7vw, 84px) clamp(16px, 4vw, 40px) clamp(30px, 4vw, 44px);
+/* The featured band is a TexturedSection now; only its vertical rhythm is overridden. */
+.featuredInner {
+  padding-block: clamp(48px, 7vw, 84px) clamp(30px, 4vw, 44px);
 }
 
 .featuredEmpty {
   text-align: center;
   padding: 48px 20px;
-  border: 1.5px dashed rgba(35, 32, 27, 0.22);
-  border-radius: var(--radius-card-lg);
-  background: rgba(251, 247, 238, 0.6);
+  /*
+    A composed still-life instead of a bare dashed box.
+
+    Whenever the catalogue is still being filled, this is the largest area on the homepage, and
+    an empty rectangle on plain paper made the whole shop read as unfinished. A framed canvas on
+    an easel-lit card says "the studio is between pieces" rather than "this site is broken".
+  */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-5);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background-color: var(--color-card);
+  background-image: var(--texture-grain);
+  box-shadow: var(--shadow-2);
+}
+
+/* The frame: a mounted canvas with a mat, at a slight angle so it reads as a physical object. */
+.emptyFrame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 128px;
+  height: 152px;
+  padding: 11px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper);
+  box-shadow: var(--shadow-3);
+  transform: rotate(-3deg);
+}
+
+.emptyCanvas {
+  position: absolute;
+  inset: 11px;
+  border-radius: 3px;
+  opacity: 0.55;
+}
+
+.emptyMark {
+  position: relative;
+  color: var(--color-sienna-deep);
+  opacity: 0.75;
 }
 
 .featuredEmptyTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 19px;
-  margin: 0 0 6px;
+  font-size: var(--text-xl);
+  margin: 0;
 }
 
 .featuredEmptySub {
-  font-size: 13.5px;
-  color: #8a8070;
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
   margin: 0;
+  max-width: 42ch;
+  text-align: center;
 }
 
 /* ---------- Category tiles ---------- */
 
+/*
+  Asymmetric editorial grid. Two equal tiles left a sparse, oddly balanced row on wide screens;
+  an uneven 3-up gives the shirts tile the emphasis it earns and gives the custom-order route
+  somewhere to live. Collapses to a single column well before it gets cramped.
+*/
 .catGrid {
   max-width: 1280px;
   margin-inline: auto;
   padding: clamp(20px, 3vw, 36px) clamp(16px, 4vw, 40px) clamp(48px, 6vw, 72px);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  grid-template-columns: 1.35fr 1fr 1fr;
   gap: 22px;
+}
+
+@media (max-width: 980px) {
+  .catGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* The wide tile keeps its prominence by spanning the row it now shares. */
+  .catCell:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .catGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .catCell:first-child {
+    grid-column: auto;
+  }
+}
+
+/* MaskReveal wraps each tile, so the cell must pass its own height through to the link. */
+.catCell {
+  display: block;
+  min-height: 250px;
+}
+
+.catCell > * {
+  height: 100%;
+}
+
+.catTileWide {
+  min-height: 320px;
+}
+
+/*
+  The custom tile is the odd one out on purpose: ink rather than photographic art, so the
+  "make something new" route reads as a different kind of action from browsing stock.
+*/
+.catTileCustom {
+  background-color: var(--color-ink);
+  background-image: var(--surface-ink);
+}
+
+.catCustomArt {
+  position: absolute;
+  inset: 0;
+  opacity: 0.34;
+  mix-blend-mode: screen;
+  transition: opacity var(--duration-lg) var(--ease-standard);
+}
+
+.catTileCustom:hover .catCustomArt {
+  opacity: 0.46;
 }
 
 .catTile {
@@ -416,47 +550,102 @@
 
 /* ---------- How it works ---------- */
 
-.howBand {
-  background: var(--color-paper-deep);
-  border-block: 1px solid var(--color-line);
-}
-
+/* The band itself is now a TexturedSection; only the inner measure is overridden here. */
 .howInner {
-  max-width: 1280px;
-  margin-inline: auto;
-  padding: clamp(48px, 7vw, 80px) clamp(16px, 4vw, 40px);
+  padding-block: clamp(48px, 7vw, 80px);
 }
 
 .stepsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 225px), 1fr));
   gap: 20px;
-  margin-top: 30px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
 .stepCard {
+  position: relative;
   background: var(--color-card);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
-  padding: 22px;
-  position: relative;
+  padding: var(--space-6);
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--duration-md) var(--ease-standard),
+    box-shadow var(--duration-md) var(--ease-standard);
+}
+
+.stepCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-3);
+}
+
+/*
+  The stitched connector. Four identical rectangles in a row read as a list of features; a run
+  of stitches between them reads as a process — which is what this section is actually
+  describing. Drawn from each card toward the next along the inline axis, so it runs
+  right-to-left in Arabic without any extra rules.
+*/
+.stepConnector {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 100%;
+  width: 20px;
+  height: 8px;
+  background-image: var(--texture-stitch-sienna);
+  background-repeat: repeat-x;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+/* Nothing to connect to after the last card. */
+.stepCard:last-child .stepConnector {
+  display: none;
+}
+
+/* Once the row wraps, a connector pointing into a line break is just a stray mark. */
+@media (max-width: 940px) {
+  .stepConnector {
+    display: none;
+  }
+}
+
+.stepHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
 .stepNum {
   font-family: var(--font-accent);
   font-size: 40px;
-  color: rgba(183, 71, 42, 0.85);
+  /* sienna-deep: this is text on a tinted band — see the contrast note in tokens.css. */
+  color: var(--color-sienna-deep);
   line-height: 1;
+}
+
+/* A distinct mark per step, so the cards are told apart by more than a numeral. */
+.stepIcon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: rgba(183, 71, 42, 0.08);
+  color: var(--color-sienna-deep);
 }
 
 .stepTitle {
   font-weight: 700;
-  font-size: 15.5px;
-  margin: 12px 0 7px;
+  font-size: var(--text-base);
+  margin: 14px 0 7px;
 }
 
 .stepDesc {
-  font-size: 13.5px;
+  font-size: var(--text-sm);
   line-height: 1.9;
   color: #57503f;
 }
@@ -536,6 +725,42 @@
   font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 1px;
+}
+
+.customAmbient {
+  /* Behind the banner's own glows, inside its rounded corners. */
+  z-index: 0;
+  border-radius: inherit;
+}
+
+/*
+  The needle between the two cards. This section's whole claim is "your upload becomes a made
+  thing", and previously the two cards just sat near each other saying it in words.
+*/
+.customArrow {
+  position: absolute;
+  inset-block-start: 42%;
+  inset-inline-start: 50%;
+  z-index: var(--z-raised);
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-inline-start: -23px;
+  border-radius: var(--radius-pill);
+  background: rgba(246, 240, 227, 0.12);
+  border: 1px solid rgba(246, 240, 227, 0.28);
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  color: var(--color-ochre);
+  transform: rotate(-18deg);
+  pointer-events: none;
+}
+
+@media (max-width: 560px) {
+  .customArrow {
+    display: none;
+  }
 }
 
 .customTitle {
