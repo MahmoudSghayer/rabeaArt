@@ -1,0 +1,156 @@
+/*
+  The wipe is a mask gradient whose position animates, NOT a clip-path or a width transition.
+  mask-position animates on the compositor; clip-path and width both trigger layout or paint on
+  every frame. At three or four of these per screen that difference is the whole frame budget.
+
+  The mask is 200% tall (or wide) with the solid half parked off-stage, so sliding it to 0 sweeps
+  coverage across the element.
+*/
+
+.wrap {
+  /*
+    The zoom variant scales the element up before settling, and a transform overhang widens the
+    document exactly like a negative inset does — 12px of sideways scroll at 412px in testing.
+    Clipping to the element's own box keeps the overscan invisible instead of scrollable.
+
+    `clip` rather than `hidden` so this never becomes a scroll container (which would break
+    sticky positioning for anything revealed inside it).
+  */
+  overflow: clip;
+  /* Fallback for the frame before the mask applies, and for forced-colors. */
+  opacity: 0;
+  transition:
+    opacity var(--duration-lg) var(--ease-out-soft) var(--reveal-delay, 0s),
+    mask-position var(--duration-xl) var(--ease-out-expo) var(--reveal-delay, 0s),
+    transform var(--duration-xl) var(--ease-out-expo) var(--reveal-delay, 0s);
+  will-change: mask-position, opacity, transform;
+}
+
+.shown {
+  opacity: 1;
+  will-change: auto;
+}
+
+/* ---------- Directions ---------- */
+
+/*
+  `start`/`end` use logical sides so the sweep follows writing direction: on this RTL site the
+  content uncovers from the right, which is the direction the reader's eye already travels.
+*/
+
+.dir-up {
+  mask-image: linear-gradient(to top, #000 50%, transparent 50%);
+  mask-size: 100% 200%;
+  mask-position: 100% 100%;
+}
+
+.dir-up.shown {
+  mask-position: 100% 0%;
+}
+
+.dir-down {
+  mask-image: linear-gradient(to bottom, #000 50%, transparent 50%);
+  mask-size: 100% 200%;
+  mask-position: 100% 0%;
+}
+
+.dir-down.shown {
+  mask-position: 100% 100%;
+}
+
+.dir-start {
+  mask-image: linear-gradient(to left, #000 50%, transparent 50%);
+  mask-size: 200% 100%;
+  mask-position: 0% 0%;
+}
+
+.dir-start.shown {
+  mask-position: 100% 0%;
+}
+
+.dir-end {
+  mask-image: linear-gradient(to right, #000 50%, transparent 50%);
+  mask-size: 200% 100%;
+  mask-position: 100% 0%;
+}
+
+.dir-end.shown {
+  mask-position: 0% 0%;
+}
+
+/* RTL flips the physical gradient so the logical intent survives. */
+[dir="rtl"] .dir-start {
+  mask-image: linear-gradient(to right, #000 50%, transparent 50%);
+  mask-position: 100% 0%;
+}
+
+[dir="rtl"] .dir-start.shown {
+  mask-position: 0% 0%;
+}
+
+[dir="rtl"] .dir-end {
+  mask-image: linear-gradient(to left, #000 50%, transparent 50%);
+  mask-position: 0% 0%;
+}
+
+[dir="rtl"] .dir-end.shown {
+  mask-position: 100% 0%;
+}
+
+/* ---------- Zoom ---------- */
+
+/*
+  A slight over-scale that settles to rest. Paired with the wipe it reads as the artwork being
+  set down; on its own it reads as a hover state, which is why it is opt-in.
+
+  The scale is applied to the CHILDREN, not to .wrap itself. An element cannot clip its own
+  transform — `overflow: clip` only contains descendants — so scaling .wrap made the overscan
+  widen the document and the page scrolled sideways. Scaling the child means .wrap keeps its
+  layout box and its clip does the containing.
+*/
+.zoom > * {
+  transform: scale(1.06);
+  transition: transform var(--duration-xl) var(--ease-out-expo) var(--reveal-delay, 0s);
+  will-change: transform;
+}
+
+.zoom.shown > * {
+  transform: scale(1);
+  will-change: auto;
+}
+
+/*
+  Reduced motion: content must be fully visible and unmasked in the frame before hydration, so
+  the mask is removed outright rather than merely having its transition zeroed — a stalled mask
+  would leave the element permanently half-covered.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .wrap {
+    opacity: 1;
+    mask-image: none;
+    transform: none;
+    transition: none;
+  }
+
+  .zoom > *,
+  .zoom.shown > * {
+    transform: none;
+    transition: none;
+  }
+}
+
+/*
+  forced-colors mode does not composite masks reliably; show everything rather than risk hiding
+  content behind a mask that never lifts.
+*/
+@media (forced-colors: active) {
+  .wrap {
+    opacity: 1;
+    mask-image: none;
+    transform: none;
+  }
+
+  .zoom > * {
+    transform: none;
+  }
+}

@@ -1,0 +1,162 @@
+.band {
+  position: relative;
+  /* Bands are full-bleed; the measure lives on .inner. isolation keeps the glow's stacking
+     context local so a decorative layer can never paint over a sticky header. */
+  isolation: isolate;
+  /*
+    Clip the decorative layer to the band.
+
+    The glow is deliberately parked outside the band's box (negative insets) so only its soft
+    falloff shows. Without clipping, that overhang widens the document and the page scrolls
+    sideways — 120px of it, caught by the overflow assertion in the E2E suite. It is worse in
+    RTL, where `inset-inline-end` resolves to the LEFT edge and the overhang lands on the side
+    the page actually scrolls toward.
+
+    `clip` rather than `hidden`: hidden on a full-bleed band silently makes it a scroll container,
+    which breaks `position: sticky` for anything inside it. clip has no such side effect.
+  */
+  overflow: clip;
+}
+
+.inner {
+  position: relative;
+  z-index: var(--z-base);
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: clamp(48px, 7vw, 84px) clamp(16px, 4vw, 40px);
+}
+
+/* ---------- Tones ---------- */
+
+/*
+  Each tone is a MATERIAL, not just a fill: colour plus the weave that belongs to it. That
+  pairing is the whole point — a band should differ from its neighbour by surface, not only by
+  being three percent darker.
+*/
+
+.tone-paper {
+  background-color: var(--color-paper);
+  background-image: var(--texture-grain);
+}
+
+.tone-deep {
+  background-color: var(--color-paper-deep);
+  background-image: var(--surface-linen-band);
+}
+
+.tone-canvas {
+  background-color: #e9dcc2;
+  background-image: var(--surface-canvas);
+}
+
+.tone-ink {
+  background-color: var(--color-ink);
+  background-image: var(--surface-ink);
+  color: var(--color-paper);
+}
+
+/* ---------- Edges ---------- */
+
+/*
+  A band has to end somewhere. The default 1px hairline is what made the old site read as a
+  stack of boxes, so the alternatives cut the paper instead of ruling a line under it.
+*/
+
+.edge-hairline {
+  border-block: 1px solid var(--color-line);
+}
+
+/*
+  Torn deckle edge. The mask is applied to a thin overlay strip rather than to .band itself,
+  because masking the band would clip its children — including anything that intentionally
+  overhangs, like a floating card.
+*/
+.edge-deckle::before,
+.edge-deckle::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 12px;
+  background: inherit;
+  pointer-events: none;
+}
+
+.edge-deckle::before {
+  inset-block-start: -11px;
+  mask-image: var(--texture-deckle);
+  mask-size: 400px 16px;
+  mask-repeat: repeat-x;
+}
+
+.edge-deckle::after {
+  inset-block-end: -11px;
+  mask-image: var(--texture-deckle);
+  mask-size: 400px 16px;
+  mask-repeat: repeat-x;
+  transform: scaleY(-1);
+}
+
+/* A running-stitch seam along the top edge — the embroidery equivalent of a rule. */
+.edge-stitch::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 8px;
+  background-image: var(--texture-stitch);
+  background-repeat: repeat-x;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ---------- Glow ---------- */
+
+/*
+  A single large blurred radial, parked off the top-inline corner. Sits at z-index below .inner
+  and is pointer-events:none, so it can never intercept a click or cover text.
+*/
+.glow {
+  position: absolute;
+  z-index: var(--z-decor);
+  inline-size: min(520px, 60%);
+  block-size: 420px;
+  inset-block-start: -140px;
+  inset-inline-end: -120px;
+  filter: blur(var(--blur-xl));
+  pointer-events: none;
+  /* Promote once, rather than letting a huge blur repaint on every scroll frame. */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.glow-sienna {
+  background: radial-gradient(circle, rgba(183, 71, 42, 0.28) 0%, rgba(183, 71, 42, 0) 70%);
+}
+
+.glow-ochre {
+  background: radial-gradient(circle, rgba(201, 155, 63, 0.3) 0%, rgba(201, 155, 63, 0) 70%);
+}
+
+.glow-teal {
+  background: radial-gradient(circle, rgba(51, 96, 90, 0.26) 0%, rgba(51, 96, 90, 0) 70%);
+}
+
+/*
+  A 40px blur across a 520px box is one of the most expensive things a mobile GPU can be asked
+  to composite per frame. Shrink and soften it rather than dropping it entirely, so small
+  screens keep the warmth without the cost.
+*/
+@media (max-width: 768px) {
+  .glow {
+    inline-size: 300px;
+    block-size: 260px;
+    inset-block-start: -90px;
+    filter: blur(var(--blur-lg));
+  }
+}
+
+@media (forced-colors: active) {
+  .glow {
+    display: none;
+  }
+}

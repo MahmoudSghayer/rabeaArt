@@ -1,0 +1,219 @@
+.field {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-decor);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.field > span {
+  position: absolute;
+  /*
+    Oversized and offset so a layer can drift a long way without its edge ever entering frame.
+    Cheaper than wrapping the animation, and there is no seam to hide.
+  */
+  inset: -25%;
+  display: block;
+  will-change: transform;
+}
+
+/* ---------- Motes ---------- */
+
+/*
+  Dust in a shaft of light. Each layer is a handful of tiny radial gradients at different sizes;
+  three layers drifting at different speeds and directions give parallax without any JS.
+*/
+
+.motes .layerA {
+  background-image:
+    radial-gradient(circle at 12% 24%, rgba(183, 71, 42, 0.5) 0, transparent 2px),
+    radial-gradient(circle at 68% 12%, rgba(201, 155, 63, 0.45) 0, transparent 2.5px),
+    radial-gradient(circle at 34% 72%, rgba(51, 96, 90, 0.4) 0, transparent 2px),
+    radial-gradient(circle at 88% 58%, rgba(183, 71, 42, 0.35) 0, transparent 1.5px);
+  background-size: 45% 45%;
+  animation: motesDriftA 34s var(--ease-in-out-art) infinite alternate;
+}
+
+.motes .layerB {
+  background-image:
+    radial-gradient(circle at 22% 62%, rgba(201, 155, 63, 0.4) 0, transparent 2px),
+    radial-gradient(circle at 78% 34%, rgba(35, 32, 27, 0.28) 0, transparent 1.5px),
+    radial-gradient(circle at 52% 88%, rgba(183, 71, 42, 0.3) 0, transparent 2px);
+  background-size: 38% 38%;
+  animation: motesDriftB 46s var(--ease-in-out-art) infinite alternate;
+}
+
+.motes .layerC {
+  background-image:
+    radial-gradient(circle at 44% 18%, rgba(51, 96, 90, 0.3) 0, transparent 1.5px),
+    radial-gradient(circle at 8% 84%, rgba(201, 155, 63, 0.32) 0, transparent 2px);
+  background-size: 52% 52%;
+  animation: motesDriftC 58s var(--ease-in-out-art) infinite alternate;
+}
+
+/* ---------- Threads ---------- */
+
+/* Long diagonal fibres, as though loose thread were lying across the surface. */
+
+.threads .layerA {
+  background-image: repeating-linear-gradient(
+    28deg,
+    transparent 0 60px,
+    rgba(35, 32, 27, 0.05) 60px 61px,
+    transparent 61px 130px
+  );
+  animation: threadSlideA 40s linear infinite;
+}
+
+.threads .layerB {
+  background-image: repeating-linear-gradient(
+    -22deg,
+    transparent 0 90px,
+    rgba(183, 71, 42, 0.045) 90px 91px,
+    transparent 91px 180px
+  );
+  animation: threadSlideB 56s linear infinite;
+}
+
+.threads .layerC {
+  background-image: repeating-linear-gradient(
+    52deg,
+    transparent 0 140px,
+    rgba(201, 155, 63, 0.04) 140px 141px,
+    transparent 141px 260px
+  );
+  animation: threadSlideA 72s linear infinite reverse;
+}
+
+/* ---------- Wash ---------- */
+
+/* Large soft colour fields that breathe — for hero and CTA backdrops. */
+
+.wash .layerA {
+  background: radial-gradient(circle at 24% 30%, rgba(183, 71, 42, 0.16) 0%, transparent 55%);
+  filter: blur(var(--blur-xl));
+  animation: washPulseA 30s var(--ease-in-out-art) infinite alternate;
+}
+
+.wash .layerB {
+  background: radial-gradient(circle at 76% 62%, rgba(201, 155, 63, 0.18) 0%, transparent 55%);
+  filter: blur(var(--blur-xl));
+  animation: washPulseB 38s var(--ease-in-out-art) infinite alternate;
+}
+
+.wash .layerC {
+  background: radial-gradient(circle at 52% 88%, rgba(51, 96, 90, 0.14) 0%, transparent 55%);
+  filter: blur(var(--blur-xl));
+  animation: washPulseA 46s var(--ease-in-out-art) infinite alternate-reverse;
+}
+
+/* ---------- Keyframes ---------- */
+
+/*
+  Declared locally, NOT in tokens.css. Lightning CSS scopes animation-name inside a CSS module,
+  so a keyframe defined in a global stylesheet compiles to a prefixed name that matches nothing
+  and the animation silently never runs — that bug killed every animation on this site once
+  already. Keep these here.
+
+  Transform only: no width/height/top/left, so nothing here touches layout.
+*/
+
+@keyframes motesDriftA {
+  from {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2.5%, 0) scale(1.05);
+  }
+}
+
+@keyframes motesDriftB {
+  from {
+    transform: translate3d(2%, 1.5%, 0) scale(1.04);
+  }
+  to {
+    transform: translate3d(-2.5%, -2%, 0) scale(1);
+  }
+}
+
+@keyframes motesDriftC {
+  from {
+    transform: translate3d(-1.5%, 2%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(2%, -1.5%, 0) scale(1.06);
+  }
+}
+
+@keyframes threadSlideA {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(6%, 8%, 0);
+  }
+}
+
+@keyframes threadSlideB {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-7%, 5%, 0);
+  }
+}
+
+@keyframes washPulseA {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, -2%, 0) scale(1.12);
+  }
+}
+
+@keyframes washPulseB {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-3%, 2%, 0) scale(1);
+  }
+}
+
+/* ---------- Gating ---------- */
+
+/*
+  Ambient drift is the definition of non-essential motion. Under reduced motion the field stays
+  as a static texture — removing it entirely would leave the flat dead background this exists to
+  fix, so it holds its position instead of disappearing.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .field > span {
+    animation: none !important;
+    will-change: auto;
+  }
+}
+
+/*
+  Touch devices skip the animation too. Three always-composited full-bleed layers is a real
+  battery cost on a phone, and the blurred `wash` variant is the most expensive thing here.
+*/
+@media (hover: none) {
+  .field > span {
+    animation: none;
+    will-change: auto;
+  }
+
+  .wash .layerA,
+  .wash .layerB,
+  .wash .layerC {
+    filter: blur(var(--blur-lg));
+  }
+}
+
+@media (forced-colors: active) {
+  .field {
+    display: none;
+  }
+}

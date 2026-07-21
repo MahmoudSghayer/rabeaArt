@@ -1,0 +1,6 @@
+.ornament {
+  display: block;
+  flex: none;
+  /* Optical alignment: these sit beside Arabic text, whose baseline runs low. */
+  vertical-align: middle;
+}

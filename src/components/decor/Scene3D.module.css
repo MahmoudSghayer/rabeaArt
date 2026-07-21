@@ -1,0 +1,61 @@
+.scene {
+  position: relative;
+  perspective: var(--scene-perspective, 900px);
+  /*
+    Origin sits above centre so the vanishing point lands near the horizon of the composition
+    rather than dead centre, which is what makes the arrangement read as objects on a table
+    instead of a symmetrical diagram.
+  */
+  perspective-origin: 50% 40%;
+  transform-style: preserve-3d;
+}
+
+.layer {
+  position: absolute;
+  transform: translate3d(0, 0, var(--layer-z, 0)) rotate(var(--layer-rotate, 0deg));
+  transform-style: preserve-3d;
+  /*
+    Perspective scales a layer's apparent size with Z, but its LAYOUT box is unchanged — so a
+    pushed-forward layer visually overflows its slot. Setting the origin to centre keeps that
+    growth symmetrical instead of dragging the layer toward one corner.
+  */
+  transform-origin: 50% 50%;
+}
+
+/*
+  Depth of field for receding layers.
+
+  Deliberately modest: 2.5px reads as "slightly out of focus", while anything more starts to look
+  like a rendering fault on text-bearing cards. The dim is doing as much work as the blur.
+*/
+.depthBlur {
+  filter: blur(2.5px) brightness(0.96);
+}
+
+/*
+  Reduced motion does not mean "no depth" — a static layered composition is still legible and
+  still handsome. What it must not do is move. Scene3D itself sets no animation; this only
+  guarantees that a layer carrying its own float/parallax cannot animate here.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .layer {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/*
+  Coarse pointers get a flatter, cheaper scene. Blur on a composited layer costs real GPU time
+  per frame on mobile, and the effect is largely lost at phone size anyway.
+*/
+@media (hover: none) {
+  .depthBlur {
+    filter: brightness(0.97);
+  }
+}
+
+@media (forced-colors: active) {
+  .depthBlur {
+    filter: none;
+  }
+}
