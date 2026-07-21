@@ -124,9 +124,9 @@ export default async function ShopPage({
             />
           </span>
           {/*
-            The halftone screen on this one is applied in CSS, not via printSurface(): the
-            --texture-halftone token carries background POSITION/SIZE, which is shorthand syntax
-            and not a valid <image>, so any `background-image` built from it is dropped whole.
+            The halftone screen on this one is applied in CSS (see .heroPlateArtPrint::after)
+            rather than via printSurface(), so it can sit on its own compositing layer above the
+            art. printSurface() would also be correct here now — see the note in page.module.css.
           */}
           <span className={cx(styles.heroPlate, styles.heroPlateFront)}>
             <span
