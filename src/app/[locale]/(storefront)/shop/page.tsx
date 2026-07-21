@@ -124,9 +124,10 @@ export default async function ShopPage({
             />
           </span>
           {/*
-            The halftone screen on this one is applied in CSS, not via printSurface(): the
-            --texture-halftone token carries background POSITION/SIZE, which is shorthand syntax
-            and not a valid <image>, so any `background-image` built from it is dropped whole.
+            The halftone screen on this one is applied in CSS (.heroPlateArtPrint::after), not via
+            printSurface(), so the dot screen can be sized and faded independently of the artwork
+            underneath it. printSurface() is fine to use here otherwise — it composes valid
+            background-image layers; see the token invariant in tests/unit/texture.test.ts.
           */}
           <span className={cx(styles.heroPlate, styles.heroPlateFront)}>
             <span

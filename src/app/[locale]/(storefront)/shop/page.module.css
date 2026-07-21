@@ -172,10 +172,9 @@
 }
 
 /*
-  The halftone screen goes on a pseudo-element with the `background` SHORTHAND, because
-  --texture-halftone carries its own position/size — shorthand syntax, not a valid <image>. Fed
-  to `background-image` (which is what printSurface() builds) the whole declaration is invalid
-  and the art disappears; that is why this one is hand-rolled instead of using the helper.
+  The halftone screen goes on its own pseudo-element rather than being another printSurface()
+  layer, so the dot screen composites above the artwork and can be tuned on its own. The
+  `background` shorthand here also clears the inherited colour in a single declaration.
 */
 .heroPlateArtPrint::after {
   content: "";

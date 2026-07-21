@@ -290,10 +290,9 @@ export function CustomWizard({
             }}
           >
             {/*
-              `background`, not `backgroundImage`: printSurface() layers the halftone screen,
-              whose value carries its own `position / size` (see --texture-halftone), and a
-              position/size pair is only legal in the background SHORTHAND. Assigning it to
-              background-image drops the whole declaration and the tile renders empty.
+              `background`, not `backgroundImage`, so the tile also clears any inherited
+              background-color in one declaration. Either works: printSurface() emits plain
+              <image> layers, guarded by tests/unit/texture.test.ts.
             */}
             <div className={styles.typeCardArt} style={{ background: card.art }}>
               <span aria-hidden="true" className={styles.typeCardScrim} />

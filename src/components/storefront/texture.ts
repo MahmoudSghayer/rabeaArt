@@ -14,6 +14,12 @@
  *
  * Composition order is texture-first, matching `grainedArt()`: in a CSS background-image list
  * the first layer paints on top, so the weave sits over the colour rather than under it.
+ *
+ * INVARIANT: every `--texture-*` value must be a bare `<image>` — a url() or a gradient with NO
+ * position/size attached. `<image> <position> / <size>` is `background` SHORTHAND syntax; inside
+ * `background-image` it makes the whole declaration invalid and the browser drops it silently,
+ * artwork layers and all. That shipped once and rendered two homepage tiles blank. Size a texture
+ * at the point of use with `background-size`. Enforced by tests/unit/texture.test.ts.
  */
 
 /** Texture names, 1:1 with the `--texture-*` custom properties in textures.css. */

@@ -175,9 +175,9 @@
 }
 
 /*
-  The halftone dot screen a print would actually lay down. `background` shorthand, not
-  `background-image`: --texture-halftone carries its own position/size, which is shorthand syntax
-  and not a valid <image> — fed to background-image the declaration is invalid and dropped whole.
+  The halftone dot screen a print would actually lay down. On its own pseudo-element rather than
+  as another printSurface() layer, so the screen sits above the garment art and can be tuned
+  without touching the artwork stack.
 */
 .shirtArt::after {
   content: "";

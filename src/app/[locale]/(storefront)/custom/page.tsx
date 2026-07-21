@@ -109,12 +109,9 @@ export default async function CustomPage({
             <Reveal as="li" key={beat.label} index={i} className={styles.beat}>
               <span aria-hidden="true" className={styles.beatConnector} />
               {/*
-                `background`, not `backgroundImage`: printSurface() layers the halftone screen,
-                whose value carries its own `position / size` pair (see --texture-halftone in
-                textures.css), and that pair is only legal in the background SHORTHAND. Assigned
-                to background-image the declaration is dropped outright and the panel renders
-                empty — with correct opacity and dimensions, which is what makes it so easy to
-                miss.
+                `background`, not `backgroundImage`, so each beat also clears any inherited
+                background-color in one declaration. Either works: printSurface() emits plain
+                <image> layers, guarded by tests/unit/texture.test.ts.
               */}
               <span
                 aria-hidden="true"
