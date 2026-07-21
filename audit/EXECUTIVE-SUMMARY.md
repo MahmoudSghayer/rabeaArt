@@ -40,6 +40,67 @@
 
 ---
 
+## How the scores are derived
+
+These are **calibrated judgements, not a formula** — but they follow a consistent rubric, so a
+score can be argued with rather than just accepted. Each layer starts at 100 and loses points per
+finding by severity:
+
+| Severity | Deduction | Rationale |
+|---|---:|---|
+| Critical | −25 to −35 | Can cause data loss, breach, or extended outage |
+| High | −10 to −15 | Real exposure or failure mode, but bounded |
+| Medium | −4 to −8 | Degrades security, performance or maintainability |
+| Low | −1 to −3 | Worth fixing; no material risk today |
+| Informational | 0 | Recorded for context only |
+
+Three modifiers then apply:
+
+- **Compensating controls reduce a deduction.** A finding whose blast radius is already limited by
+  something else costs less. Example: `product-images` being a public bucket is normally a
+  Medium — here it holds only public product photography and is never used for customer uploads,
+  so it lands at the low end.
+- **Verified strengths earn points back**, but only with cited evidence. Layer 2's 85 is not "few
+  problems found" — it reflects positively confirmed properties like server-side price derivation
+  and unique-constraint-backed idempotency.
+- **Unverifiable items are scored as if unresolved.** Nothing gets credit for being *probably*
+  fine. This is why Availability sits at 25 despite backups plausibly existing: absence of
+  evidence is scored as absence.
+
+**Worked example — Security & RLS, 45 → 80:**
+
+```
+100  start
+−35  SEC-01: RLS disabled on all 22 tables (Critical)    → CLOSED 2026-07-21, restored
+−12  SEC-02: no Content-Security-Policy (High)
+ −6  SEC-03: 5 moderate transitive advisories (Medium)
+ −2  X-Powered-By header leak (Low)                      → FIXED, restored
+ = 45 at audit time  →  80 after SEC-01 and the header fix
+```
+
+The remaining 20 points are held back almost entirely by the missing CSP; it returns to the low
+90s once that ships.
+
+**Worked example — Availability & Recovery, 25:**
+
+```
+100  start
+−35  AVL-01: no evidence backups exist (Critical)
+−30  AVL-02: no restore ever tested (Critical)
+−10  DB-02: rollback.sql drops all 22 tables, guarded only by a comment (High)
+ = 25
+```
+
+Deliberately harsh. Two Criticals in one layer compound rather than average, because an untested
+backup and a destructive unguarded script are the *same* failure waiting to happen. This is the
+one layer where a single bad afternoon ends the business, and the score says so.
+
+**Overall readiness is not an average of the layers.** A 64 in Database does not offset a 25 in
+Availability — the verdict is gated by the weakest blocking item, which is why the recommendation
+stays "NOT YET" even though ten of thirteen layers are amber or better.
+
+---
+
 ## The single most important correction
 
 **You told me the site is live and publicly accessible. It is not.** Every page is still behind
