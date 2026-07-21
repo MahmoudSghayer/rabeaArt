@@ -9,7 +9,7 @@
 
 | Layer | Status | Score | Critical | Warnings | Passed |
 | ------------------------ | :----: | ----: | -------: | -------: | -----: |
-| Frontend                 | ⚠️ WARNING  |  78/100 | 0 | 6 | 3 |
+| Frontend                 | ⚠️ WARNING  |  86/100 | 0 | 4 | 5 |
 | API & Backend            | ⚠️ WARNING  |  85/100 | 0 | 5 | 6 |
 | Database & Storage       | ⚠️ WARNING  |  64/100 | 1 | 10 | 2 |
 | Auth & Permissions       | ⚠️ WARNING  |  84/100 | 0 | 3 | 6 |
@@ -18,10 +18,10 @@
 | CI/CD & Version Control  | ⚠️ WARNING  |  74/100 | 0 | 4 | 2 |
 | Security & RLS           | ⚠️ WARNING  |  80/100 | 0 | 3 | 6 |
 | Rate Limiting            | ⚠️ WARNING  |  62/100 | 0 | 4 | 0 |
-| Caching & CDN            | ⚠️ WARNING  |  45/100 | 0 | 2 | 1 |
+| Caching & CDN            | ⚠️ WARNING  |  68/100 | 0 | 1 | 2 |
 | Load Balancing & Scaling | ⚠️ WARNING  |  60/100 | 0 | 3 | 0 |
 | Error Tracking & Logs    | ⚠️ WARNING  |  45/100 | 0 | 3 | 1 |
-| Availability & Recovery  | ❌ CRITICAL |  25/100 | 2 | 2 | 0 |
+| Availability & Recovery  | ⚠️ WARNING  |  66/100 | 0 | 3 | 3 |
 
 **Overall system health:** ⚠️ **Application solid; data perimeter now closed, recovery still unproven**
 **Overall production readiness:** ⚠️ **NOT YET — backups are the remaining blocker**
@@ -64,8 +64,8 @@ Three modifiers then apply:
   problems found" — it reflects positively confirmed properties like server-side price derivation
   and unique-constraint-backed idempotency.
 - **Unverifiable items are scored as if unresolved.** Nothing gets credit for being *probably*
-  fine. This is why Availability sits at 25 despite backups plausibly existing: absence of
-  evidence is scored as absence.
+  fine. Availability originally scored 25 despite backups plausibly existing, because absence of
+  evidence is scored as absence — and it only rose once the dashboard was actually checked.
 
 **Worked example — Security & RLS, 45 → 80:**
 
@@ -81,7 +81,9 @@ Three modifiers then apply:
 The remaining 20 points are held back almost entirely by the missing CSP; it returns to the low
 90s once that ships.
 
-**Worked example — Availability & Recovery, 25:**
+**Worked example — Availability & Recovery, 25 → 66:**
+
+At audit time:
 
 ```
 100  start
@@ -92,8 +94,33 @@ The remaining 20 points are held back almost entirely by the missing CSP; it ret
 ```
 
 Deliberately harsh. Two Criticals in one layer compound rather than average, because an untested
-backup and a destructive unguarded script are the *same* failure waiting to happen. This is the
-one layer where a single bad afternoon ends the business, and the score says so.
+backup and a destructive unguarded script are the *same* failure waiting to happen.
+
+After 2026-07-21:
+
+```
+100  start
+  0  AVL-01  RESOLVED — Supabase Pro, daily automatic backups, two snapshots
+             observed (20 & 21 Jul). Verified in the dashboard, not assumed.
+  0  DB-02   FIXED — rollback.sql now aborts unless armed with
+             SET LOCAL rabea.i_really_mean_it = 'yes'
+−14  AVL-02  Restore still never performed. Downgraded from Critical to High:
+             backups demonstrably EXIST now, so this is "unproven" rather than
+             "absent", and docs/verify-restore.sql reduces validation to one
+             paste. RTO remains unmeasured.
+ −8  AVL-03  RPO is 24 hours. PITR declined on cost — correct at zero orders,
+             but a database loss costs up to a day of orders once trading.
+ −8  AVL-04  Storage has no backup at all. Supabase database backups do not
+             cover Storage objects, so customer reference photos are
+             unprotected and unversioned.
+ −4  AVL-05  No secret-rotation or DNS-recovery runbook.
+ = 66
+```
+
+The layer is no longer CRITICAL because the unrecoverable-loss scenario is gone: real backups
+exist and run daily. What remains is *unproven* recovery rather than *absent* recovery — a
+materially different risk. It reaches the mid-80s once a restore has actually been performed and
+timed, since that single act closes AVL-02 and produces the first real RTO figure.
 
 **Overall readiness is not an average of the layers.** A 64 in Database does not offset a 25 in
 Availability — the verdict is gated by the weakest blocking item, which is why the recommendation
