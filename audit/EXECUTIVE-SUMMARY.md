@@ -3,6 +3,29 @@
 **Audit date:** 2026-07-20 · **Commit audited:** `ec8d610` · **Scope:** all 13 layers
 **Deployment:** Vercel `prj_R538d9e1dVISeWWFL1X6azbbRcH5` → `www.rabea.art` (`fra1`/`iad1`)
 
+> ## ⚠️ SUPERSEDED IN PART BY SESSION 3 (2026-07-23) — read `SESSION-3-REAUDIT.md` first
+> An independent re-audit at commit `89ec89e` found **the `COMING_SOON` gate is now OFF in
+> production** — the real, catalog-empty storefront is live and crawlable, against session 2's
+> explicit "do not remove the gate yet." Several blockers below are therefore no longer
+> pre-launch — they are **live exposures**. Session-3 dashboard (per-layer /10):
+>
+> | Layer | S1–2 | S3 | | Layer | S1–2 | S3 |
+> |---|---|---|---|---|---|---|
+> | Frontend | 8.6 | **5** 🚨 | | Security | 8.0 | **6** ⚠️ |
+> | API & Backend | 8.5 | 7 ⚠️ | | Rate Limiting | 6.2 | 6 ⚠️ |
+> | Database | 6.4 | 6 ⚠️ | | Caching | 6.8 | 7 ⚠️ |
+> | Auth | 8.4 | 8 ⚠️ | | Scaling | 6.0 | 6 ⚠️ |
+> | Hosting | 7.0 | **5** 🚨 | | Error Tracking | 4.5 | **4** 🚨 |
+> | Cloud | 6.5 | 6 ⚠️ | | Availability | 6.6 | **4** 🚨 |
+> | CI/CD | 7.4 | 7 ⚠️ | | **Overall** | — | **58/100** |
+>
+> **Session-3 verdict: 🚨 NOT READY FOR LAUNCH — and currently live regardless.** New criticals:
+> product images have no render path (FE-08), product pages soft-404 (FE-09), the `PREVIEW_KEY` is
+> committed in git not just chat-leaked (SEC-04), the recovery runbook rebuilds an *insecure* DB
+> (AVL-06/07), and the order-email is a fire-and-forget with no `after()` — the likely cause of the
+> session-2 "email doesn't send" mystery (API-07/CLOUD-01). All CRITICAL/HIGH findings survived an
+> adversarial refutation pass (0 refuted).
+
 ---
 
 ## Layer Dashboard
