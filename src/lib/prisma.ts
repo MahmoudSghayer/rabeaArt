@@ -19,7 +19,19 @@ function createClient(): PrismaClient {
   if (!connectionString) {
     throw new Error("DATABASE_URL is not set — copy .env.example to .env and fill it in.");
   }
-  const adapter = new PrismaPg({ connectionString });
+  // DB-07: DATABASE_URL must be the POOLED Supabase connection (Supavisor — port 6543 /
+  // ?pgbouncer=true). A direct :5432 URL opens a full Postgres connection per pool slot and
+  // exhausts the direct-connection limit within a few concurrent lambdas. Warn rather than throw:
+  // the site is live, and a noisy log beats a boot failure if the URL format is merely unusual.
+  if (!/6543|pgbouncer=true/.test(connectionString)) {
+    console.warn(
+      "prisma: DATABASE_URL does not look like the pooled Supabase connection (:6543 / pgbouncer=true) — connection-exhaustion risk under load (audit DB-07).",
+    );
+  }
+  // DB-07: cap connections PER serverless instance. Vercel autoscales instances, so the real
+  // ceiling is (instances x max) against Supavisor — an unbounded per-instance pool (pg-pool's
+  // default of 10) lets a modest burst converge past that ceiling. 3 is ample at this scale.
+  const adapter = new PrismaPg({ connectionString, max: 3 });
   return new PrismaClient({ adapter });
 }
 
