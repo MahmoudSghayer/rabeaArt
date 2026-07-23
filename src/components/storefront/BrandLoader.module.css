@@ -1,0 +1,197 @@
+/**
+ * Brand loading screen. See BrandLoader.tsx for why the keyframes are local to this module and
+ * why the resting (non-animated) styles are the visible state (reduced-motion safety).
+ */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-7);
+  /* Same paper surface as <body> so the loader reads as the page, not a modal pasted over it. */
+  background-color: var(--color-paper);
+  background-image: var(--surface-paper);
+  /* New stacking context so the ambient blobs can sit at z-index:-1 behind the emblem without
+     escaping behind the paper fill. */
+  isolation: isolate;
+  overflow: clip;
+  animation: rbLoaderIn var(--duration-md) var(--ease-out-soft) both;
+}
+
+/* Warm ambient depth — the same drifting blobs as the coming-soon page, tuned softer. */
+.blobA,
+.blobB {
+  position: absolute;
+  width: min(46vw, 420px);
+  aspect-ratio: 1;
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(30px);
+  animation: rbFloat 8s ease-in-out infinite alternate;
+}
+
+.blobA {
+  inset-block-start: -8%;
+  inset-inline-end: -10%;
+  background: radial-gradient(circle, rgba(201, 155, 63, 0.28), rgba(201, 155, 63, 0) 70%);
+}
+
+.blobB {
+  inset-block-end: -12%;
+  inset-inline-start: -12%;
+  background: radial-gradient(circle, rgba(183, 71, 42, 0.16), rgba(183, 71, 42, 0) 70%);
+  animation-delay: 0.9s;
+}
+
+.emblem {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(150px, 34vw, 224px);
+  aspect-ratio: 1;
+}
+
+/* Pulsing halo behind the mark — a soft ochre glow that breathes in time with it. */
+.emblem::before {
+  content: "";
+  position: absolute;
+  inset: 14%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 155, 63, 0.34), rgba(201, 155, 63, 0) 68%);
+  filter: blur(10px);
+  animation: rbPulse 2.6s var(--ease-in-out-art) infinite;
+}
+
+/* A single brush-sweep arc that rotates around the mark — a painterly take on a spinner, in the
+   brand's sienna→ochre. Masked to a thin ring so only the outline stroke shows. */
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(183, 71, 42, 0) 0deg,
+    rgba(183, 71, 42, 0) 70deg,
+    var(--color-sienna) 250deg,
+    var(--color-ochre) 340deg,
+    rgba(183, 71, 42, 0) 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  animation: rbSpin 1.5s linear infinite;
+}
+
+.mark {
+  position: relative;
+  z-index: 1;
+  width: 58%;
+  height: auto;
+  /* Near-black lockup reads best a touch softened on warm paper (matches the header/coming-soon
+     treatment). This is also the resting opacity the reduced-motion fallback settles on. */
+  opacity: 0.92;
+  animation: rbBreathe 2.6s var(--ease-in-out-art) infinite;
+}
+
+.label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+/* Letter-spacing + small-caps flourish only in LTR: applied to Arabic it would break the
+   cursive letter-joining, so the default (Arabic-first) label stays untouched. */
+:global([dir="ltr"]) .label {
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Indeterminate ink line sweeping beneath the caption. */
+.track {
+  position: relative;
+  width: clamp(120px, 30vw, 184px);
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  overflow: hidden;
+}
+
+.trackFill {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 42%;
+  /* Resting position for reduced motion — a static ink segment sitting inside the track. */
+  inset-inline-start: 29%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    rgba(183, 71, 42, 0) 0%,
+    var(--color-sienna) 45%,
+    var(--color-ochre) 100%
+  );
+  animation: rbSweep 1.5s var(--ease-in-out-art) infinite;
+}
+
+/* --- Local keyframes (see file header) --- */
+
+@keyframes rbLoaderIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rbSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rbBreathe {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+}
+
+@keyframes rbPulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes rbSweep {
+  from {
+    inset-inline-start: -45%;
+  }
+  to {
+    inset-inline-start: 100%;
+  }
+}
+
+@keyframes rbFloat {
+  from {
+    transform: translateY(-7px);
+  }
+  to {
+    transform: translateY(9px);
+  }
+}
