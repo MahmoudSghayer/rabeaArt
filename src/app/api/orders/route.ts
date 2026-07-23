@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import { clientIp } from "@/lib/client-ip";
 import { log, requestIdFrom } from "@/lib/log";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -38,10 +38,12 @@ export async function POST(request: NextRequest) {
 
     const result = await submitOrder(parsed.data);
 
-    // Confirmation email — fire-and-forget: sendOrderNotification never throws and logs every
-    // attempt to EmailLog, and a mail failure must never turn a successfully stored order into
-    // an error response.
-    void (async () => {
+    // Confirmation email — deferred, not blocking: sendOrderNotification never throws and logs
+    // every attempt to EmailLog, and a mail failure must never turn a successfully stored order
+    // into an error response. `after()` (not a bare un-awaited promise) is required on Vercel:
+    // it registers the work with the platform's `waitUntil`, so the serverless invocation stays
+    // alive until the send AND its EmailLog write finish, instead of being frozen mid-flight.
+    after(async () => {
       try {
         const order = await prisma.order.findUnique({
           where: { ref: result.ref },
@@ -70,7 +72,7 @@ export async function POST(request: NextRequest) {
           error: emailErr,
         });
       }
-    })();
+    });
 
     return NextResponse.json(result, { status: 200 });
   } catch (err) {
