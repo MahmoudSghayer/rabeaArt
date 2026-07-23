@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { AdminRole } from "@/generated/prisma/enums";
 import { requireRole, AuthError } from "@/lib/auth/requireRole";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { csvResponseBody, toCsv } from "@/lib/csv";
 import { createTranslator, getAdminLocale, getAdminMessages } from "@/app/admin/_lib/messages";
 import { ordersCsvHeaders, ordersCsvRow } from "@/app/admin/orders/csv";
@@ -17,6 +18,13 @@ export const runtime = "nodejs";
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
     const admin = await requireRole(AdminRole.ADMIN);
+
+    // RL-03: cheaper than the list export (one row), but still keyed per admin so it can't be
+    // scripted in a tight loop.
+    const rl = await checkRateLimit({ key: `admin-export:order:${admin.id}`, limit: 40, windowSeconds: 600 });
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429, headers: { "Retry-After": "600" } });
+    }
 
     const { id } = await ctx.params;
     const order = await prisma.order.findUnique({

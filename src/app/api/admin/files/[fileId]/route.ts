@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { AdminRole } from "@/generated/prisma/enums";
 import { requireRole, AuthError } from "@/lib/auth/requireRole";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
   createSignedDownloadUrl,
   fromOrderUploadsBucketPath,
@@ -22,7 +23,14 @@ const DOWNLOAD_URL_TTL_SECONDS = 120;
  */
 export async function GET(_req: Request, ctx: { params: Promise<{ fileId: string }> }) {
   try {
-    await requireRole(AdminRole.STAFF);
+    const admin = await requireRole(AdminRole.STAFF);
+
+    // RL-03: file views are frequent when browsing an order's attachments, so this cap is high —
+    // it exists only to stop a scripted enumeration of signed download URLs, not normal use.
+    const rl = await checkRateLimit({ key: `admin-file:${admin.id}`, limit: 120, windowSeconds: 600 });
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429, headers: { "Retry-After": "600" } });
+    }
 
     const { fileId } = await ctx.params;
     const file = await prisma.orderFile.findUnique({ where: { id: fileId } });
