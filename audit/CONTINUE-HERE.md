@@ -1,7 +1,7 @@
 # Continuation Prompt — rabea.art
 
 Copy everything below the line into a fresh Claude Code session on any device.
-Last updated: 2026-07-23 (session 3 — independent 13-layer re-audit).
+Last updated: 2026-07-23 (session 3 — re-audit complete + first remediation batch: 8 findings shipped to `main`).
 
 ---
 
@@ -35,63 +35,96 @@ indexed, so consider robots disallow-all/noindex until real products exist.
 Frontend 5 · API 7 · Database 6 · Auth 8 · Hosting 5 · Cloud 6 · CI/CD 7 · Security 6 ·
 Rate Limiting 6 · Caching 7 · Scaling 6 · **Error Tracking 4** · **Availability 4** · Overall **58/100**.
 
-## P0 — do now (regardless of gate status)
+## ✅ SHIPPED in session 3 remediation (all merged to `main`, deployed via Vercel)
 
-1. **Gate decision: RESOLVED — intentional soft-launch (owner-confirmed 2026-07-23), staying live.**
-   Do not re-gate. Instead, decide on crawl policy: consider setting `robots.txt` to disallow-all /
-   `noindex` until the catalog is real, so Google doesn't index the empty shop. (OPS-01/HOST-05)
-2. **Rotate `PREVIEW_KEY`.** It is committed in plaintext in git history (SEC-04) — this doc used
-   to contain the literal value; it has been redacted here, but rotation is still required because
-   the old value survives in history. Store the new value ONLY in Vercel env, never in a repo file.
-3. **Fix the order-confirmation email (API-07/CLOUD-01).** It's an un-awaited `void (async()=>{})()`
-   in `src/app/api/orders/route.ts:44-75` with no `after()`/`waitUntil` — on Vercel the send (and
-   its `EmailLog` write) can be dropped when the function freezes. This is the likely cause of the
-   session-2 "email doesn't send" mystery. Fingerprint: run
-   `SELECT at,"to",template,status,error FROM email_logs ORDER BY at DESC LIMIT 10;` — **no row at
-   all** for a test order = this bug; a `failed` row = missing `RESEND_API_KEY`/unverified domain.
-   Fix: `import { after } from "next/server"` and wrap the block (same for `dispatchStatusEmail`).
-4. **Product pages soft-404 (FE-09).** `/product/<any-unknown-slug>` returns HTTP 200 "temporary
-   error", not 404. Get Vercel function logs for one such request; suspect the `unstable_cache`
-   wrap of `getProductBySlug`. This may also break *real* product pages once the catalog is seeded.
-5. **Fix the recovery runbook before trusting any backup (AVL-06/AVL-07).** `docs/SETUP-DATABASE.md`
-   never applies `docs/rls-lockdown.sql` or the index migration, and `docs/verify-restore.sql` has
-   no UTF-8 encoding check — so a rebuild is insecure+under-indexed and a WIN1255 restore silently
-   mangles Arabic while passing every check. Fix these, THEN do the timed rebuild drill (AVL-02).
+Each went through `tsc` + full unit suite (378 passing) + `next build` before merge; each is its
+own merge commit on `main`.
 
-## P1 — before a deliberate (re)launch or real order volume
+1. **API-07 / CLOUD-01** — order + admin status emails now use `after()` from `next/server` (no more
+   silent drops on serverless freeze). `src/app/api/orders/route.ts`, `admin/orders/[id]/actions.ts`.
+2. **LOG-04 / SEC-08** — customer PII no longer logged in cleartext; `log.ts` `REDACT_PATTERNS` now
+   covers email/phone/whatsapp/address/street/postal/instructions/notes; `notify.ts` routes through
+   `log.error`. Test: `tests/unit/log-redaction.test.ts`.
+3. **AUTH-06** — owner-floor mutations (`changeAdminRoleAction`, `setAdminUserActiveAction`) run at
+   `SERIALIZABLE` isolation, closing the two-different-owners write-skew.
+4. **DB-03** — the 6 missing FK indexes: `@@index` lines added + migration
+   `prisma/migrations/20260723000000_add_remaining_fk_indexes/`. **Owner already ran the SQL in
+   Supabase — indexes are live.**
+5. **RL-03 / API-04** — the 5 admin cost endpoints (3 CSV exports, file download, product-image sign)
+   are rate-limited per-admin with `Retry-After`; `productId` constrained to `[A-Za-z0-9_-]`.
+6. **DB-07** — Prisma pool capped `max: 3` + non-fatal warning if `DATABASE_URL` isn't pooled.
+7. **LOG-02 (monitor half)** — `GET /api/health` readiness probe (200 / 503 on DB reachability),
+   unauthenticated, ungated. **Owner action: point an uptime monitor (Better Uptime / UptimeRobot /
+   Vercel Monitoring) at `https://www.rabea.art/api/health`.**
 
-- **Wire the product-image render path (FE-08).** The storefront renders CSS-gradient placeholders
-  unconditionally; `queries.ts` already fetches+types `product.images`/`primaryImage` — nothing
-  renders them. Branch `ProductCard`/`Gallery`/`ProductView` to `next/image`, gradient as fallback.
-- **Error tracking + uptime (LOG-01/02).** Wire `@sentry/nextjs` into `src/lib/log.ts`'s `emit()`
-  (all `log.error` sites report with zero call-site change) + one uptime check. Do **LOG-04 first**:
-  `notify.ts:39` logs a customer email in cleartext and `REDACT_PATTERNS` has no PII coverage.
-- **Login brute-force + MFA (AUTH-01/AUTH-05).** Sign-in is client-side, so add an app-level
-  failed-attempt lockout and enable Supabase TOTP for OWNER/ADMIN. Admin is the crown jewel.
-- **Upload verification bypass (API-06/SEC-07).** A direct `POST /api/orders` accepts a never-verified
-  `bucketPath`. Require server-side verify (or inline `getObjectMetadata`) + magic-byte sniff.
-- **Migration-drift guard (DB-13)** + **customer-erasure path (DB-08, `Customer.anonymizedAt`)**.
-- **Branch protection (CI-01)** + **DB-gated E2E in CI (CI-03)** — the commerce path is untested.
-- **Region pin (HOST-02)** `regions` in `vercel.json`; **connection pool cap (DB-07)** `max: 3`.
-- **Confirm env scoping (HOST-06):** are Vercel Preview deploys pointed at a SEPARATE database, or
-  can a PR-branch preview write production data? Verify in the dashboard.
-- **Canonical domain (FE-13):** `NEXT_PUBLIC_SITE_URL=https://www.rabea.art` (currently apex, which
-  308-redirects — every sitemap/OG/JSON-LD URL redirects).
-- **Add the 6 missing FK indexes (DB-03)** — the prior "FIXED" was inaccurate.
-- **Ship CSP report-only → enforce (SEC-02).**
+## P0 — still open
 
-## Blockers that need the site owner (not code)
+- **Gate: RESOLVED — intentional soft-launch (owner-confirmed), staying live.** Not a task; context.
+- **Crawl policy** — `robots.txt` says `Allow: /` + live sitemap, inviting Google to index the empty
+  catalog. Consider disallow-all/`noindex` until real products exist (a `robots.ts` change, or leave
+  as-is if SEO-now is intended). (OPS-01)
+- **Rotate `PREVIEW_KEY`** (SEC-04) — committed in git history; redacted from docs but the old value
+  survives in history. Rotate in Vercel env only. **Owner/dashboard.**
+- **FE-09 product-page soft-404** — `/product/<unknown-slug>` returns HTTP 200 "temporary error", not
+  404. Pull Vercel function logs for one such request; prime suspect is the `unstable_cache` wrap of
+  `getProductBySlug`. May also break *real* product pages once the catalog is seeded. **Code.**
+- **AVL-06/07 recovery runbook** — `docs/SETUP-DATABASE.md` never applies `docs/rls-lockdown.sql` or
+  the index migrations (rebuild = insecure + under-indexed), and `docs/verify-restore.sql` has no
+  UTF-8 check (a WIN1255 restore mangles Arabic and passes every check). Fix the docs, THEN do the
+  timed rebuild drill (AVL-02). **Docs + owner drill.**
+- **Confirm the email fix worked** — after the deploy, place a test order and check
+  `SELECT at,"to",template,status,error FROM email_logs ORDER BY at DESC LIMIT 10;`. A `sent`/`failed`
+  row now appears reliably (the row-drop bug is fixed); a `failed` row with `EMAIL_DISABLED`/provider
+  error = still need `RESEND_API_KEY`/`EMAIL_FROM` set + a verified Resend domain.
 
-- Add real products (catalog is empty). · Confirm daily backups + consider PITR (AVL-03). · Confirm
-  production points at the RLS-hardened Supabase project, not another on the account (AVL-08). ·
-  Storage buckets have no backup (AVL-04).
+## P1 — next code work (all clear of the storefront-redesign files except FE-08)
+
+- **LOG-01 error tracking (Sentry)** — the seam is ready (`log.ts` `emit()` is the single forward
+  point). Needs a **`SENTRY_DSN` from the owner**. Use `@sentry/nextjs` (not `@sentry/node`) because
+  it handles the serverless-flush problem; init gated on the DSN so it's a no-op until set; forward
+  from `emit()` on `level==="error"`. Verify events actually arrive before calling it done.
+- **AUTH-01 / AUTH-05** — app-level login failed-attempt lockout + Supabase TOTP MFA for OWNER/ADMIN
+  (sign-in is client-side `signInWithPassword`, so add a thin server path to throttle).
+- **API-06 / SEC-07 upload-verify bypass** — `POST /api/orders` accepts a never-verified `bucketPath`
+  (`submit.ts` builds `OrderFile` rows straight from the client payload). Require server-side verify
+  or inline `getObjectMetadata`, + magic-byte sniff.
+- **DB-08 customer erasure** — `orders.customerId` is `ON DELETE RESTRICT`, no delete/anonymize
+  action. Add `Customer.anonymizedAt` + an in-place PII-null action (don't touch the FK).
+- **FE-08 product-image render path** (HIGHEST product value) — storefront renders CSS gradients
+  unconditionally; `queries.ts` already fetches+types `product.images`/`primaryImage`. Branch
+  `ProductCard`/`Gallery`/`ProductView` to `next/image`, gradient as fallback. **COORDINATE with the
+  storefront-redesign workstream — these are the files that session actively edits.**
+- **SEC-02 CSP** — ship `Content-Security-Policy-Report-Only` (nonce via `proxy.ts`) → enforce.
+- **RL-04** — make the fixed-window limiter atomic (`INSERT ... ON CONFLICT`) + `Retry-After` on the
+  public routes. Touches the order hot path — get a throwaway Postgres to test the concurrency
+  before rewriting.
+
+## CI hardening (one ephemeral-Postgres job unlocks three findings — CI-only, no prod risk)
+
+- **CI-03** — 4 E2E specs (order-flow, shop-browse, duplicate-submit, mobile) `test.skip` without
+  `E2E_HAS_DB`; CI never sets it, so the whole commerce path is untested. Add a Postgres service to
+  the `e2e` job, apply the migration SQL + seed, set `E2E_HAS_DB=1`.
+- **DB-13** migration-drift guard (`prisma migrate diff --exit-code` against the shadow DB in the
+  same job) and **SEC-06** RLS-coverage check (assert every `public` table has `relrowsecurity`).
+- **CI-01** branch protection on `main` — **owner/dashboard** (require `verify`+`e2e`, 1 review).
+
+## Owner / dashboard only (no code)
+
+- Seed real products (catalog is empty). · **NEXT_PUBLIC_SITE_URL → `https://www.rabea.art`** (FE-13;
+  currently apex, which 308-redirects every sitemap/OG/JSON-LD URL). · Confirm Vercel **Preview**
+  deploys use a SEPARATE database, not production (HOST-06). · Confirm prod points at the
+  RLS-hardened Supabase project (AVL-08). · Pin `regions` in `vercel.json` to Supabase's region
+  (HOST-02). · Enable PITR (AVL-03) + Storage bucket backup (AVL-04). · Point an uptime monitor at
+  `/api/health`.
 
 ## Verification
 
 `npm run lint && npm run typecheck && npm run test && npm run build`
 
-Baseline to beat (HEAD `89ec89e`): lint **0 errors** (3 warnings — 1 real at `ProductForm.tsx:85`,
-tripled by stale worktrees per CI-06), typecheck clean, **369 tests**, build compiles. `npx
+Baseline to beat (`main` at the last remediation commit): lint **0 errors** (3 warnings — 1 real at
+`ProductForm.tsx:85`, tripled by stale worktrees per CI-06), typecheck clean, **378 tests**, build
+compiles. Every remediation commit is on `main`; branch each new fix off `main`, gate with
+`tsc`+`test`+`build`, then merge (owner said "merge to main, don't ask"). `npx
 playwright test` shows ~5 local failures from parallelism on Windows — pre-existing, pass with
 `--workers=1`, CI pins `workers: 1`. Don't chase them. `npm audit` reports 5 moderate transitives
 only fixable by downgrading `next`; accepted, CI gates at `--audit-level=high`.
