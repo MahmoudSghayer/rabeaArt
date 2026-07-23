@@ -108,6 +108,7 @@
       { "title": "Materials that last", "desc": "Heavy cotton, silk threads, archival fade-resistant inks and paints." },
       { "title": "A personal line", "desc": "You talk directly with Rabea — and get progress photos before delivery." }
     ],
+    "valuesTitle": "What sets the studio apart",
     "storyTitle": "From sketchbook to studio",
     "story1": "It began in a small room: watercolours on school paper, and thread borrowed from his mother’s sewing box. The drawings grew, became gifts for friends, then someone asked for the first shirt — “paint me this on a black tee” — and from that sentence Rabea.art was born.",
     "pull": "“Every piece that leaves the studio has passed through my hands twice: once as an idea, once as colour.”",
@@ -156,6 +157,7 @@
   },
   "legal": {
     "updated": "Last updated: July 2026",
+    "toc": "On this page",
     "contactLine": "Questions about this page?",
     "contactLink": "Contact us",
     "terms": {
@@ -279,6 +281,8 @@
   },
   "product": {
     "breadcrumbLabel": "Breadcrumb",
+    "panelConfigure": "Configure your piece",
+    "panelOrder": "Complete your order",
     "viewFull": "Full piece",
     "viewTexture": "Texture detail",
     "viewBrush": "Brushwork",

@@ -341,7 +341,12 @@ export function ProductView({ product }: { product: CatalogProductDetail }) {
             separate those jobs; each carries a corner mark so they are told apart at a glance
             without inventing new copy.
           */}
-          <div className={styles.optionsPanel}>
+          {/*
+            role="group" + aria-label names each surface for assistive tech, which previously
+            saw three anonymous divs. Purely programmatic — the visible design still leans on the
+            corner ornament, so this adds no layout and cannot regress it.
+          */}
+          <div className={styles.optionsPanel} role="group" aria-label={t("panelConfigure")}>
             <span aria-hidden="true" className={styles.panelMark}>
               <Ornament name={isShirt ? "fold" : "frame"} size={18} strokeWidth={1.5} />
             </span>
@@ -493,7 +498,7 @@ export function ProductView({ product }: { product: CatalogProductDetail }) {
             )}
           </div>
 
-          <div className={styles.orderPanel}>
+          <div className={styles.orderPanel} role="group" aria-label={t("panelOrder")}>
             <span aria-hidden="true" className={styles.panelMark}>
               <Ornament name="ribbon" size={18} strokeWidth={1.5} />
             </span>

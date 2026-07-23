@@ -68,7 +68,7 @@ export default async function CustomPage({
       art: textured(grainedArt("custom"), "grain"),
     },
     {
-      label: t("review.requestType"),
+      label: t("boardStep2"),
       ornament: "fold",
       art: textured(grainedArt("dawn"), "weaveSoft", "grain"),
     },
@@ -104,6 +104,7 @@ export default async function CustomPage({
       </section>
 
       <TexturedSection tone="deep" edge="deckle" glow="ochre" innerClassName={styles.boardInner}>
+        <h2 className={styles.boardTitle}>{t("boardTitle")}</h2>
         <ol className={styles.board}>
           {storyboard.map((beat, i) => (
             <Reveal as="li" key={beat.label} index={i} className={styles.beat}>

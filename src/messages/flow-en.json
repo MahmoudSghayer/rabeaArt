@@ -4,6 +4,8 @@
     "title": "Design your own piece",
     "sub": "Upload your idea — a photo, sketch, logo, or just a description — and together we turn it into a shirt or painting that feels like you.",
     "priceNotice": "Final pricing for custom pieces is confirmed after design review — depending on complexity, colour count, size and production method. We send you the price and timing before any work starts.",
+    "boardTitle": "From idea to finished piece",
+    "boardStep2": "Choose your piece",
     "chooser": {
       "startHere": "Start here",
       "shirt": {

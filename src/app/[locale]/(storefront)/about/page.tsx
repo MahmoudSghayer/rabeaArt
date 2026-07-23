@@ -83,6 +83,7 @@ export default async function AboutPage({
         material rather than by three percent of lightness.
       */}
       <TexturedSection tone="deep" edge="deckle" glow="ochre" innerClassName={styles.valuesInner}>
+        <h2 className={styles.valuesTitle}>{t("valuesTitle")}</h2>
         <ul className={styles.valuesGrid}>
           {values.map((value, i) => (
             /*

@@ -67,12 +67,13 @@ export async function LegalPageShell({ active, title, sections }: LegalPageShell
           Margin table of contents. Desktop only — below 1080px it is `display: none`, which also
           takes its links out of the tab order rather than leaving them focusable but invisible.
 
-          Not a <nav>: the tab switcher above is already one, and a second unnamed navigation
-          landmark on the same page is worse for a screen-reader user than a plain list of links.
-          A complementary landmark says what this is without needing new copy.
+          A NAMED navigation landmark: a second nav is only a problem for a screen-reader user
+          when it is unnamed. `aria-label` (and the visible heading it mirrors) distinguishes it
+          from the terms/privacy switcher above, so both announce their purpose.
         */}
-        <aside className={styles.toc}>
+        <nav className={styles.toc} aria-label={t("toc")}>
           <div className={styles.tocCard}>
+            <p className={styles.tocTitle}>{t("toc")}</p>
             <ol className={styles.tocList}>
               {sections.map((section, i) => (
                 <li key={i}>
@@ -86,7 +87,7 @@ export async function LegalPageShell({ active, title, sections }: LegalPageShell
               ))}
             </ol>
           </div>
-        </aside>
+        </nav>
       </TexturedSection>
     </div>
   );
