@@ -1,0 +1,14 @@
+.magnetic {
+  display: inline-block;
+  /* Eases the pull home when the pointer leaves; the spring curve gives it a hint of overshoot,
+     which is what reads as "magnetic" rather than "sliding". */
+  transition: transform var(--duration-md) var(--ease-spring);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magnetic {
+    transition: none;
+    transform: none !important;
+  }
+}

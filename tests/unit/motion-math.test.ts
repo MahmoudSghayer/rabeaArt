@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   MAX_PARALLAX_SHIFT,
+  magneticOffset,
   parallaxOffset,
   tiltAngles,
 } from "@/components/motion/math";
@@ -85,6 +86,42 @@ describe("tiltAngles", () => {
     expect(tiltAngles(5, 5, { left: 0, top: 0, width: 0, height: 0 }, MAX)).toEqual({
       rotateX: 0,
       rotateY: 0,
+    });
+  });
+});
+
+describe("magneticOffset", () => {
+  const RECT = { left: 100, top: 100, width: 200, height: 80 };
+  const centerX = RECT.left + RECT.width / 2; // 200
+  const centerY = RECT.top + RECT.height / 2; // 140
+
+  it("returns no pull at the element centre", () => {
+    expect(magneticOffset(centerX, centerY, RECT, 0.35, 10)).toEqual({ x: 0, y: 0 });
+  });
+
+  it("pulls toward the pointer, proportional to distance from centre", () => {
+    // 20px right of centre, strength 0.35 → 7px, under the cap.
+    const o = magneticOffset(centerX + 20, centerY, RECT, 0.35, 10);
+    expect(o.x).toBeCloseTo(7);
+    expect(o.y).toBe(0);
+  });
+
+  it("follows the pointer's sign on both axes", () => {
+    const o = magneticOffset(centerX - 20, centerY - 10, RECT, 0.5, 100);
+    expect(o.x).toBeCloseTo(-10);
+    expect(o.y).toBeCloseTo(-5);
+  });
+
+  it("caps the pull at ±max per axis", () => {
+    const o = magneticOffset(centerX + 1000, centerY - 1000, RECT, 0.35, 10);
+    expect(o.x).toBe(10);
+    expect(o.y).toBe(-10);
+  });
+
+  it("degrades to zero for a zero-size rect", () => {
+    expect(magneticOffset(50, 50, { left: 0, top: 0, width: 0, height: 0 }, 0.35, 10)).toEqual({
+      x: 0,
+      y: 0,
     });
   });
 });

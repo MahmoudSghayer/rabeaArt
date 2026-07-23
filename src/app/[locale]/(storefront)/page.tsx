@@ -8,6 +8,7 @@ import type { CatalogListItem } from "@/lib/catalog/types";
 import { ArtMarquee } from "@/components/storefront/ArtMarquee";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { AmbientField, MaskReveal, Ornament, TexturedSection, type OrnamentName } from "@/components/decor";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { ParallaxLayer } from "@/components/motion/ParallaxLayer";
 import { Reveal } from "@/components/motion/Reveal";
 import buttonStyles from "@/components/ui/Button.module.css";
@@ -72,9 +73,13 @@ export default async function HomePage({
           </div>
           <p className={styles.heroSub}>{t("heroSub")}</p>
           <div className={styles.ctaRow}>
-            <Link href="/custom" className={cx(buttonStyles.button, buttonStyles.accent)}>
-              {t("ctaCustom")}
-            </Link>
+            {/* The primary action gets the magnetic pull; the secondary links stay still, so the
+                emphasis reads rather than everything wobbling at once. */}
+            <Magnetic>
+              <Link href="/custom" className={cx(buttonStyles.button, buttonStyles.accent)}>
+                {t("ctaCustom")}
+              </Link>
+            </Magnetic>
             <Link
               href={{ pathname: "/shop", query: { cat: "shirts" } }}
               className={cx(buttonStyles.button, buttonStyles.primary)}
