@@ -24,9 +24,11 @@ robots.txt                       → Allow: /  (un-gated) + live sitemap
 ```
 
 The catalog is empty, product pages soft-404, product images don't render, there's no error
-tracking, and the DB restore has never been tested. **First decision for the next session: is this
-an intentional soft-launch?** If NO → set `COMING_SOON=1` in Vercel and redeploy immediately. If
-YES → the P0/P1 list below is an active incident, not a pre-launch checklist.
+tracking, and the DB restore has never been tested. **The owner confirmed (2026-07-23) this is an
+intentional soft-launch** — so do NOT re-gate; the P0/P1 list below is a live-production priority
+queue, worked in order. One soft-launch nuance: `robots.txt` currently says `Allow: /` with a live
+sitemap, inviting Google to index the empty catalog — a direct-link soft-launch doesn't need to be
+indexed, so consider robots disallow-all/noindex until real products exist.
 
 ## Session-3 scores (derivation in SESSION-3-REAUDIT.md)
 
@@ -35,7 +37,9 @@ Rate Limiting 6 · Caching 7 · Scaling 6 · **Error Tracking 4** · **Availabil
 
 ## P0 — do now (regardless of gate status)
 
-1. **Decide the gate.** Confirm soft-launch vs misconfig; re-gate if unintended. (OPS-01/HOST-05)
+1. **Gate decision: RESOLVED — intentional soft-launch (owner-confirmed 2026-07-23), staying live.**
+   Do not re-gate. Instead, decide on crawl policy: consider setting `robots.txt` to disallow-all /
+   `noindex` until the catalog is real, so Google doesn't index the empty shop. (OPS-01/HOST-05)
 2. **Rotate `PREVIEW_KEY`.** It is committed in plaintext in git history (SEC-04) — this doc used
    to contain the literal value; it has been redacted here, but rotation is still required because
    the old value survives in history. Store the new value ONLY in Vercel env, never in a repo file.

@@ -11,11 +11,13 @@ was put through an adversarial refutation pass; **0 were refuted.**
 
 ---
 
-## THE HEADLINE — the site is LIVE, and it should not be
+## THE HEADLINE — the site is LIVE (intentional soft-launch, owner-confirmed)
 
 Sessions 1–2 ended with a hard instruction: *"Do not remove `COMING_SOON` until items 1–5 are
-done."* **It was removed anyway.** Confirmed six independent ways (five sub-audit agents + a direct
-orchestrator probe) on 2026-07-23:
+done."* The gate is now off — and the owner confirmed (2026-07-23) this is an **intentional
+soft-launch**, not a misconfiguration. Re-gating is therefore NOT the action; the entire P0/P1 list
+below is a **live-production priority queue**, worked in order, with no pre-launch cushion left.
+Confirmed six independent ways (five sub-audit agents + a direct orchestrator probe) on 2026-07-23:
 
 ```
 GET https://www.rabea.art/            → 200, X-Matched-Path: /[locale], <title>Rabea.art</title>   (real storefront, NOT /coming-soon)
@@ -30,10 +32,16 @@ product pages soft-404, product images have no render path, there is no error tr
 restore has never been tested, and the recovery runbook itself is broken. Every finding previously
 softened as "fix before the gate drops" is now a **live production exposure**.
 
-**OPS-01 (Critical, P0):** production launched with sessions-1–2 blockers unresolved and zero
-observability, so no one is watching. Immediate action: decide whether this is an intentional
-soft-launch. If not, re-set `COMING_SOON=1` in Vercel and redeploy. If yes, treat the entire P0/P1
-list below as an active incident, not a pre-launch checklist.
+**OPS-01 (Critical, P0):** production is a live soft-launch (owner-confirmed 2026-07-23) with
+sessions-1–2 blockers unresolved and zero observability, so no one is watching. Because staying live
+is the intended state, the fixes below are worked as production priorities, not as a re-gate. Two
+soft-launch-specific consequences to handle immediately: (a) `robots.txt` currently emits `Allow: /`
+plus a live sitemap, so search engines are actively invited to crawl and index the **empty**
+catalog — a soft-launch reachable by direct link does not require being indexed. Consider keeping
+the site publicly reachable while setting robots to disallow-all (or noindex) until the catalog is
+real, so the first Google impression isn't an empty shop. (b) With no error tracking and a
+possibly-dropping order email, the first real customer's failure is invisible — LOG-01/02/04 and
+API-07 move to the very top of the queue.
 
 ---
 
