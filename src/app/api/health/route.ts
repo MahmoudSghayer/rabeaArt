@@ -26,14 +26,9 @@ export async function GET() {
       { status: "ok", db: "ok" },
       { status: 200, headers: { "Cache-Control": "no-store" } },
     );
-  } catch (err) {
-    // TEMPORARY DIAGNOSTIC (will be reverted right after): surface the connection error's
-    // name + message so it can be read via curl during a live DB-connectivity incident. Postgres
-    // driver errors never contain the password — only the code/user/host — and this is removed as
-    // soon as the root cause is identified.
-    const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+  } catch {
     return NextResponse.json(
-      { status: "degraded", db: "down", detail: detail.slice(0, 300) },
+      { status: "degraded", db: "down" },
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
