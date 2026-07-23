@@ -236,6 +236,10 @@ model ProductColor {
   color   Color   @relation(fields: [colorId], references: [id])
 
   @@id([productId, colorId])
+  // colorId is only the trailing column of the @@id composite, so it cannot serve a lookup
+  // filtered on colorId alone (leftmost-prefix rule) — e.g. checking whether a Color is in use
+  // before deleting it. (DB-03: the FK-index sweep missed the join-table FKs.)
+  @@index([colorId])
   @@map("product_colors")
 }
 
@@ -266,6 +270,9 @@ model ProductSize {
   size    Size    @relation(fields: [sizeId], references: [id])
 
   @@unique([productId, sizeId])
+  // sizeId is the trailing column of the @@unique, so `sizeInUse()` (options/actions.ts) —
+  // `productSize.count({ where: { sizeId } })` before deleting a Size — was a seq scan. (DB-03)
+  @@index([sizeId])
   @@map("product_sizes")
 }
 
@@ -285,6 +292,11 @@ model ProductVariant {
   orderItems OrderItem[]
 
   @@unique([productId, colorId, sizeId])
+  // colorId/sizeId are non-leading columns of the @@unique, so neither serves a single-column
+  // lookup — `sizeInUse()` (options/actions.ts) filters `productVariant.count({ where: { sizeId } })`
+  // alone, and the color equivalent. (DB-03)
+  @@index([colorId])
+  @@index([sizeId])
   @@map("product_variants")
 }
 
@@ -396,6 +408,10 @@ model OrderItem {
   // `items: { some: { kind: { in: [...] } } }` on the overview and reports pages compiles to a
   // correlated subquery over this table.
   @@index([kind])
+  // productId/variantId FKs were unindexed — needed once product usage is queried from order
+  // history and to keep the FK joins off seq scans as orders accumulate. (DB-03)
+  @@index([productId])
+  @@index([variantId])
   @@map("order_items")
 }
 
