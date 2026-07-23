@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { AdminRole } from "@/generated/prisma/enums";
 import { requireRole, AuthError } from "@/lib/auth/requireRole";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { ALLOWED_UPLOAD_MIME, MAX_UPLOAD_BYTES, validateUpload, randomObjectKey } from "@/lib/storage/validation";
 import { PRODUCT_IMAGES_BUCKET } from "@/lib/storage/uploads";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -14,9 +15,11 @@ export const runtime = "nodejs";
 const MAX_PRODUCT_IMAGES = 6;
 
 const bodySchema = z.object({
-  // Groups objects under a draft/product id for tidy storage paths — "new" for a not-yet-created
-  // product (see ProductForm, which mints a stable crypto.randomUUID() draft id per form mount).
-  productId: z.string().min(1).max(64),
+  // Groups objects under a draft/product id for tidy storage paths — a product cuid, or a
+  // crypto.randomUUID() draft id for a not-yet-created product (see ProductForm). API-04: constrain
+  // to a safe charset so it can never inject path separators into the storage key — cuid, uuid and
+  // the draft ids all match [A-Za-z0-9_-], while "/" "." ".." are rejected.
+  productId: z.string().min(1).max(64).regex(/^[A-Za-z0-9_-]+$/),
   filename: z.string().min(1).max(200),
   size: z.number().int().positive().max(MAX_UPLOAD_BYTES),
   // Spread to a mutable array: z.enum's typing wants a non-readonly tuple even though the
@@ -36,15 +39,15 @@ const bodySchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
-    await requireRole(AdminRole.ADMIN);
-  } catch (err) {
-    if (err instanceof AuthError) {
-      return NextResponse.json({ error: "FORBIDDEN" }, { status: err.status });
-    }
-    throw err;
-  }
+    const admin = await requireRole(AdminRole.ADMIN);
 
-  try {
+    // RL-03: mints signed upload URLs — cap per admin so a compromised session can't spray the
+    // bucket with upload grants.
+    const rl = await checkRateLimit({ key: `admin-image-sign:${admin.id}`, limit: 30, windowSeconds: 600 });
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429, headers: { "Retry-After": "600" } });
+    }
+
     const json = await request.json().catch(() => null);
     const parsed = bodySchema.safeParse(json);
     if (!parsed.success) {
@@ -70,6 +73,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ path: data.path, token: data.token, signedUrl: data.signedUrl });
   } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: err.status });
+    }
     console.error("POST /api/admin/product-images/sign failed", err);
     return NextResponse.json({ error: "INTERNAL" }, { status: 500 });
   }

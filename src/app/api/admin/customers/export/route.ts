@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { AdminRole } from "@/generated/prisma/enums";
 import { requireRole, AuthError } from "@/lib/auth/requireRole";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { csvResponseBody, toCsv } from "@/lib/csv";
 import { getAdminLocale } from "@/app/admin/_lib/messages";
 import { buildCustomersWhere, parseCustomersQuery, type CustomersSearchParams } from "@/app/admin/customers/query";
@@ -24,6 +25,13 @@ const MAX_EXPORT_ROWS = 5000;
 export async function GET(request: NextRequest) {
   try {
     const admin = await requireRole(AdminRole.ADMIN);
+
+    // RL-03: the role gate is not a volumetric one — cap repeated exports per admin so a leaked or
+    // compromised session can't hammer the 5000-row export + groupBy. Keyed by admin id, not IP.
+    const rl = await checkRateLimit({ key: `admin-export:customers:${admin.id}`, limit: 20, windowSeconds: 600 });
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "RATE_LIMITED" }, { status: 429, headers: { "Retry-After": "600" } });
+    }
 
     const params: CustomersSearchParams = Object.fromEntries(request.nextUrl.searchParams.entries());
     const parsed = parseCustomersQuery(params);
