@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { SiteHeader, type SiteHeaderAnnouncement } from "@/components/storefront/SiteHeader";
 import { SiteFooter } from "@/components/storefront/SiteFooter";
+import { NavigationLoader } from "@/components/storefront/NavigationLoader";
 import { getCachedSettings } from "@/lib/catalog/cached";
 
 /**
@@ -33,6 +34,8 @@ export default async function StorefrontLayout({ children }: { children: ReactNo
       <SiteHeader announcement={announcement} />
       <main>{children}</main>
       <SiteFooter />
+      {/* Shows the brand loader on client-side page switches (loading.tsx covers first load). */}
+      <NavigationLoader />
     </div>
   );
 }

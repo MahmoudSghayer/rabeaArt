@@ -1,0 +1,14 @@
+/**
+ * The wrapper carries no box of its own — its only job is to fade the position:fixed BrandLoader
+ * descendant out as the new page paints. Opacity on this ancestor applies to the fixed child
+ * (opacity does not establish a containing block, so the loader stays pinned to the viewport).
+ */
+.wrap {
+  transition: opacity var(--duration-sm) var(--ease-standard);
+}
+
+.exiting {
+  opacity: 0;
+  /* Let clicks reach the freshly-arrived page while the loader fades away. */
+  pointer-events: none;
+}
