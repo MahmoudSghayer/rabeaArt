@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { log } from "@/lib/log";
 import { getEmailProvider } from "./resend";
 import { renderTemplate, type EmailLocale, type EmailTemplateData } from "./templates";
 import type { EmailTemplate } from "./types";
@@ -36,7 +37,15 @@ export async function sendOrderNotification(opts: {
       },
     });
   } catch (err) {
-    console.error(`sendOrderNotification: failed to send "${template}" to ${to}`, err);
+    // `recipientEmail` (not the raw `to` string interpolated into a message) so the logger's
+    // redaction catches the customer's address; the order id/template are the safe correlators.
+    log.error("order notification send failed", {
+      event: "order.email.send_failed",
+      template,
+      orderId: orderId ?? undefined,
+      recipientEmail: to,
+      error: err,
+    });
     try {
       await prisma.emailLog.create({
         data: {
@@ -48,7 +57,12 @@ export async function sendOrderNotification(opts: {
         },
       });
     } catch (logErr) {
-      console.error("sendOrderNotification: failed to write EmailLog after send error", logErr);
+      log.error("order notification EmailLog write failed after send error", {
+        event: "order.email.log_write_failed",
+        template,
+        orderId: orderId ?? undefined,
+        error: logErr,
+      });
     }
   }
 }

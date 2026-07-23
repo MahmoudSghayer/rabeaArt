@@ -16,6 +16,7 @@ export type LogLevel = "debug" | "info" | "warn" | "error";
 
 /** Keys whose values are never safe to emit, matched case-insensitively as substrings. */
 const REDACT_PATTERNS = [
+  // Credentials / secrets.
   "password",
   "token",
   "secret",
@@ -26,6 +27,17 @@ const REDACT_PATTERNS = [
   "service_role",
   "serviceRole",
   "anonKey",
+  // Customer PII. A log sink (Vercel drain, Sentry) is the wrong place for it — correlate an
+  // incident to a customer via the order ref/id instead, which are safe to log. Log a recipient
+  // email under a key that ends in "email" (e.g. `recipientEmail`) so it is caught here.
+  "email",
+  "phone",
+  "whatsapp",
+  "address",
+  "street",
+  "postal",
+  "instructions",
+  "notes",
 ];
 
 const REDACTED = "[redacted]";

@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { AdminRole, ContactMethod, OrderStatus, PaymentStatus } from "@/generated/prisma/enums";
 import { requireRole, AuthError } from "@/lib/auth/requireRole";
+import { log } from "@/lib/log";
 import { isValidTransition, stockActionForTransition } from "@/lib/orders/transitions";
 import { applyStock, releaseStock, InventoryError } from "@/lib/inventory";
 import { sendOrderNotification } from "@/lib/email/notify";
@@ -52,7 +54,12 @@ async function dispatchStatusEmail(orderId: string, template: EmailTemplate): Pr
       },
     });
   } catch (err) {
-    console.error("status email dispatch failed", err);
+    log.error("status email dispatch failed", {
+      event: "order.status_email.failed",
+      orderId,
+      template,
+      error: err,
+    });
   }
 }
 
@@ -134,7 +141,9 @@ export async function updateOrderStatusAction(orderId: string, nextStatusRaw: Or
 
     // Post-commit customer notification for QUOTED/ACCEPTED/DECLINED/READY (see map above).
     const emailTemplate = STATUS_EMAIL_TEMPLATES[nextStatus];
-    if (emailTemplate) void dispatchStatusEmail(orderId, emailTemplate);
+    // Deferred via `after()` (not a bare un-awaited promise) so Vercel keeps the invocation alive
+    // until the send + its EmailLog write finish — see the same fix in api/orders/route.ts.
+    if (emailTemplate) after(() => dispatchStatusEmail(orderId, emailTemplate));
 
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath("/admin/orders");
