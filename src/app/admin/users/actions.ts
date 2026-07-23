@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { AdminRole } from "@/generated/prisma/enums";
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { requireRole, AuthError } from "@/lib/auth/requireRole";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -43,7 +43,15 @@ const ROLE_VALUES = Object.values(AdminRole) as [AdminRole, ...AdminRole[]];
  * already at the floor of 1 — the invariant AGENTS.md requires: "reject any role-change/
  * deactivation that would leave zero active OWNERs (count check inside the same transaction)".
  * Called from inside the same `$transaction` as the actual mutation so the count can't go stale
- * between the check and the write (no separate read-then-write race).
+ * between the check and the write within one transaction.
+ *
+ * The single-transaction structure alone is NOT enough across concurrent transactions: two owners
+ * being removed at the same time (demote A in one request, deactivate B in another) each `count()`
+ * before either commits, both see 2, both pass, and both commit — a write-skew that leaves zero
+ * active owners. Postgres's default READ COMMITTED does not prevent it (the two writes touch
+ * different rows, so they never lock-conflict). Every caller therefore runs its `$transaction` at
+ * SERIALIZABLE isolation, whose SSI predicate tracking aborts one of the two with a serialization
+ * failure.
  */
 async function assertOwnerFloorNotBroken(
   tx: Prisma.TransactionClient,
@@ -135,7 +143,8 @@ export async function changeAdminRoleAction(userId: string, nextRoleRaw: AdminRo
           metadata: { from: target.role, to: nextRole },
         },
       });
-    });
+      // Serializable: prevents the owner-floor write-skew — see assertOwnerFloorNotBroken.
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     revalidatePath("/admin/users");
     return { ok: true };
@@ -165,7 +174,8 @@ export async function setAdminUserActiveAction(userId: string, active: boolean):
           metadata: {},
         },
       });
-    });
+      // Serializable: prevents the owner-floor write-skew — see assertOwnerFloorNotBroken.
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     // Best-effort Supabase ban/unban AFTER the transaction commits — an external auth-provider
     // call must never sit inside a DB transaction (same rule `dispatchStatusEmail` follows in
